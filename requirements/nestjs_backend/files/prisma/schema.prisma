@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+//maybe here is the issue?
+//chatGPT Verify your connection settings: Double-check that the connection settings in your Prisma schema file match the configuration of your PostgreSQL database server. Make sure that the url parameter in your datasource block specifies the correct hostname, port, and database name.
+
+//will hold all your user information
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique @db.VarChar(255)
+  //an eamil longer than that won't count
+  username String @unique @db.VarChar(255)
+  passhash String @db.VarChar(255)
+
+  //basically a typedef
+  @@map("users")
+}
