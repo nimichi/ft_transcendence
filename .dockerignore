@@ -1,5 +1,5 @@
-/files/backend/node_modules
-/files/frontend/node_modules
+./requirements/angular_frontend/files/node_modules
+./requirements/nestjs_backend/files/node_modules
 Dockerfile
 .dockerignore
 node_modules
