@@ -12,7 +12,7 @@ datasource db {
 
 // prisma/schema.prisma
 
-model Article {
+model History {
   id          Int      @id @default(autoincrement())
   title       String   @unique
   description String?
