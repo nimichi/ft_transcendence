@@ -33,9 +33,6 @@ services:
     restart: always
     ports:
       - "5432:5432"
-    volumes:
-      - ./requirements/nestjs_backend/files:/ft_transcendence
-      - /ft_transcendence/node_modules
     env_file:
       - .env
     networks:
