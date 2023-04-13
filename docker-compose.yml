@@ -2,24 +2,42 @@ version: '3'
 
 services:
   nestjs:
-    build: ./requirenments/nestjs_backend
+    build: ./requirements/nestjs_backend
     image: nestjs
     container_name: nestjs
     restart: always
     ports:
       - "3000:3000"
     volumes:
-      - ./requirenments/nestjs_backend/files:/ft_transcendence
+      - ./requirements/nestjs_backend/files:/ft_transcendence
       - /ft_transcendence/node_modules
     env_file: .env
+    networks:
+      - network
   angular:
-    build: ./requirenments/angular_frontend
+    build: ./requirements/angular_frontend
     image: angular
     container_name: angular
     restart: always
     ports:
       - "4200:4200"
     volumes:
-      - ./requirenments/angular_frontend/files:/ft_transcendence
+      - ./requirements/angular_frontend/files:/ft_transcendence
       - /ft_transcendence/node_modules
     env_file: .env
+    networks:
+      - network
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    networks:
+      - network
+
+networks:
+    network:
+      driver: bridge
