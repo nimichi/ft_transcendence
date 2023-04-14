@@ -7,4 +7,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
 
+  intra_auth(){
+    console.log('omg dis is wooorking')
+  }
 }

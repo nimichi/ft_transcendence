@@ -32,13 +32,17 @@ export class RegisterComponent {
         Validators.required
       ]),
       phone: new FormControl('', [
-        // Validators.required,
-        // Validators.min(13),
-        // Validators.max(13)
+        Validators.required,
+        Validators.min(13),
+        Validators.max(13)
       ])
 
     })
     //retrieve info from the form and controll it
+
+    register(){
+      console.log('register called')
+    }
 
     constructor(){
       this.registerForm.controls.name
