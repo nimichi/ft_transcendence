@@ -1,16 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
-import { AxiosResponse } from 'axios'
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs'
+import { Observable, map, catchError, lastValueFrom } from 'rxjs'
+// import * as jwt from 'jsonwebtoken'; // TODO: verify access token?!?
 
 @Injectable()
 export class AuthService {
+	// protected api_access: Promise<any>;
 
 	constructor(private readonly jwtService: JwtService, private readonly httpService: HttpService) {}
 
-	successAuth(code: string) {
+	async initAuth(){
+
+		const url = 'https://api.intra.42.fr/oauth/authorize?';
+		var params = new URLSearchParams();
+		params.append('client_id', process.env.API_UID);
+		params.append('redirect_uri', process.env.API_REDIRECT);
+		params.append('response_type', 'code');
+		return url + params;
+	}
+
+	async successAuth(code: string) {
 		if (code === undefined)
 			return '<h1 style="color: red">FAIL</h1>';
 
@@ -20,20 +30,54 @@ export class AuthService {
 			'client_secret' : process.env.API_SECRET,
 			'code' : code,
 			'redirect_uri' : process.env.API_REDIRECT
-
 		};
-		return this.httpService.post('https://api.intra.42.fr/oauth/token', data).pipe(map(response => response.data));
 
-		//  curl -F grant_type=authorization_code \
-		//  -F client_id=u-s4t2ud-c382e100c622295e93e44462a9d52a641082cd42bdfb563a589339714ddf3b08 \
-		//  -F client_secret=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 \
-		//  -F code=708e5d6e1b2a0f755c0265f8072ecd2af8bb5bf9b06ee38fc282e133e1f2c06b \
-		//  -F redirect_uri=https://localhost:3000/auth \
-		//  -X POST https://api.intra.42.fr/oauth/token
+		const request = this.httpService.post('https://api.intra.42.fr/oauth/token', data)
+			.pipe(
+				map(response => response.data)
+			)
+			.pipe(
+				catchError(() => {
+					throw new ForbiddenException('Authorization failed.');
+				}),
+			);
 
+		const res = await lastValueFrom(request);
+		console.log("Promise:");
+		console.log(res);
 
-		// const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_SECRET});
+		// console.log("Access token: " + res.access_token);
+		// console.log("Token type: " + res.token_type);
+		// console.log("Expires in: " + res.expires_in);
+		// console.log("Refresh token: " + res.refresh_token);
+		// console.log("Scope: " + res.scope);
+		// console.log("Created at: " + res.created_at);
 
-		// return "<p>SUCCESFUL MY FRIEND!! :DD</p>";
+		const options = {
+			headers: {
+				Authorization: 'Bearer ' + res.access_token,
+			},
+		};
+		const url = "https://api.intra.42.fr/v2/me";
+		const response = await this.httpService.get(url, options)
+		.pipe(
+			map(response => response.data)
+		);
+		const user = await lastValueFrom(response);
+
+		console.log("Keys:");
+		console.log(Object.keys(user));
+
+		const user_data = {
+			email: user.email,
+			firstname: user.first_name,
+			lastname: user.last_name,
+			username: user.login,
+			image: user.image.versions.medium,
+		}
+		console.log("USER DATA:");
+		console.log(user_data);
+
+		return (user_data.image);
 	}
 }
