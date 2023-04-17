@@ -10,6 +10,16 @@ export class AuthService {
 
 	constructor(private readonly jwtService: JwtService, private readonly httpService: HttpService) {}
 
+	async initAuth(){
+
+		const url = 'https://api.intra.42.fr/oauth/authorize?';
+		var params = new URLSearchParams();
+		params.append('client_id', process.env.API_UID);
+		params.append('redirect_uri', process.env.API_REDIRECT);
+		params.append('response_type', 'code');
+		return url + params;
+	}
+
 	async successAuth(code: string) {
 		if (code === undefined)
 			return '<h1 style="color: red">FAIL</h1>';
@@ -42,7 +52,7 @@ export class AuthService {
 		// console.log("Refresh token: " + res.refresh_token);
 		// console.log("Scope: " + res.scope);
 		// console.log("Created at: " + res.created_at);
-		
+
 		const options = {
 			headers: {
 				Authorization: 'Bearer ' + res.access_token,
@@ -67,7 +77,7 @@ export class AuthService {
 		}
 		console.log("USER DATA:");
 		console.log(user_data);
-		
+
 		return (user_data.image);
 	}
 }

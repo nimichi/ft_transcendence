@@ -5,6 +5,11 @@ import { AuthService } from './auth.service';
 export class AuthController {
 	constructor(private authService: AuthService) {}
 
+	@Get('init')
+	async initAuth() {
+		return this.authService.initAuth();
+	}
+
 	@Get()
 	async successAuth(@Query('code') code: string) {
 		return this.authService.successAuth(code);
