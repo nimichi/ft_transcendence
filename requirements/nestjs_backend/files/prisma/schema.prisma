@@ -19,7 +19,7 @@ model User {
 	User_Name	String @unique
 	User_Pw		String
 	Email		String @unique
-	Avatar		Bytes?
+	Avatar		String?
 	User_Status	String @default("online")
 	Stats		User_stats[]
 }
