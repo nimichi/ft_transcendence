@@ -12,12 +12,44 @@ datasource db {
 
 // prisma/schema.prisma
 
-model History {
-  id          Int      @id @default(autoincrement())
-  title       String   @unique
-  description String?
-  body        String
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model User {
+	id			Int @id @unique
+	First_Name	String
+	Last_Name	String
+	User_Name	String @unique
+	User_Pw		String
+	Email		String @unique
+	Avatar		Bytes?
+	User_Status	String @default("online")
+	Stats		User_stats[]
+}
+
+model User_stats {
+	id				Int @id @default(autoincrement())
+	Wins 			Int
+	Losses 			Int
+	Player			User	@relation(fields: [PlayerId], references: [id])
+	PlayerId		Int
+	MMR				Int	@default(0)
+	Achievements	Achievements[]
+	Match_History	Matches[]
+	Friendlist		String[]
+}
+
+model Achievements {
+	id			Int @id @default(autoincrement())
+	Stats		User_stats @relation(fields: [Stats_Id], references: [id])
+	Stats_Id	Int
+	// just a list of booleans thats going to be default false
+	exists		Boolean @default(true)
+}
+
+model Matches {
+	id			Int @id @default(autoincrement())
+	Stats		User_stats @relation(fields: [Stats_Id], references: [id])
+	Stats_Id	Int
+	Type		String
+	Outcome		Boolean?
+	Result		Int[] @default([0,0])
+	startTime	DateTime
 }
