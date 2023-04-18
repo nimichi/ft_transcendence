@@ -85,7 +85,9 @@ export class AuthService {
 		service.createUser(user_data);
 		// console.log("USER DATA:");
 		// console.log(user_data);
+		service.updateUser(user_data.id, "dncmon");
+		service.findUserById(user_data.id);
 
-		return (user_data.Avatar);
+		return (user_data);
 	}
 }
