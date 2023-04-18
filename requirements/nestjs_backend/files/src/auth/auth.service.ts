@@ -69,6 +69,7 @@ export class AuthService {
 		console.log(Object.keys(user));
 
 		const user_data = {
+			id: user.id,
 			email: user.email,
 			firstname: user.first_name,
 			lastname: user.last_name,
@@ -78,6 +79,8 @@ export class AuthService {
 		console.log("USER DATA:");
 		console.log(user_data);
 
-		return (user_data.image);
+		// const img_tag = '<img src="'+ user_data.image + '" alt="Profile Image">';
+
+		return (user_data);
 	}
 }
