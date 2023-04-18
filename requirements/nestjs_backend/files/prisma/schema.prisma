@@ -13,7 +13,7 @@ datasource db {
 // prisma/schema.prisma
 
 model User {
-	id			Int @id @unique
+	id			Int @id
 	First_Name	String
 	Last_Name	String
 	User_Name	String @unique
