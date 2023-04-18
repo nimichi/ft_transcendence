@@ -82,7 +82,7 @@ export class AuthService {
 			User_Status: "default",
 		}
 
-		console.log(service.createUser(user_data));
+		service.createUser(user_data);
 		// console.log("USER DATA:");
 		// console.log(user_data);
 
