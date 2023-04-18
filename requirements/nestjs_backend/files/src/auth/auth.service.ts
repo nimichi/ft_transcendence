@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { Observable, map, catchError, lastValueFrom } from 'rxjs'
+import { PrismaService } from 'src/prisma/prisma.service';
 // import * as jwt from 'jsonwebtoken'; // TODO: verify access token?!?
 
 @Injectable()
@@ -68,16 +69,23 @@ export class AuthService {
 		console.log("Keys:");
 		console.log(Object.keys(user));
 
-		const user_data = {
-			email: user.email,
-			firstname: user.first_name,
-			lastname: user.last_name,
-			username: user.login,
-			image: user.image.versions.medium,
-		}
-		console.log("USER DATA:");
-		console.log(user_data);
+		const service = new PrismaService();
 
-		return (user_data.image);
+		const user_data = {
+			id: user.id,
+			Email: user.email,
+			First_Name: user.first_name,
+			Last_Name: user.last_name,
+			User_Name: user.login,
+			Avatar: user.image.versions.medium,
+			User_Pw: "default",
+			User_Status: "default",
+		}
+
+		console.log(service.createUser(user_data));
+		// console.log("USER DATA:");
+		// console.log(user_data);
+
+		return (user_data.Avatar);
 	}
 }
