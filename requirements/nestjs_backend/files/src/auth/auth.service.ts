@@ -15,7 +15,8 @@ export class AuthService {
 	// .scope
 	// .created_at
 
-	constructor(private readonly jwtService: JwtService, private readonly httpService: HttpService) {}
+	constructor(private readonly jwtService: JwtService,
+				private readonly httpService: HttpService) {}
 
 	async initAuth(){
 
@@ -32,44 +33,34 @@ export class AuthService {
 			return '<h1 style="color: red">FAIL</h1>';
 
 		this.api_access = await this.getAccessToken(code);
-		// console.log(this.api_access);
+		console.log(this.api_access.access_token);
 
-		const options = {
-			headers: {
-				Authorization: 'Bearer ' + this.api_access.access_token,
-			},
-		};
-		const url = "https://api.intra.42.fr/v2/me";
-		const response = await this.httpService.get(url, options)
-		.pipe(
-			map(response => response.data)
-		);
-		const user = await lastValueFrom(response);
+		const user_data = await this.requestUserData(this.api_access.access_token);
 
 		console.log("Keys:");
-		console.log(Object.keys(user));
+		console.log(Object.keys(user_data));
 
 		const service = new PrismaService();
 
-		const user_data = {
-			id: user.id,
-			Email: user.email,
-			First_Name: user.first_name,
-			Last_Name: user.last_name,
-			User_Name: user.login,
-			Avatar: user.image.versions.medium,
+		const user = {
+			id: user_data.id,
+			First_Name: user_data.first_name,
+			Last_Name: user_data.last_name,
+			User_Name: user_data.login,
+			Email: user_data.email,
+			Avatar: user_data.image.versions.medium,
 			User_Pw: "default",
 			User_Status: "default",
 		}
 
-		service.createUser(user_data);
+		service.createUser(user);
 		// console.log("USER DATA:");
 		// console.log(user_data);
-		service.updateUser(user_data.id, "dncmon");
-		const result = service.findUserById(user_data.id);
+		// service.updateUser(user.id, "dncmon");
+		const result = service.findUserById(user.id);
 
-		console.log(`Username: ${user_data.User_Name}`);
-		// return (user_data);
+		console.log(`Username: ${user.User_Name}`);
+		// return (user);
 		return (result);
 	}
 
@@ -94,7 +85,20 @@ export class AuthService {
 
 		return (await lastValueFrom(response));
 	}
-	// async getUserData(accessToken) {}
+	async requestUserData(accessToken: string) {
+		const http_header = {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		};
+		const url = "https://api.intra.42.fr/v2/me";
+		const response = await this.httpService.get(url, http_header)
+		.pipe(
+			map(res => res.data)
+		);
+
+		return (await lastValueFrom(response));
+	}
 	// async userExist(): Promise<boolean> {}
 
 }
