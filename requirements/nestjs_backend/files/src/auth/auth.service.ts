@@ -7,7 +7,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
-	// protected api_access: Promise<any>;
+	protected api_access: any;
+	// .access_token
+	// .token_type
+	// .expires_in
+	// .refresh_token
+	// .scope
+	// .created_at
 
 	constructor(private readonly jwtService: JwtService, private readonly httpService: HttpService) {}
 
@@ -25,38 +31,12 @@ export class AuthService {
 		if (code === undefined)
 			return '<h1 style="color: red">FAIL</h1>';
 
-		const data = {
-			'grant_type': 'authorization_code',
-			'client_id': process.env.API_UID,
-			'client_secret' : process.env.API_SECRET,
-			'code' : code,
-			'redirect_uri' : process.env.API_REDIRECT
-		};
-
-		const request = this.httpService.post('https://api.intra.42.fr/oauth/token', data)
-			.pipe(
-				map(response => response.data)
-			)
-			.pipe(
-				catchError(() => {
-					throw new ForbiddenException('Authorization failed.');
-				}),
-			);
-
-		const res = await lastValueFrom(request);
-		console.log("Promise:");
-		console.log(res);
-
-		// console.log("Access token: " + res.access_token);
-		// console.log("Token type: " + res.token_type);
-		// console.log("Expires in: " + res.expires_in);
-		// console.log("Refresh token: " + res.refresh_token);
-		// console.log("Scope: " + res.scope);
-		// console.log("Created at: " + res.created_at);
+		this.api_access = await this.getAccessToken(code);
+		// console.log(this.api_access);
 
 		const options = {
 			headers: {
-				Authorization: 'Bearer ' + res.access_token,
+				Authorization: 'Bearer ' + this.api_access.access_token,
 			},
 		};
 		const url = "https://api.intra.42.fr/v2/me";
@@ -86,8 +66,35 @@ export class AuthService {
 		// console.log("USER DATA:");
 		// console.log(user_data);
 		service.updateUser(user_data.id, "dncmon");
-		service.findUserById(user_data.id);
+		const result = service.findUserById(user_data.id);
 
-		return (user_data);
+		console.log(`Username: ${user_data.User_Name}`);
+		// return (user_data);
+		return (result);
 	}
+
+	async getAccessToken(code: string): Promise<any> {
+		const http_header = {
+			'grant_type': 'authorization_code',
+			'client_id': process.env.API_UID,
+			'client_secret' : process.env.API_SECRET,
+			'code' : code,
+			'redirect_uri' : process.env.API_REDIRECT
+		};
+		const response = await this.httpService.post(process.env.API_ACCESS_TOKEN_URL, http_header)
+		.pipe(
+			map(res => res.data)
+		)
+		.pipe(
+			catchError(() => {
+				throw new ForbiddenException(`Error: Fetching access token failed.`);
+			}),
+		);
+		// NOTE: with the try catch method accessing .data does not work, why?
+
+		return (await lastValueFrom(response));
+	}
+	// async getUserData(accessToken) {}
+	// async userExist(): Promise<boolean> {}
+
 }
