@@ -50,7 +50,10 @@ export class AuthService {
 			User_Pw: "default",
 			User_Status: "default",
 		}
-		const user = this.prismaService.findOrCreateUser(user_tmp);
+		const user = await this.prismaService.findOrCreateUser(user_tmp);
+		// await this.prismaService.updateUserName(user.id, "dncmon");
+		// console.log("USER:");
+		// console.log(JSON.stringify(user, null, 2));
 		return (user);
 	}
 

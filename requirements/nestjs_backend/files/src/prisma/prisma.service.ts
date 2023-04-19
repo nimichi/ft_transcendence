@@ -30,16 +30,21 @@ export class PrismaService extends PrismaClient {
 	return (new_entry);
   }
 
-  async updateUser(id: number, User_Name: string) {
-    return await this.user.update({
-      where: {
-        id: id,
-
-      },
-	  data: {
-		User_Name
-	  }
-    });
+  async findUserById(id: number): Promise<User | null> {
+	const user = await this.user.findUnique({ where: { id } });
+	return (user || null);
   }
 
+  async updateUserName(id: number, User_Name: string): Promise<void> {
+	if (this.findUserById === null) {
+		console.log("User not found.");
+		return ;
+	}
+	const updatedUser = await this.user.update({
+		where: { id: id },
+		data: { User_Name },
+	});
+
+	console.log("User entry updated.");
+  }
 }
