@@ -16,7 +16,8 @@ export class AuthService {
 	// .created_at
 
 	constructor(private readonly jwtService: JwtService,
-				private readonly httpService: HttpService) {}
+				private readonly httpService: HttpService,
+				private readonly prismaService: PrismaService) {}
 
 	async initAuth(){
 
@@ -33,16 +34,13 @@ export class AuthService {
 			return '<h1 style="color: red">FAIL</h1>';
 
 		this.api_access = await this.getAccessToken(code);
-		console.log(this.api_access.access_token);
+		// console.log(this.api_access.access_token);
 
 		const user_data = await this.requestUserData(this.api_access.access_token);
 
-		console.log("Keys:");
-		console.log(Object.keys(user_data));
+		// console.log(`Keys: ${Object.keys(user_data)}`);
 
-		const service = new PrismaService();
-
-		const user = {
+		const user_tmp = {
 			id: user_data.id,
 			First_Name: user_data.first_name,
 			Last_Name: user_data.last_name,
@@ -52,16 +50,8 @@ export class AuthService {
 			User_Pw: "default",
 			User_Status: "default",
 		}
-
-		service.createUser(user);
-		// console.log("USER DATA:");
-		// console.log(user_data);
-		// service.updateUser(user.id, "dncmon");
-		const result = service.findUserById(user.id);
-
-		console.log(`Username: ${user.User_Name}`);
-		// return (user);
-		return (result);
+		const user = this.prismaService.findOrCreateUser(user_tmp);
+		return (user);
 	}
 
 	async getAccessToken(code: string): Promise<any> {
@@ -99,6 +89,5 @@ export class AuthService {
 
 		return (await lastValueFrom(response));
 	}
-	// async userExist(): Promise<boolean> {}
 
 }

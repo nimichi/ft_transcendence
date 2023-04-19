@@ -1,5 +1,3 @@
-// src/prisma/prisma.service.ts
-
 import { INestApplication, Injectable } from '@nestjs/common';
 import { PrismaClient, User } from '@prisma/client';
 import { from, Observable } from 'rxjs';
@@ -17,28 +15,19 @@ export class PrismaService extends PrismaClient {
     });
   }
 
-  async createUser(data: User): Promise<User> {
-	const check = await this.user.findUnique({
-		where: {
-			id: data.id,
-		}
+  async findOrCreateUser(data: User) {
+	const existing_entry = await this.user.findFirst({
+		where: { id: data.id, },
 	});
-	if (!check)
-	{
-		const user = await this.user.create({ data });
-		console.log(await this.user.findMany());
-		return user;
-	}
-	console.log("found");
-	console.log(check);
-  }
 
-  async findUserById(id: number) {
-    return await this.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
+	if (existing_entry) {
+		console.log("User already exist - logging in...");
+		return (existing_entry);
+	}
+
+	const new_entry = await this.user.create({ data });
+	console.log("User did not exist - creating and signing up User...");
+	return (new_entry);
   }
 
   async updateUser(id: number, User_Name: string) {
@@ -52,4 +41,5 @@ export class PrismaService extends PrismaClient {
 	  }
     });
   }
+
 }
