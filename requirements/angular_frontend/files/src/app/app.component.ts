@@ -15,18 +15,21 @@ import { SocketService } from './services/socket.service';
 
 export class AppComponent {
 
-	constructor(private http: HttpClient, private activatedRoute: ActivatedRoute) {}
+	constructor(private http: HttpClient, private activatedRoute: ActivatedRoute, private socket: SocketService) {
+
+	}
 
 	ngOnInit() {
-		let code: string | null;
-		code = this.activatedRoute.snapshot.paramMap.get('code');
-		if (!code){
-			console.log('without code: ' + code);
-			return;
-		}
-		let socketService = new SocketService(code);
-		console.log('with code: ' + code);
-		socketService.sendMessage('Hello');
+		this.activatedRoute.queryParams.subscribe(params => {
+			console.log(params);
+			if (!params.code){
+				console.log('loaded without code');
+				return;
+			}
+			if (this.socket.socketState() == false)
+				this.socket.openSocket(params.code);
+			console.log('loaded with code: ' + params.code);
+		});
 	}
 
 	makeRequest() {

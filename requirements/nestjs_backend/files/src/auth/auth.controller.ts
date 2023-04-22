@@ -9,9 +9,4 @@ export class AuthController {
 	async initAuth() {
 		return this.authService.initAuth();
 	}
-
-	@Get()
-	async successAuth(@Query('code') code: string) {
-		return this.authService.successAuth(code);
-	}
 }

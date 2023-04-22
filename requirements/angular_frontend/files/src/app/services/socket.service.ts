@@ -8,19 +8,31 @@ import { io } from 'socket.io-client';
 // })
 export class SocketService {
 	private socket: any;
+	private isOpen: boolean;
 
-	constructor(private code: string) {
+	constructor() {
+		this.isOpen = false;
+	}
+
+	openSocket(code: string) {
 		this.socket = io('localhost:3000', {
 			transports: ['websocket'],
 			withCredentials: true,
 			extraHeaders: {
 				'Access-Control-Allow-Origin': 'localhost:3000',
-				'Authorization': 'abc'
-			  },
+			},
+			auth: { token: code }
 		  });
+		this.isOpen = true;
+	}
+
+	socketState(): boolean {
+		return this.isOpen;
 	}
 
 	sendMessage(message: string): void {
-	  this.socket.emit('chat', message);
+		console.log(this.isOpen);
+		if (this.isOpen)
+			this.socket.emit('chat', message);
 	}
 }

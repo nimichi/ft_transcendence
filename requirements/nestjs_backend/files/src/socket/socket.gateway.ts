@@ -1,11 +1,25 @@
-import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
+import { SocketService } from './socket.service';
+// import { SocketService } from './socket.service';
 
 @WebSocketGateway()
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+	@WebSocketServer()
+	public server: Server;
+
+	constructor(private socketService: SocketService){}
+
 	afterInit(server: Server) {
-		console.log('Socket.io server initialized');
-		// Add any additional configuration or initialization here
+		this.server.use(async (socket, next) => {
+			const authorized = await this.socketService.doAuth(socket);
+			if (authorized) {
+				console.log('authorized');
+				next();
+			} else {
+				next(new Error('Not authorized'));
+			}
+		});
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
