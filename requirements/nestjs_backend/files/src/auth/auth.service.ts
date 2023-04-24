@@ -58,6 +58,7 @@ export class AuthService {
 	}
 
 	async getAccessToken(code: string): Promise<any> {
+		// console.log("Code: " + code);
 		const http_header = {
 			'grant_type': 'authorization_code',
 			'client_id': process.env.API_UID,
@@ -70,7 +71,8 @@ export class AuthService {
 			map(res => res.data)
 		)
 		.pipe(
-			catchError(() => {
+			catchError((error) => {
+				console.error("ERROR (" + error + ")");
 				throw new ForbiddenException(`Error: Fetching access token failed.`);
 			}),
 		);
@@ -78,6 +80,7 @@ export class AuthService {
 
 		return (await lastValueFrom(response));
 	}
+
 	async requestUserData(accessToken: string) {
 		const http_header = {
 			headers: {
@@ -90,29 +93,7 @@ export class AuthService {
 			map(res => res.data)
 		);
 
-		console.log("Keys:");
-		console.log(Object.keys(user));
-
-		const service = new PrismaService();
-
-		const user_data = {
-			id: user.id,
-			Email: user.email,
-			First_Name: user.first_name,
-			Last_Name: user.last_name,
-			User_Name: user.login,
-			Avatar: user.image.versions.medium,
-			User_Pw: "default",
-			User_Status: "default",
-		}
-
-		service.createUser(user_data);
-		// console.log("USER DATA:");
-		// console.log(user_data);
-		service.updateUser(user_data.id, "dncmon");
-		service.findUserById(user_data.id);
-
-		return (user_data);
+		return (await lastValueFrom(response));
 	}
 
 }

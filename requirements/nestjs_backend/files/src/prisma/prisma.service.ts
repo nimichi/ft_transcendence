@@ -64,14 +64,6 @@ export class PrismaService extends PrismaClient {
 	console.log(check);
   }
 
-  async findUserById(id: number) {
-    return await this.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
-  }
-
   async updateUser(id: number, User_Name: string) {
     return await this.user.update({
       where: {
