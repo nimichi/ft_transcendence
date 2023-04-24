@@ -7,7 +7,6 @@ COPY ./files/package*.json ./
 COPY ./files/prisma ./prisma/
 COPY ./files/.env ./
 RUN npm install
-RUN npm install socket.io-client --save
 RUN npx prisma generate
 
 ENTRYPOINT npx prisma migrate dev --name "init" && nest start --watch
