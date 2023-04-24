@@ -1,2 +1,3 @@
 .DS_Store
 .env
+requirements/nestjs_backend/files/prisma/migrations/*
