@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { UserModule } from './user/user.module';
 import { NavComponent } from './nav/nav.component';
 import { HttpClientModule } from '@angular/common/http';
+import { SocketService } from './services/socket.service';
 
 
 
@@ -20,7 +21,7 @@ import { HttpClientModule } from '@angular/common/http';
     UserModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [SocketService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
