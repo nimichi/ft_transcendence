@@ -2,13 +2,22 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { Observable, map, catchError, lastValueFrom } from 'rxjs'
+import { PrismaService } from 'src/prisma/prisma.service';
 // import * as jwt from 'jsonwebtoken'; // TODO: verify access token?!?
 
 @Injectable()
 export class AuthService {
-	// protected api_access: Promise<any>;
+	protected api_access: any;
+	// .access_token
+	// .token_type
+	// .expires_in
+	// .refresh_token
+	// .scope
+	// .created_at
 
-	constructor(private readonly jwtService: JwtService, private readonly httpService: HttpService) {}
+	constructor(private readonly jwtService: JwtService,
+				private readonly httpService: HttpService,
+				private readonly prismaService: PrismaService) {}
 
 	async initAuth(){
 
@@ -24,60 +33,64 @@ export class AuthService {
 		if (code === undefined)
 			return '<h1 style="color: red">FAIL</h1>';
 
-		const data = {
+		this.api_access = await this.getAccessToken(code);
+		// console.log(this.api_access.access_token);
+
+		const user_data = await this.requestUserData(this.api_access.access_token);
+
+		// console.log(`Keys: ${Object.keys(user_data)}`);
+
+		const user_tmp = {
+			id: user_data.id,
+			First_Name: user_data.first_name,
+			Last_Name: user_data.last_name,
+			User_Name: user_data.login,
+			Email: user_data.email,
+			Avatar: user_data.image.versions.medium,
+			User_Pw: "default",
+			User_Status: "default",
+		}
+		const user = await this.prismaService.findOrCreateUser(user_tmp);
+		// await this.prismaService.updateUserName(user.id, "dncmon");
+		// console.log("USER:");
+		// console.log(JSON.stringify(user, null, 2));
+		return (user);
+	}
+
+	async getAccessToken(code: string): Promise<any> {
+		const http_header = {
 			'grant_type': 'authorization_code',
 			'client_id': process.env.API_UID,
 			'client_secret' : process.env.API_SECRET,
 			'code' : code,
 			'redirect_uri' : process.env.API_REDIRECT
 		};
+		const response = await this.httpService.post(process.env.API_ACCESS_TOKEN_URL, http_header)
+		.pipe(
+			map(res => res.data)
+		)
+		.pipe(
+			catchError(() => {
+				throw new ForbiddenException(`Error: Fetching access token failed.`);
+			}),
+		);
+		// NOTE: with the try catch method accessing .data does not work, why?
 
-		const request = this.httpService.post('https://api.intra.42.fr/oauth/token', data)
-			.pipe(
-				map(response => response.data)
-			)
-			.pipe(
-				catchError(() => {
-					throw new ForbiddenException('Authorization failed.');
-				}),
-			);
-
-		const res = await lastValueFrom(request);
-		console.log("Promise:");
-		console.log(res);
-
-		// console.log("Access token: " + res.access_token);
-		// console.log("Token type: " + res.token_type);
-		// console.log("Expires in: " + res.expires_in);
-		// console.log("Refresh token: " + res.refresh_token);
-		// console.log("Scope: " + res.scope);
-		// console.log("Created at: " + res.created_at);
-
-		const options = {
+		return (await lastValueFrom(response));
+	}
+	async requestUserData(accessToken: string) {
+		const http_header = {
 			headers: {
-				Authorization: 'Bearer ' + res.access_token,
+				Authorization: `Bearer ${accessToken}`,
 			},
 		};
 		const url = "https://api.intra.42.fr/v2/me";
-		const response = await this.httpService.get(url, options)
+		const response = await this.httpService.get(url, http_header)
 		.pipe(
-			map(response => response.data)
+			map(res => res.data)
 		);
-		const user = await lastValueFrom(response);
 
-		console.log("Keys:");
-		console.log(Object.keys(user));
-
-		const user_data = {
-			email: user.email,
-			firstname: user.first_name,
-			lastname: user.last_name,
-			username: user.login,
-			image: user.image.versions.medium,
-		}
-		console.log("USER DATA:");
-		console.log(user_data);
-
-		return (user_data.image);
+		return (await lastValueFrom(response));
 	}
+
 }
