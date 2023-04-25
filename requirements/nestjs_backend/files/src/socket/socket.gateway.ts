@@ -37,6 +37,8 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 
 	@SubscribeMessage('userdata')
 	handleUserDataMessage(client: any, payload: any): string {
-		return 'Hello world!';
+		console.log('hello world')
+		client.emit('bla', 'backend sent this');
+		return 'Answer in Backend!';
 	}
 }

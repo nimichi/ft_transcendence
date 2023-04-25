@@ -24,6 +24,12 @@ export class SocketService {
 			auth: { token: code }
 		  });
 		this.isOpen = true;
+
+		this.socket.on('bla', (arg: string) => { this.recievedBla(arg) })
+	}
+
+	recievedBla(arg: string){
+		console.log(arg);
 	}
 
 	socketState(): boolean {
@@ -40,7 +46,7 @@ export class SocketService {
 		if (this.isOpen)
 		{
 			console.log('1st');
-			this.socket.emit('userdata', null);
+			const res = this.socket.emit('userdata', null);
 		}
 		else
 			console.log('bla');
