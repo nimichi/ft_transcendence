@@ -1,0 +1,43 @@
+<section class="relative overflow-hidden mb-2"> 
+  <!-- The video -->
+  <video autoplay muted loop class="w-full h-full object-cover absolute z-0">
+    <source src="assets/video/pingpong.mp4" type="video/webm">
+  </video>
+
+  <div class="bg-gradient absolute w-full h-full z-40 opacity-60"></div>
+
+  <div class="w-full h-full absolute z-40">
+    <div class="cube"></div>
+    <div class="cube"></div>
+    <div class="cube"></div>
+    <div class="cube"></div>
+    <div class="cube"></div>
+  </div>
+
+  <div class="container mx-auto relative z-50">
+    <div class="text-center px-20 py-60 w-full md:w-8/12 mx-auto">
+      <!-- <h1 class="text-5xl text-indigo-400 font-bold uppercase mb-2">TRANSCENDENCE</h1> -->
+      <h1 class="text-7xl font-bold uppercase mb-2">the mighty Pong contest!</h1>
+
+      <p class="mb-2">
+        Only available for 42 students. Get started today!
+      </p>
+      <!-- <button class="bg-sky-800 hover:bg-sky-700 ...">
+        LOGIN
+      </button> -->
+      <!-- <button class="block w-full bg-indigo-400 text-white py-1.5 px-3 rounded transitionhover:bg-indigo-500">
+        LOGIN
+      </button> -->
+      <button style="color:rgb(255, 255, 255)" 
+      class="py-2 px-32 bg-indigo-400 font-semibold rounded-lg shadow-md hover:bg-indigo-500 focus:outline-none "
+      (click)="makeRequest()">
+        LOGIN WITH INTRA
+      </button>
+      <!-- <button style="color:rgb(255, 255, 255)" 
+      class="py-2 px-32 bg-indigo-400 font-semibold rounded-lg shadow-md hover:bg-indigo-500 focus:outline-none "
+      routerLink="/login">
+      LOGIN WITH INTRA
+      </button> -->
+    </div>
+  </div>
+</section>

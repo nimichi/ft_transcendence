@@ -5,6 +5,8 @@ import { AppComponent } from './app.component';
 import { UserModule } from './user/user.module';
 import { NavComponent } from './nav/nav.component';
 import { HttpClientModule } from '@angular/common/http';
+import { LoginComponent } from './login-button/login.component';
+import { HomeComponent } from './home/home.component';
 import { SocketService } from './services/socket.service';
 
 
@@ -13,7 +15,9 @@ import { SocketService } from './services/socket.service';
 @NgModule({
   declarations: [
     AppComponent,
-    NavComponent
+    NavComponent,
+    LoginComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,

@@ -36,3 +36,5 @@ lerna-debug.log*
 
 # .env for prisma
 .env
+
+/nestjs_backend/files/prisma/migrations
