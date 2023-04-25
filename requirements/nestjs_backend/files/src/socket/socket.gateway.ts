@@ -34,4 +34,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	handleMessage(client: any, payload: any): string {
 		return 'Hello world!';
 	}
+
+	@SubscribeMessage('userdata')
+	handleUserDataMessage(client: any, payload: any): string {
+		return 'Hello world!';
+	}
 }

@@ -35,4 +35,14 @@ export class SocketService {
 		if (this.isOpen)
 			this.socket.emit('chat', message);
 	}
+
+	requestUserData(){
+		if (this.isOpen)
+		{
+			console.log('1st');
+			this.socket.emit('userdata', null);
+		}
+		else
+			console.log('bla');
+	}
 }

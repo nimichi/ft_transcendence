@@ -13,7 +13,7 @@ import { HttpHeaders } from '@angular/common/http';
 
 export class LoginComponent {
   constructor(private http: HttpClient) {}
-  
+
   // intra_auth(): void {
   //     console.log('omg dis is wooorking')
   // // intra_auth(){
@@ -34,17 +34,17 @@ export class LoginComponent {
       // 'contentType': 'application/json',
       'Access-Control-Allow-Origin': 'localhost:3000'
     });
-  
-    this.http.get('http://localhost:3000/auth/init', {headers: header}).subscribe((data) =>{
-      console.log(data);
-      this.jsongetvalue = data;
-    })
 
-    
+	this.http.get('http://localhost:3000/auth/init', { headers: header, responseType: 'text' }).subscribe(url => {
+		console.log(url);
+		window.location.href = url;
+	});
+
+
     };
     //query snippet abgreifen
     //neue get request an die api mit dem query strimg schicken
-    
-    
+
+
     //an jsongetvalue weiterleiten!:)
 }
