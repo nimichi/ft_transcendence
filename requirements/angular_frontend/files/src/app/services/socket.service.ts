@@ -24,6 +24,12 @@ export class SocketService {
 			auth: { token: code }
 		  });
 		this.isOpen = true;
+
+		this.socket.on('bla', (arg: string) => { this.recievedBla(arg) })
+	}
+
+	recievedBla(arg: string){
+		console.log(arg);
 	}
 
 	socketState(): boolean {
@@ -34,5 +40,15 @@ export class SocketService {
 		console.log(this.isOpen);
 		if (this.isOpen)
 			this.socket.emit('chat', message);
+	}
+
+	requestUserData(){
+		if (this.isOpen)
+		{
+			console.log('1st');
+			const res = this.socket.emit('userdata', null);
+		}
+		else
+			console.log('bla');
 	}
 }

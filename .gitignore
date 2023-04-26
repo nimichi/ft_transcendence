@@ -1,5 +1,6 @@
 .DS_Store
 .env
-requirements/nestjs_backend/files/prisma/migrations/*
 .start
 .vscode
+pingpong.mp4
+requirements/nestjs_backend/files/prisma/migrations/*
