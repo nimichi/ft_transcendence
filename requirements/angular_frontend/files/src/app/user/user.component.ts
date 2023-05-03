@@ -9,6 +9,8 @@ import { SocketService } from '../services/socket.service';
 })
 export class UserComponent {
 
+	userName: string = String();
+
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketService) {
 
 	}
@@ -25,7 +27,11 @@ export class UserComponent {
 			console.log('loaded with code: ' + params.code);
 		});
 
-		this.socket.requestUserData();
+		this.socket.requestEvent("userdata", null, (data: string) => this.callbackUserData(data));
 	}
 
+	callbackUserData(userName: string){
+		this.userName = userName;
+		console.log("This is: " + this.userName);
+	}
 }
