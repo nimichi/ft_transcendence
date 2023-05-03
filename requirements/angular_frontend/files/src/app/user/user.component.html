@@ -1,36 +1,73 @@
-<p>user works!</p>
-<!DOCTYPE html>
-<html>
-  <body>
-    <h1 id="username">ROMY</h1>
-    <div>
-      <img src="https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg" alt="User Profile Picture">
+<!-- <app-nav></app-nav> -->
+
+<!-- picture -->
+
+
+  <div class="mx-auto grid max-w-7xl gap-x-8 gap-y-20 px-6 lg:px-8 xl:grid-cols-3">
+    <div class="max-w-2xl">
+      <!-- <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Meet our leadership</h2>
+      <p class="mt-6 text-lg leading-8 text-gray-600">Libero fames augue nisl porttitor nisi, quis. Id ac elit odio vitae elementum enim vitae ullamcorper suspendisse.</p> -->
     </div>
-  </body>
-</html>
+    <ul role="list" class="grid gap-x-8 gap-y-12 sm:grid-cols-2 sm:gap-y-16 xl:col-span-2">
+      <li>
+        <div class="flex items-center gap-x-6">
+          <img class="h-32 w-32 rounded-full" [src]="intraPic" alt="">
+          <div>
+            <h3 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ intraName }}</h3>
+            <!-- <p class="text-sm font-semibold leading-6 text-indigo-400">{{ realName }}</p> -->
+
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- stats -->
 
 
-<!-- <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>User Profile</title>
-  </head>
-  <body>
-    <img id="user-image">
-    <h1 id="user-name"></h1>
+  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+    <dt class="text-sm font-medium leading-6 text-indigo-400">Wins</dt>
+    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{wins}}</dd>
+  </div>
+  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+    <dt class="text-sm font-medium leading-6 text-indigo-400">Losses</dt>
+    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{losses}}</dd>
+  </div>
+  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+    <dt class="text-sm font-medium leading-6 text-indigo-400">Level</dt>
+    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{level}}</dd>
+  </div>
+  <ng-container *ngFor="let badgeLevel of [1, 2, 3, 4, 5]">
+    <span *ngIf="intraBadgeLevel >= badgeLevel" 
+      class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-{{100 * badgeLevel}} ring-1 ring-inset ring-indigo-{{900 - (100 * badgeLevel)}}/10">Badge {{badgeLevel}}</span>
+  </ng-container>
+  
 
-    <script>
-      const userProfile = {
-        name: "John Smith",
-        image: "https://example.com/user.jpg"
-      };
+<!-- matchHistory -->
+  
+  <ul class="list-none">
+    <li *ngFor="let item of listData">
+      <span class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.versus}} {{item.result}} {{item.level}} </span>
+      <!-- <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.name}}</dd> -->
 
-      const userImage = document.getElementById("user-image");
-      userImage.src = userProfile.image;
+    </li>
+  </ul>
 
-      const userName = document.getElementById("user-name");
-      userName.innerText = userProfile.name;
-    </script>
-  </body>
-</html> -->
+  <div class="table">
+    <div class="table-row header">
+      <div class="table-cell">Versus</div>
+      <div class="table-cell">Result</div>
+      <div class="table-cell">Level</div>
+    </div>
+    <div class="table-row" *ngFor="let item of listData">
+      <div class="table-cell">{{ item.versus }}</div>
+      <div class="table-cell">{{ item.result }}</div>
+      <div class="table-cell">{{ item.level }}</div>
+    </div>
+  </div>
+
+  <!-- <app-list></app-list> -->
+  <!-- chat -->
+  
+  <app-chat></app-chat>
+
