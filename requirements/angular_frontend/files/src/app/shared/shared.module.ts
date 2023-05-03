@@ -10,6 +10,7 @@ import { provideNgxMask } from 'ngx-mask';
 import { NgxMaskDirective } from 'ngx-mask';
 import { NgxMaskPipe } from 'ngx-mask';
 import { AlertComponent } from './alert/alert.component';
+import { ListComponent } from './list/list.component';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { AlertComponent } from './alert/alert.component';
     TabsContainerComponent,
     TabComponent,
     InputComponent,
-    AlertComponent
+    AlertComponent,
+    ListComponent
   ],
   imports: [
     CommonModule,
@@ -32,7 +34,8 @@ import { AlertComponent } from './alert/alert.component';
     TabsContainerComponent,
     TabComponent,
     InputComponent,
-    AlertComponent
+    AlertComponent,
+    ListComponent
   ],
   providers: [
     provideNgxMask()

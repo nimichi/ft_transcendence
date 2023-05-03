@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { io } from 'socket.io-client';
-
+// import { Observable } from 'rxjs/Observable';
+// import * as Rx from 'rxjs/Rx';
 
 
 // @Injectable({
@@ -43,6 +44,7 @@ export class SocketService {
 	}
 
 	socketState(): boolean {
+		//auf die Login Seite redirecten
 		return this.isOpen;
 	}
 
