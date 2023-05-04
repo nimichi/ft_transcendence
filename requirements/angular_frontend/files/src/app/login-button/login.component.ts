@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
+import { SocketService } from '../services/socket.service';
 
 @Component({
   selector: 'app-login',
@@ -11,8 +12,10 @@ import { HttpHeaders } from '@angular/common/http';
 `
 })
 
+
+
 export class LoginComponent {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private socket: SocketService) {}
 
   // intra_auth(): void {
   //     console.log('omg dis is wooorking')
@@ -24,6 +27,15 @@ export class LoginComponent {
   //   console.log(response);
   // });
   // }
+
+
+  ngOnInit(){
+
+    if (this.socket.socketState())
+		  window.location.href = "/user";
+    console.log(this.socket.socketState());
+
+  }
 
   jsongetvalue: any
 

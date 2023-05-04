@@ -1,12 +1,38 @@
 <!-- <app-nav></app-nav> -->
 
-<!-- picture -->
+<!-- change name and picture pop ups -->
+<!-- hier muessen die modals noch mit buttons verknuepft werden -->
+<app-modal modalID="chooseName">
+  <p class="text-2xl font-bold" heading>Wanna update your boring intra name?</p>
+  <div class="mb-3">
+    <input class="block w-full py-1.5 px-3 text-gray-200 border border-gray-400 transition
+        duration-500 focus:outline-none rounded bg-transparent
+        focus:border-indigo-400"
+      placeholder="Enter unique name" required>
+      <button type="submit"
+      class="mt-6 block w-full bg-indigo-400 text-white py-1.5 px-3 rounded transition
+        hover:bg-indigo-500 disabled:opacity-50 disabled:bg-indigo-400">
+      Submit
+    </button>
+    </div>
+</app-modal>
+<app-modal modalID="choosePicture">
+  <p class="text-2xl font-bold" heading>Wanna be whoever you want?</p>
+  <div class="mb-3">
+      <button type="submit"
+      class="mt-6 block w-full bg-indigo-400 text-white py-1.5 px-3 rounded transition
+        hover:bg-indigo-500 disabled:opacity-50 disabled:bg-indigo-400">
+      SELECT
+    </button>
+    </div>
+</app-modal>
 
+<!-- enable tfa -->
+
+<!-- picture -->
 
   <div class="mx-auto grid max-w-7xl gap-x-8 gap-y-20 px-6 lg:px-8 xl:grid-cols-3">
     <div class="max-w-2xl">
-      <!-- <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Meet our leadership</h2>
-      <p class="mt-6 text-lg leading-8 text-gray-600">Libero fames augue nisl porttitor nisi, quis. Id ac elit odio vitae elementum enim vitae ullamcorper suspendisse.</p> -->
     </div>
     <ul role="list" class="grid gap-x-8 gap-y-12 sm:grid-cols-2 sm:gap-y-16 xl:col-span-2">
       <li>
@@ -14,8 +40,11 @@
           <img class="h-32 w-32 rounded-full" [src]="intraPic" alt="">
           <div>
             <h3 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ intraName }}</h3>
-            <!-- <p class="text-sm font-semibold leading-6 text-indigo-400">{{ realName }}</p> -->
-
+            <button style="color:rgb(255, 255, 255)" 
+            class="py-2 px-16 bg-indigo-400 font-semibold rounded-lg shadow-md hover:bg-indigo-500 focus:outline-none "
+            (click)="enableTFA()">
+              ENABLE TFA
+            </button>
           </div>
         </div>
       </li>
@@ -23,7 +52,6 @@
   </div>
 
   <!-- stats -->
-
 
   <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
     <dt class="text-sm font-medium leading-6 text-indigo-400">Wins</dt>
@@ -39,7 +67,7 @@
   </div>
   <ng-container *ngFor="let badgeLevel of [1, 2, 3, 4, 5]">
     <span *ngIf="intraBadgeLevel >= badgeLevel" 
-      class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-{{100 * badgeLevel}} ring-1 ring-inset ring-indigo-{{900 - (100 * badgeLevel)}}/10">Badge {{badgeLevel}}</span>
+      class="inline-flex items-center rounded-md bg-indigo-50 px-10 py-5 text-xs font-medium text-indigo-{{100 * badgeLevel}} ring-1 ring-inset ring-indigo-{{900 - (100 * badgeLevel)}}/10">Badge {{badgeLevel}}</span>
   </ng-container>
   
 
