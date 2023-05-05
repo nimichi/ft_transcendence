@@ -9,6 +9,8 @@ import { LoginComponent } from './login-button/login.component';
 import { HomeComponent } from './home/home.component';
 import { SocketService } from './services/socket.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FriendsComponent } from './friends/friends.component';
+// import { SearchbarComponent } from './searchbar/searchbar.component';
 
 
 @NgModule({
@@ -17,6 +19,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     NavComponent,
     LoginComponent,
     HomeComponent,
+    FriendsComponent,
+    // SearchbarComponent,
   ],
   imports: [
     BrowserModule,

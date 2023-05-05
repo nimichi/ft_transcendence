@@ -6,10 +6,8 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { UserComponent } from './user.component';
-// import { ChatModule } from '../chat/chat.module';
 import { ChatComponent } from '../chat/chat.component';
-// import { NavComponent } from '../nav/nav.component';
-
+import { SearchbarComponent } from '../searchbar/searchbar.component';
 @NgModule({
   declarations: [
     AuthModalComponent,
@@ -17,14 +15,13 @@ import { ChatComponent } from '../chat/chat.component';
     RegisterComponent,
     UserComponent,
     ChatComponent,
-    // NavComponent
+    SearchbarComponent
   ],
   imports: [
     CommonModule,
     SharedModule,
     ReactiveFormsModule,
     FormsModule,
-    // ChatModule
   ],
   exports: [
     AuthModalComponent

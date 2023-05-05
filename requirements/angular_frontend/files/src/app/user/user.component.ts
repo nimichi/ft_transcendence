@@ -4,7 +4,7 @@ import { SocketService } from '../services/socket.service';
 import { ChatComponent } from '../chat/chat.component';
 import { ModalComponent } from '../shared/modal/modal.component';
 import { ModalService } from '../services/modal.service';
-
+import { SearchbarComponent } from '../searchbar/searchbar.component';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',

@@ -1,5 +1,7 @@
 <!-- <app-nav></app-nav> -->
 
+
+
 <!-- change name and picture pop ups -->
 <!-- hier muessen die modals noch mit buttons verknuepft werden -->
 <app-modal modalID="chooseName">
@@ -27,9 +29,10 @@
     </div>
 </app-modal>
 
+<app-searchbar></app-searchbar>
+
 <!-- enable tfa -->
 
-<!-- picture -->
 
   <div class="mx-auto grid max-w-7xl gap-x-8 gap-y-20 px-6 lg:px-8 xl:grid-cols-3">
     <div class="max-w-2xl">
@@ -73,13 +76,13 @@
 
 <!-- matchHistory -->
   
-  <ul class="list-none">
-    <li *ngFor="let item of listData">
-      <span class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.versus}} {{item.result}} {{item.level}} </span>
+  <!-- <ul class="list-none"> -->
+    <!-- <li *ngFor="let item of listData"> -->
+      <!-- <span class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.versus}} {{item.result}} {{item.level}} </span> -->
       <!-- <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.name}}</dd> -->
 
-    </li>
-  </ul>
+    <!-- </li> -->
+  <!-- </ul> -->
 
   <div class="table">
     <div class="table-row header">

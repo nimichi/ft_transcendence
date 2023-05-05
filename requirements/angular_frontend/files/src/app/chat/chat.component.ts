@@ -9,4 +9,17 @@ import { FormControl } from '@angular/forms';
 export class ChatComponent {
 
   searchControl = new FormControl ('')
+  
+  sendMessage(){
+    console.log('send message works')
+  }
+
+
+  enterMessage(){
+    console.log('enter key works')
+  }
+  
 }
+
+
+  
