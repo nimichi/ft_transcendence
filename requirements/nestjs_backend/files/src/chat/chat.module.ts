@@ -14,7 +14,7 @@ export class ChatModule {
   }
 
   public recieveMsg (intra: string, payload: string) : any {
-    this.chatSerive.recieveMsg(intra, payload);
+    this.chatSerive.reciveMsg(intra, payload);
 
   }
 
