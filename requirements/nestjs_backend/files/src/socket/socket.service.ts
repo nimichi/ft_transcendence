@@ -1,6 +1,6 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { EMPTY, throwError, Observable, map, catchError, lastValueFrom } from 'rxjs'
+import { throwError, map, catchError, lastValueFrom } from 'rxjs'
 import { Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
 

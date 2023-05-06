@@ -6,6 +6,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { UserComponent } from './user.component';
+import { SocketModule } from '../socket/socket.module';
 // import { ChatModule } from '../chat/chat.module';
 import { ChatComponent } from '../chat/chat.component';
 // import { NavComponent } from '../nav/nav.component';
@@ -22,6 +23,7 @@ import { ChatComponent } from '../chat/chat.component';
   imports: [
     CommonModule,
     SharedModule,
+	SocketModule,
     ReactiveFormsModule,
     FormsModule,
     // ChatModule
