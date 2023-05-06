@@ -5,7 +5,7 @@ import { ChannelArrayProvider } from 'src/commonProvider/ChannelArrayProvider';
 @Injectable()
 export class ChatService {
 	constructor(private channelArrayProvider: ChannelArrayProvider){};
-
+	private userList: string[];
 	async reciveMsg(messageFrom: string,message: string) {
 		const dataTransferObject = this.parseMessage(messageFrom, message);
 		this.addChannel(dataTransferObject);
@@ -13,7 +13,10 @@ export class ChatService {
 	}
 
 	async disconnectUser(intra: string) {
-		//TDOD: Der user muss vom chat-room disconected werden
+		if(this.userList.length !== 0 && this.userList.includes(intra)) {
+			const index = this.userList.indexOf(intra);
+			this.userList.splice(index, 1);
+		}
 	}
 
 	private parseMessage(messageFrom: string, messageString: string) : messageDTO {
