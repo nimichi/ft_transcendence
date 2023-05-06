@@ -8,8 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './login-button/login.component';
 import { HomeComponent } from './home/home.component';
 import { SocketService } from './services/socket.service';
-
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 @NgModule({
@@ -17,13 +16,14 @@ import { SocketService } from './services/socket.service';
     AppComponent,
     NavComponent,
     LoginComponent,
-    HomeComponent
+    HomeComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     UserModule,
-    HttpClientModule
+    HttpClientModule,
+    BrowserAnimationsModule,
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]

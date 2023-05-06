@@ -23,11 +23,15 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
-		console.log(`Client connected: ${client.id}`);
+		let login;
+		[login] = client.rooms;
+		console.log(`Client connected! id: ${client.id} login: ${login}`);
 	}
 
 	handleDisconnect(client: Socket) {
-		console.log(`Client disconnected: ${client.id}`);
+		let login;
+		[login] = client.rooms;
+		console.log(`Client disconnected! id: ${client.id} login: ${login}`);
 	}
 
 	@SubscribeMessage('message')
@@ -36,9 +40,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	}
 
 	@SubscribeMessage('userdata')
-	handleUserDataMessage(client: any, payload: any): string {
-		console.log('hello world')
-		client.emit('bla', 'backend sent this');
-		return 'Answer in Backend!';
+	handleUserDataMessage(client: any, payload: any) {
+
+		const [name] = client.rooms;
+
+		return name;
 	}
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { io } from 'socket.io-client';
-
+// import { Observable } from 'rxjs/Observable';
+// import * as Rx from 'rxjs/Rx';
 
 
 // @Injectable({
@@ -25,14 +26,25 @@ export class SocketService {
 		  });
 		this.isOpen = true;
 
-		this.socket.on('bla', (arg: string) => { this.recievedBla(arg) })
+		this.socket.on('bla', (arg: any) => { this.recievedBla(arg) })
+		this.socket.on('close', () => this.closeSocket())
 	}
 
-	recievedBla(arg: string){
+	closeSocket(){
+		this.isOpen = false;
+		console.log("Socket closed");
+	}
+
+	recievedBla(arg: any){
 		console.log(arg);
 	}
 
+	recievedUserdata(name: string){
+		console.log("The User Login is: " + name);
+	}
+
 	socketState(): boolean {
+		//auf die Login Seite redirecten
 		return this.isOpen;
 	}
 
@@ -42,13 +54,12 @@ export class SocketService {
 			this.socket.emit('chat', message);
 	}
 
-	requestUserData(){
+	requestEvent(eventName: string, payload: any, callback: any): boolean{
 		if (this.isOpen)
 		{
-			console.log('1st');
-			const res = this.socket.emit('userdata', null);
+			this.socket.emit(eventName, payload, callback);
+			return true;
 		}
-		else
-			console.log('bla');
+		return false;
 	}
 }
