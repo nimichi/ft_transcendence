@@ -12,6 +12,10 @@ export class ChatService {
 		return dataTransferObject;
 	}
 
+	async disconnectUser(intra: string) {
+		//TDOD: Der user muss vom chat-room disconected werden
+	}
+
 	private parseMessage(messageFrom: string, messageString: string) : messageDTO {
 		///MSG mjeyavat: bla bla
 		const messageValues = messageString.split(":");
