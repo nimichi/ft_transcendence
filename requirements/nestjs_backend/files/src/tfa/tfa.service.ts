@@ -20,10 +20,18 @@ export class TfaService {
 				if (err) {
 					reject(err);
 				} else {
-					console.log("QR Code: " + data_url);
+					// console.log("QR Code: " + data_url);
 					resolve(data_url);
 				}
 			});
 		});
+	}
+	verifyTFA(secret: string, token: string): boolean {
+
+		return ( speakeasy.totp.verify({
+			secret: secret,
+			encoding: 'ascii',
+			token: token
+		}) );
 	}
 }
