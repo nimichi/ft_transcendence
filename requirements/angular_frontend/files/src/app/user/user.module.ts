@@ -9,8 +9,7 @@ import { UserComponent } from './user.component';
 import { SocketModule } from '../socket/socket.module';
 // import { ChatModule } from '../chat/chat.module';
 import { ChatComponent } from '../chat/chat.component';
-// import { NavComponent } from '../nav/nav.component';
-
+import { SearchbarComponent } from '../searchbar/searchbar.component';
 @NgModule({
   declarations: [
     AuthModalComponent,
@@ -18,7 +17,7 @@ import { ChatComponent } from '../chat/chat.component';
     RegisterComponent,
     UserComponent,
     ChatComponent,
-    // NavComponent
+    SearchbarComponent
   ],
   imports: [
     CommonModule,
@@ -26,7 +25,6 @@ import { ChatComponent } from '../chat/chat.component';
 	SocketModule,
     ReactiveFormsModule,
     FormsModule,
-    // ChatModule
   ],
   exports: [
     AuthModalComponent

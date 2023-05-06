@@ -13,6 +13,8 @@ import { TargetService } from '../services/target.service';
 `
 })
 
+
+
 export class LoginComponent {
   constructor(private http: HttpClient, private socket: SocketModule, private target: TargetService) {
 	console.log("Socket state is: " + this.socket.socketState());
@@ -37,6 +39,15 @@ export class LoginComponent {
   //   console.log(response);
   // });
   // }
+
+
+  ngOnInit(){
+
+    if (this.socket.socketState())
+		  window.location.href = "/user";
+    console.log(this.socket.socketState());
+
+  }
 
   jsongetvalue: any
 
