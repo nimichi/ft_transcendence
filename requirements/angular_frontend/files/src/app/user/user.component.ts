@@ -26,14 +26,18 @@ export class UserComponent {
 	//die liste kommt vom backend
 
 	userName: string = String();
+	tfaBool: boolean = false;
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule,
-		public nameModal: ModalService, public picModal: ModalService) {
+		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService, public tokenModal: ModalService) {
 	}
 
 	ngOnInit() {
 		this.nameModal.register('chooseName')
 		this.picModal.register('choosePicture')
+		this.tfaModal.register('registerTFA')
+		this.tokenModal.register('loginTFA')
+
 
 		//hier funcion die das modal aktiviert, wenn man auf den button klickt :)
 		//function muss dann im template eingebaut werden
@@ -68,6 +72,9 @@ export class UserComponent {
 	ngOnDestroy(): void {
 		this.nameModal.unregister('chooseName')
 		this.picModal.unregister('choosePicture')
+		this.picModal.unregister('registerTFA')
+		this.picModal.unregister('loginTFA')
+
 
 	  }
 
