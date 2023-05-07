@@ -35,9 +35,18 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 		console.log(`Client disconnected! id: ${client.id} login: ${login}`);
 	}
 
-	@SubscribeMessage('message')
-	handleMessage(client: any, payload: any): string {
-		return 'Hello world!';
+	@SubscribeMessage('friendlist')
+	handleMessage(client: any, payload: any): {name: string, status: number, pic: string}[] {
+		const [name] = client.rooms;
+
+		const listValues: {name: string, status: number, pic: string}[] = [
+			{name: 'mnies', status: 2, pic: 'https://cdn.intra.42.fr/users/f39c95b440a7892a13fd0815fdc4ed78/mnies.jpg'},
+			{name: 'dmontema', status: 3, pic: 'https://cdn.intra.42.fr/users/90e5daf132867874fda0b6d5c6227f08/dmontema.jpg'},
+			{name: 'lrosch', status: 1, pic: 'https://cdn.intra.42.fr/users/cd93c8ee7920347eedfeafb9f8b7b294/lrosch.jpg'},
+			{name: 'mjeyavat', status: 1, pic: 'https://cdn.intra.42.fr/users/70fdc8bacb35cb5b1f666383b0eee5ff/mjeyavat.JPG'}
+		];
+
+		return listValues;
 	}
 
 	@SubscribeMessage('userdata')

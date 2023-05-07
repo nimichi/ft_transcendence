@@ -4,6 +4,7 @@ import { SocketModule } from '../socket/socket.module';
 import { ChatComponent } from '../chat/chat.component';
 import { ModalComponent } from '../shared/modal/modal.component';
 import { ModalService } from '../services/modal.service';
+import { Router } from '@angular/router';
 import { SearchbarComponent } from '../searchbar/searchbar.component';
 @Component({
   selector: 'app-user',
@@ -22,17 +23,22 @@ export class UserComponent {
 	versus: string = "mnies"
 	result:string = "WIN"
 	laddderLevel: number = 100
-	listData: any [ ] = [{versus: "romy", result: "win", level: 3},{versus: "michi", result: "loss", level: 4}]
+	listData: any [ ] = []
 	//die liste kommt vom backend
 
 	userName: string = String();
 	tfaBool: boolean = false;
 
-	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule,
+	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router,
 		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService, public tokenModal: ModalService) {
 	}
 
 	ngOnInit() {
+		if (!this.socket.socketState()){
+			this.router.navigate(['']);
+		}
+
+
 		this.nameModal.register('chooseName')
 		this.picModal.register('choosePicture')
 		this.tfaModal.register('registerTFA')
