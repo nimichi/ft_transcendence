@@ -32,11 +32,16 @@ export class SocketService {
 				loss: 0
 			}
 
-			const user = await this.prismaService.findOrCreateUser(user_tmp);
+			let user = await this.prismaService.findOrCreateUser(user_tmp);
 			// await this.prismaService.updateUserName(user.id, "dncmon");
 			// console.log("USER:");
+			
+			if (this.prismaService.findUserByIntra(user_data.login)) {
+				console.log("User found - Full Name will be updated ...");
+				this.prismaService.updateFullname(user_data.login, "Denice Georgettezen W. Montemayor");
+			}
+			
 			console.log(JSON.stringify(user, null, 2));
-
 			socket.join(user_data.login);
 			return (true);
 		}
