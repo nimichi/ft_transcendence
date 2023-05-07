@@ -1,6 +1,7 @@
 import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { SocketService } from './socket.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 // import { SocketService } from './socket.service';
 
 @WebSocketGateway()
@@ -8,7 +9,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	@WebSocketServer()
 	public server: Server;
 
-	constructor(private socketService: SocketService){}
+	constructor(private socketService: SocketService, private prismaService: PrismaService){}
 
 	afterInit(server: Server) {
 		this.server.use(async (socket, next) => {
@@ -40,15 +41,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	}
 
 	@SubscribeMessage('userdata')
-	handleUserDataMessage(client: any, payload: any) {
-		const userdata = {picture: "https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg",
-							name: "Romy Schleicher", login: "rschleic", win: 21, los: 15, level: 6, badge: 2,
-							list: [{versus: "romy", result: "win", level: 3},{versus: "michi", result: "loss", level: 4}]};
+	async handleUserDataMessage(client: any, payload: any) {
+		// const userdata = {picture: "https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg",
+		// 					name: "Romy Schleicher", login: "rschleic", win: 21, los: 15, level: 6, badge: 2,
+		// 					list: [{versus: "romy", result: "win", level: 3},{versus: "michi", result: "loss", level: 4}]};
 
 		const [name] = client.rooms;
+		let user_data = await this.prismaService.findUserByIntra(name);
 
-		
-
-		return userdata;
+		return user_data;
 	}
 }

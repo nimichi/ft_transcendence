@@ -54,13 +54,13 @@ export class UserComponent {
 
 	callbackUserData(userdata: any){
 		this.intraPic = userdata.picture;
-		this.intraName = userdata.login;
-		this.realName = userdata.name;
+		this.intraName = userdata.intra_name;
+		this.realName = userdata.displayname;
 		this.wins = userdata.win;
-		this.losses = userdata.los;
-		this.level = userdata.level;
-		this.intraBadgeLevel = userdata.badge;
-		this.listData = userdata.list;
+		this.losses = userdata.loss;
+		this.level = userdata.win - userdata.loss;
+		this.intraBadgeLevel = this.level / 5;
+		this.listData = [{versus: "romy", result: "win", level: 3},{versus: "michi", result: "loss", level: 4}];
 
 		console.log("This is: " + this.intraName);
 	}

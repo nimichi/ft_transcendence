@@ -20,20 +20,19 @@ export class SocketService {
 			console.log('user ' + user_data.login + ' authorized');
 
 			const user_tmp = {
-				id: user_data.id,
-				First_Name: user_data.first_name,
-				Last_Name: user_data.last_name,
-				User_Name: user_data.login,
-				Email: user_data.email,
-				Avatar: user_data.image.versions.medium,
-				User_Pw: "default",
-				User_Status: "default",
+				intra_name: user_data.login,
+				full_name: user_data.displayname,
+				picture: user_data.image.versions.medium,
+				tfa: false,
+				tfa_secret: null,
+				win: 0,
+				loss: 0
 			}
 
 			const user = await this.prismaService.findOrCreateUser(user_tmp);
 			// await this.prismaService.updateUserName(user.id, "dncmon");
 			// console.log("USER:");
-			// console.log(JSON.stringify(user, null, 2));
+			console.log(JSON.stringify(user, null, 2));
 
 			socket.join(user_data.login);
 			return (true);

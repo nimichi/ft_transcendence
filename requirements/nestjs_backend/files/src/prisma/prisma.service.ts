@@ -17,7 +17,7 @@ export class PrismaService extends PrismaClient {
 
   async findOrCreateUser(data: User) {
 	const existing_entry = await this.user.findFirst({
-		where: { id: data.id, },
+		where: { intra_name: data.intra_name, },
 	});
 
 	if (existing_entry) {
@@ -30,21 +30,25 @@ export class PrismaService extends PrismaClient {
 	return (new_entry);
   }
 
-  async findUserById(id: number): Promise<User | null> {
-	const user = await this.user.findUnique({ where: { id } });
+  async findUserByIntra(intra_name: string): Promise<User | null> {
+	const user = await this.user.findUnique({ where: { intra_name } });
 	return (user || null);
   }
-
-  async updateUserName(id: number, User_Name: string): Promise<void> {
-	if (this.findUserById === null) {
-		console.log("User not found.");
-		return ;
-	}
-	const updatedUser = await this.user.update({
-		where: { id: id },
-		data: { User_Name },
-	});
-
-	console.log("User entry updated.");
-  }
 }
+
+
+
+
+
+//   async updateUserName(id: number, User_Name: string): Promise<void> {
+// 	if (this.findUserById === null) {
+// 		console.log("User not found.");
+// 		return ;
+// 	}
+// 	const updatedUser = await this.user.update({
+// 		where: { id: id },
+// 		data: { User_Name },
+// 	});
+
+// 	console.log("User entry updated.");
+//   }
