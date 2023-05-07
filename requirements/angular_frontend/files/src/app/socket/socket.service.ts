@@ -4,35 +4,41 @@ import { io } from 'socket.io-client';
 // import * as Rx from 'rxjs/Rx';
 
 
-// @Injectable({
-//   providedIn: 'root'
-// })
+@Injectable({
+  providedIn: 'root'
+})
 export class SocketService {
-	private socket: any;
 	private isOpen: boolean;
 
 	constructor() {
 		this.isOpen = false;
 	}
 
-	openSocket(code: string) {
-		this.socket = io('localhost:3000', {
+	openSocket(code: string) : any {
+		let socket : any;
+		socket = io('localhost:3000', {
 			transports: ['websocket'],
 			withCredentials: true,
 			extraHeaders: {
 				'Access-Control-Allow-Origin': 'localhost:3000',
 			},
 			auth: { token: code }
-		  });
-		this.isOpen = true;
+		});
 
-		this.socket.on('bla', (arg: any) => { this.recievedBla(arg) })
-		this.socket.on('close', () => this.closeSocket())
+		socket.on('bla', (arg: any) => { this.recievedBla(arg) })
+		socket.on('close', () => this.closedSocket())
+		socket.on('connect', () => this.connectedSocket())
+		return socket;
 	}
 
-	closeSocket(){
+	closedSocket(){
 		this.isOpen = false;
 		console.log("Socket closed");
+	}
+
+	connectedSocket(){
+		this.isOpen = true;
+		console.log("Socket connected");
 	}
 
 	recievedBla(arg: any){
@@ -48,16 +54,16 @@ export class SocketService {
 		return this.isOpen;
 	}
 
-	sendMessage(message: string): void {
+	sendMessage(socket: any, message: string): void {
 		console.log(this.isOpen);
 		if (this.isOpen)
-			this.socket.emit('chat', message);
+			socket.emit('chat', message);
 	}
 
-	requestEvent(eventName: string, payload: any, callback: any): boolean{
+	requestEvent(socket: any, eventName: string, payload: any, callback: any): boolean{
 		if (this.isOpen)
 		{
-			this.socket.emit(eventName, payload, callback);
+			socket.emit(eventName, payload, callback);
 			return true;
 		}
 		return false;

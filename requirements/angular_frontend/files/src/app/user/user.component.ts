@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { SocketService } from '../services/socket.service';
+import { SocketModule } from '../socket/socket.module';
 import { ChatComponent } from '../chat/chat.component';
-
+import { ModalComponent } from '../shared/modal/modal.component';
+import { ModalService } from '../services/modal.service';
+import { SearchbarComponent } from '../searchbar/searchbar.component';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
@@ -10,13 +12,13 @@ import { ChatComponent } from '../chat/chat.component';
 })
 export class UserComponent {
 
-	intraPic: string  = "https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg"
-	intraName: string  = "Rschleic"
-	realName: string = "Romy Schleicher"
+	intraPic: string  = ""
+	intraName: string  = ""
+	realName: string = ""
 	wins: number = 0
 	losses: number = 0
 	level: number = 0
-	intraBadgeLevel: number = 2
+	intraBadgeLevel: number = 5
 	versus: string = "mnies"
 	result:string = "WIN"
 	laddderLevel: number = 100
@@ -25,26 +27,51 @@ export class UserComponent {
 
 	userName: string = String();
 
-	constructor(private activatedRoute: ActivatedRoute, private socket: SocketService) {
+	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule,
+		public nameModal: ModalService, public picModal: ModalService) {
 	}
 
 	ngOnInit() {
+		this.nameModal.register('chooseName')
+		this.picModal.register('choosePicture')
+
+		//hier funcion die das modal aktiviert, wenn man auf den button klickt :)
+		//function muss dann im template eingebaut werden
+
 		this.activatedRoute.queryParams.subscribe(params => {
 			console.log(params);
 			if (!params.code){
 				console.log('loaded without code');
-				return;
+				this.socket.requestEvent("userdata", null, (data: any) => this.callbackUserData(data));
 			}
-			if (this.socket.socketState() == false)
+			else{
 				this.socket.openSocket(params.code);
-			console.log('loaded with code: ' + params.code);
+			}
 		});
 
 		this.socket.requestEvent("userdata", null, (data: string) => this.callbackUserData(data));
 	}
 
-	callbackUserData(userName: string){
-		this.userName = userName;
-		console.log("This is: " + this.userName);
+	callbackUserData(userdata: any){
+		this.intraPic = userdata.picture;
+		this.intraName = userdata.login;
+		this.realName = userdata.name;
+		this.wins = userdata.win;
+		this.losses = userdata.los;
+		this.level = userdata.level;
+		this.intraBadgeLevel = userdata.badge;
+		this.listData = userdata.list;
+
+		console.log("This is: " + this.intraName);
+	}
+
+	ngOnDestroy(): void {
+		this.nameModal.unregister('chooseName')
+		this.picModal.unregister('choosePicture')
+
+	  }
+
+	enableTFA(){
+
 	}
 }

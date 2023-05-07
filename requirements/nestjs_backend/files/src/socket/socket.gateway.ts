@@ -41,9 +41,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 
 	@SubscribeMessage('userdata')
 	handleUserDataMessage(client: any, payload: any) {
+		const userdata = {picture: "https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg",
+							name: "Romy Schleicher", login: "rschleic", win: 21, los: 15, level: 6, badge: 2,
+							list: [{versus: "romy", result: "win", level: 3},{versus: "michi", result: "loss", level: 4}]};
 
 		const [name] = client.rooms;
 
-		return name;
+		
+
+		return userdata;
 	}
 }
