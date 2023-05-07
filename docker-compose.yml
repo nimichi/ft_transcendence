@@ -26,6 +26,7 @@ services:
     volumes:
       - ./requirements/angular_frontend/files:/ft_transcendence
       - /ft_transcendence/node_modules
+      - /ft_transcendence/prisma/migrations
     env_file: .env
     networks:
       - network

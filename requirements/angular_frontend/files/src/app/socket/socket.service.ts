@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { io } from 'socket.io-client';
+import { Router } from '@angular/router';
 // import { Observable } from 'rxjs/Observable';
 // import * as Rx from 'rxjs/Rx';
 
@@ -10,7 +11,7 @@ import { io } from 'socket.io-client';
 export class SocketService {
 	private isOpen: boolean;
 
-	constructor() {
+	constructor(private router: Router) {
 		this.isOpen = false;
 	}
 
@@ -31,6 +32,8 @@ export class SocketService {
 		return socket;
 	}
 
+
+
 	closedSocket(){
 		this.isOpen = false;
 		console.log("Socket closed");
@@ -38,6 +41,7 @@ export class SocketService {
 
 	connectedSocket(){
 		this.isOpen = true;
+		this.router.navigate(['/user']);
 		console.log("Socket connected");
 	}
 
