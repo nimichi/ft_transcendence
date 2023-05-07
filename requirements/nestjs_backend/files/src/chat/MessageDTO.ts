@@ -14,4 +14,5 @@ export class messageDTO {
 	readonly channel: string | null;
 	readonly message: string;
 	readonly messageFrom: string;
+	readonly reciverList: string[];
 }
