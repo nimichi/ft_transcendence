@@ -4,8 +4,12 @@ import { ChannelArrayProvider } from 'src/commonProvider/ChannelArrayProvider';
 
 @Injectable()
 export class ChatService {
-	constructor(private channelArrayProvider: ChannelArrayProvider){};
 	private userList: string[];
+	constructor(private channelArrayProvider: ChannelArrayProvider)
+	{
+		this.userList = [];
+	};
+
 	async reciveMsg(messageFrom: string,message: string) {
 		const dataTransferObject = this.parseMessage(messageFrom, message);
 		this.addChannel(dataTransferObject);
@@ -19,13 +23,20 @@ export class ChatService {
 		}
 	}
 
+	async connectUser(intra: string) {
+		//is user in channle
+		if(this.userList.length !== 0 && !this.userList.includes(intra)) {
+			this.userList.push(intra);
+		}
+	}
+
 	private parseMessage(messageFrom: string, messageString: string) : messageDTO {
 		///MSG mjeyavat: bla bla
 		const messageValues = messageString.split(":");
 		const messageMetaInf = messageValues[0].split(" ");
 		//create vals
-		const joinCmd = messageMetaInf[0].includes("MSG") === true ? messageMetaInf[0] : "";
-		const messageCmd = messageMetaInf[0].includes("JOIN") === true ? messageMetaInf[0] : "";
+		const joinCmd = messageMetaInf[0].includes("JOIN") === true ? messageMetaInf[0] : "";
+		const messageCmd = messageMetaInf[0].includes("MSG") === true ? messageMetaInf[0] : "";
 		const channel = messageMetaInf[1].includes("#") === true ? messageMetaInf[1] : "";
 		const messageTo = messageMetaInf[1].includes("#") === false ? messageMetaInf[1] : ""; 
 		
