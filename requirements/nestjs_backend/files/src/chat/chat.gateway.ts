@@ -8,11 +8,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(private chat: ChatService){}
 
 	@SubscribeMessage('chatsend')
-	async handleRecieveMsg (client: Socket, payload: string) : Promise<string> {
+	async handleRecieveMsg (client: Socket, payload: {chat: string, msg: string}) : Promise<string> {
 		let intra;
 		[intra] = client.rooms;
 
-		console.log(payload);
+		console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + payload.msg);
 
 
 		// const responseDTO = await this.chat.reciveMsg(intra, payload);
@@ -21,8 +21,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// 	console.log(reciever);
 		// 	client.to(reciever).emit('chatrecv', responseDTO.message);
 		// })
-		client.to(payload).emit('chatrecv', payload);
-		return payload;
+		client.to(payload.chat).emit('chatrecv', payload.msg);
+		return payload.msg;
 	}
 
 	handleConnection(client: Socket) {

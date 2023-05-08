@@ -13,7 +13,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 
 	afterInit(server: Server) {
 		this.server.use(async (socket, next) => {
-			const authorized = await this.socketService.doAuth(socket);
+			const authorized = await this.socketService.doAuth(socket, this.server);
 			if (authorized) {
 				console.log('authorized');
 				next();

@@ -48,4 +48,8 @@ export class SocketModule {
 	requestEvent(eventName: string, payload: any, callback: any): boolean{
 		return this.socketService.requestEvent(this.socket, eventName, payload, callback);
 	}
+
+	getBackendAdr() : string {
+		return this.socketService.getBackendAdr();
+	}
 }

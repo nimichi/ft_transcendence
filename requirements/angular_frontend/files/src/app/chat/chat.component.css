@@ -8,19 +8,40 @@
     margin: 16 px;
     background: #9da9f4;
     border-radius: 16 px;
-    
+
+}
+
+.box{
+	background: black;
 }
 
 .messages{
     width: 60%;
     margin: 16 px;
     background: #737bed;
-
     border-radius: 16 px;
-    
+
 }
 
 .search-input {
     margin: 24;
+}
 
+.list-item{
+	background-color: #9da9f4;
+    margin-bottom: 3px;
+	margin-top: 3px;
+	margin-left: 3px;
+	margin-right: 3px;
+	border-radius: 16px;
+    padding: 6px;
+	cursor: pointer;
+}
+
+.list-item:hover {
+    background-color: #848ae5;
+}
+
+.list-item.selected {
+    background-color: #737bed;
 }

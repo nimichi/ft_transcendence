@@ -8,27 +8,39 @@ import { SocketModule } from '../socket/socket.module';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent {
+	selectedChat: string = "";
 	public chatInput: string = "";
-	public chatOutputList: any [] = [];
+	public msgList: {msg: string, align: string}[] = [];
+	public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [ { name: 'mnies', msgs: [] }, { name: 'rschleic', msgs: [] },  { name: 'dmontema', msgs: [] }, { name: 'lrosch', msgs: [] }, { name: 'mjeyavat', msgs: [] }]
 
 	constructor(private socket: SocketModule){
 		this.socket.socketSubscribe('chatrecv', (msg: string) => this.recvMessage(msg));
 	}
 
+	selectChat(chat: {name: string, msgs: {msg: string, align: string}[]}, event: Event){
+		this.msgList = chat.msgs;
+		this.selectedChat = chat.name;
+		(event.target as HTMLInputElement).parentElement?.childNodes.forEach(child => {
+			if ((child as HTMLInputElement).classList)
+			(child as HTMLInputElement).classList.remove("selected");
+		});
+		(event.target as HTMLInputElement).classList.add("selected");
+	}
+
 	recvMessage(msg: string){
-		this.chatOutputList.unshift( { msg: msg, align: 'left' } );
-		console.log(this.chatOutputList);
+		this.msgList.unshift( { msg: msg, align: 'left' } );
+		console.log(this.msgList);
 	}
 
 	searchControl = new FormControl ('')
 
 	sendMessage(){
-		this.socket.requestEvent('chatsend', this.chatInput, (value: any) => this.sendMessageCallback(value));
+		this.socket.requestEvent('chatsend', { chat: this.selectedChat, msg: this.chatInput}, (value: any) => this.sendMessageCallback(value));
 	}
 
 	sendMessageCallback(msg: any){
 		this.chatInput = '';
-		this.chatOutputList.unshift( { msg: msg, align: 'right' } );
+		this.msgList.unshift( { msg: msg, align: 'right' } );
 		console.log(msg);
 	}
 

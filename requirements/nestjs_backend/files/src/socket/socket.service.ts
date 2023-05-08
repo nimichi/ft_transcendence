@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { throwError, map, catchError, lastValueFrom } from 'rxjs'
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -10,9 +10,8 @@ export class SocketService {
 
 	constructor(private readonly httpService: HttpService, private readonly prismaService: PrismaService) {}
 
-	async doAuth(socket: Socket) {
+	async doAuth(socket: Socket, server: Server) {
 		console.log("TFA");
-		// this.someMethod(socket.handshake.auth.callback);
 		try{
 			console.log('request token');
 			const access = await this.getAccessToken(socket.handshake.auth.token);
@@ -35,8 +34,16 @@ export class SocketService {
 			const user = await this.prismaService.findOrCreateUser(user_tmp);
 			// await this.prismaService.updateUserName(user.id, "dncmon");
 			// console.log("USER:");
-			console.log(JSON.stringify(user, null, 2));
 
+			//disconnect old connection for this intra
+			const clients = server.sockets.adapter.rooms.get(user_data.login);
+			if (clients){
+				clients.forEach((client) => {
+					server.sockets.sockets.get(client).disconnect();
+				});
+			}
+
+			//join new connection to room
 			socket.join(user_data.login);
 			return (true);
 		}

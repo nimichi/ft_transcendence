@@ -15,28 +15,37 @@ export class SocketService {
 		this.isOpen = false;
 	}
 
+	getBackendAdr() : string {
+		return 'localhost:3000'
+	}
+
 	openSocket(code: string) : any {
 		let socket : any;
-		socket = io('localhost:3000', {
+		const backendAdr: string = this.getBackendAdr();
+
+		console.log('Backen is: ' + backendAdr + ':3000')
+
+		socket = io( backendAdr, {
 			transports: ['websocket'],
 			withCredentials: true,
 			extraHeaders: {
-				'Access-Control-Allow-Origin': 'localhost:3000',
+				'Access-Control-Allow-Origin': backendAdr,
 			},
 			auth: { token: code }
 		});
 
 		socket.on('bla', (arg: any) => { this.recievedBla(arg) })
-		socket.on('close', () => this.closedSocket())
+		socket.on('disconnect', () => this.disconnectSocket())
 		socket.on('connect', () => this.connectedSocket())
 		return socket;
 	}
 
 
 
-	closedSocket(){
+	disconnectSocket(){
 		this.isOpen = false;
-		console.log("Socket closed");
+		console.log("Socket disconnect");
+		this.router.navigate(['/']);
 	}
 
 	connectedSocket(){
