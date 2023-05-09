@@ -29,18 +29,6 @@ export class LoginComponent {
 	}
   }
 
-  // intra_auth(): void {
-  //     console.log('omg dis is wooorking')
-  // // intra_auth(){
-  // //   //call http://10.11.4.19:3000/login
-  // }
-  // makeRequest() {
-  // this.http.get('https://localhost:3000/login', { headers: headers }).subscribe(response => {
-  //   console.log(response);
-  // });
-  // }
-
-
   ngOnInit(){
 
     if (this.socket.socketState())
@@ -54,12 +42,14 @@ export class LoginComponent {
 
 
   makeRequest() {
+	const backendAdr: string = this.socket.getBackendAdr()
+
     const header = new HttpHeaders({
       // 'contentType': 'application/json',
-      'Access-Control-Allow-Origin': 'localhost:3000'
+      'Access-Control-Allow-Origin': backendAdr
     });
 
-	this.http.get('http://localhost:3000/auth/init', { headers: header, responseType: 'text' }).subscribe(url => {
+	this.http.get('http://' + backendAdr + '/auth/init', { headers: header, responseType: 'text' }).subscribe(url => {
 		console.log(url);
 		window.location.href = url;
 	});

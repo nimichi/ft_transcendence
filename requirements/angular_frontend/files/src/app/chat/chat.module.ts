@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatComponent } from './chat.component';
+import { SocketModule } from '../socket/socket.module';
 
 
 
@@ -9,7 +10,7 @@ import { ChatComponent } from './chat.component';
     ChatComponent
   ],
   imports: [
-    CommonModule,
+    CommonModule, SocketModule
   ]
 })
 export class ChatModule { }
