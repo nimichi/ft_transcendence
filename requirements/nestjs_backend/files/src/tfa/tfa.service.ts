@@ -27,6 +27,8 @@ export class TfaService {
 	}
 
 	verifyTFA(secret: string, token: string): boolean {
+		console.log("secret: " + secret);
+		console.log("token: " + token);
 
 		return ( speakeasy.totp.verify({
 			secret: secret,

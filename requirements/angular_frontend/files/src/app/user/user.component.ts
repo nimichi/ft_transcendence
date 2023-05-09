@@ -87,4 +87,11 @@ export class UserComponent {
 		let qrCode: string;
 		this.socket.requestEvent("initTFA", null, (res: string) => { qrCode = res; console.log("QR Code: " + qrCode); });
 	}
+
+	verifyTFA() {
+		let token: string = "15341";
+		let verified: boolean;
+		this.socket.requestEvent("verifyTFA", token, (res: boolean) => verified = res);
+	}
+
 }

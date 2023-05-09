@@ -61,8 +61,12 @@ export class PrismaService extends PrismaClient {
 	});
 	console.log("added TFA verification.");
   }
-}
 
+	async getTfaSecret(intra_name: string): Promise<string> {
+		const user = await this.findUserByIntra(intra_name);
+		return (user.tfa_secret);
+	}
+}
 
 //   async updateUserName(id: number, User_Name: string): Promise<void> {
 // 	if (this.findUserById === null) {
