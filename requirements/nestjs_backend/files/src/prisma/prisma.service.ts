@@ -35,7 +35,7 @@ export class PrismaService extends PrismaClient {
 	return (user || null);
   }
   
-  async updateFullname(intra_name: string, full_name) {
+  async updateFullname(intra_name: string, full_name: string) {
 	if (this.findUserByIntra(intra_name) === null) {
 		console.log("User not found.");
 		return ;
@@ -45,6 +45,21 @@ export class PrismaService extends PrismaClient {
 		data: {full_name},
 	});
 	console.log("User entry updated.");
+  }
+
+  async updateTFA(intra_name: string, tfa_secret: string) {
+	if (this.findUserByIntra(intra_name) === null) {
+		console.log("User not found.");
+		return ;
+	}
+	const updatedUser = await this.user.update({
+		where: { intra_name: intra_name},
+		data: {
+			tfa: true,
+			tfa_secret: tfa_secret
+		},
+	});
+	console.log("added TFA verification.");
   }
 }
 

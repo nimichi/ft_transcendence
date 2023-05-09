@@ -81,10 +81,10 @@ export class UserComponent {
 		this.picModal.unregister('registerTFA')
 		this.picModal.unregister('loginTFA')
 
-
-	  }
+	}
 
 	enableTFA(){
-
+		let qrCode: string;
+		this.socket.requestEvent("initTFA", null, (res: string) => { qrCode = res; console.log("QR Code: " + qrCode); });
 	}
 }

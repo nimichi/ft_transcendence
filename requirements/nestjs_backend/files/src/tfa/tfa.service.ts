@@ -5,10 +5,10 @@ import * as qrcode from 'qrcode';
 @Injectable()
 export class TfaService {
 
-	genTfaSecret() {
+	async genTfaSecret(login: string) {
 		const secret = speakeasy.generateSecret({
 			length: 20,
-			name: "Mighty RMMLD"
+			name: "Mighty RMMLD for " + login
 		});
 
 		return (secret);
@@ -20,12 +20,12 @@ export class TfaService {
 				if (err) {
 					reject(err);
 				} else {
-					// console.log("QR Code: " + data_url);
 					resolve(data_url);
 				}
 			});
 		});
 	}
+
 	verifyTFA(secret: string, token: string): boolean {
 
 		return ( speakeasy.totp.verify({
