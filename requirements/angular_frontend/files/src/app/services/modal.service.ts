@@ -20,6 +20,8 @@ export class ModalService {
     })
   }
 
+  
+
   unregister(id: string){
     this.modals = this.modals.filter(
       element => element.id !== id

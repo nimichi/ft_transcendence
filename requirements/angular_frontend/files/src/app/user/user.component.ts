@@ -27,7 +27,7 @@ export class UserComponent {
 	//die liste kommt vom backend
 
 	userName: string = String();
-	tfaBool: boolean = false;
+	tfaToken: string = ''
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router,
 		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService, public tokenModal: ModalService) {
@@ -78,13 +78,20 @@ export class UserComponent {
 	ngOnDestroy(): void {
 		this.nameModal.unregister('chooseName')
 		this.picModal.unregister('choosePicture')
-		this.picModal.unregister('registerTFA')
-		this.picModal.unregister('loginTFA')
+		this.tfaModal.unregister('registerTFA')
+		this.tokenModal.unregister('loginTFA')
 
 
 	  }
 
 	enableTFA(){
+		//backend call 
+		//store qr code in varible
 
+		this.tfaModal.toggleModal('registerTFA')
+	}
+
+	registerTFA(){
+		console.log(this.tfaToken)
 	}
 }

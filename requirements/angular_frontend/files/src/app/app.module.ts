@@ -10,6 +10,7 @@ import { HomeComponent } from './home/home.component';
 import { SocketService } from './socket/socket.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FriendsComponent } from './friends/friends.component';
+import { RedirectComponent } from './redirect/redirect.component';
 // import { SearchbarComponent } from './searchbar/searchbar.component';
 
 
@@ -20,6 +21,7 @@ import { FriendsComponent } from './friends/friends.component';
     LoginComponent,
     HomeComponent,
     FriendsComponent,
+    RedirectComponent,
     // SearchbarComponent,
   ],
   imports: [
