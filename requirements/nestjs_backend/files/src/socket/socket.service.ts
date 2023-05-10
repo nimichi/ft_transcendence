@@ -29,6 +29,12 @@ export class SocketService {
 			let user = await this.prismaService.findOrCreateUser(user_tmp);
 			// await this.prismaService.updateUserName(user.id, "dncmon");
 			// console.log("USER:");
+			if(user.type == 'new'){
+				socket.emit('newfriend', {name: user.value.full_name, intra: user.value.intra_name, status: 3, pic: user.value.picture})
+			}
+			else{
+				socket.emit('status', {name: user.value.intra_name , status: 3})
+			}
 
 			//disconnect old connection for this intra
 			const clients = server.sockets.adapter.rooms.get(user_data.login);

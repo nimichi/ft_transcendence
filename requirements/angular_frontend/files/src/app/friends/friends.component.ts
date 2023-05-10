@@ -10,7 +10,7 @@ import { SocketModule } from '../socket/socket.module';
 export class FriendsComponent {
 
   // playing 1, offline 2, online 3
-  listValues: {name: string, status: number, pic: string}[] = [];
+  listValues: {name: string, intra: string, status: number, pic: string}[] = [];
 
 	constructor(private socket: SocketModule, private router: Router){}
 
@@ -19,12 +19,27 @@ export class FriendsComponent {
 			this.router.navigate(['']);
 			return;
 		}
-
-		this.socket.requestEvent('friendlist', null, (data: {name: string, status: number, pic: string}[]) => this.getListCallback(data))
+		this.socket.requestEvent('friendlist', null, (data: {name: string, intra: string, status: number, pic: string}[]) => this.getListCallback(data))
+		this.socket.socketSubscribe('newfriend', (friend: {name: string, intra: string, status: number, pic: string}) => this.newFriend(friend));
+		this.socket.socketSubscribe('status', (status: any) => this.changeStatus(status));
 	}
 
-	getListCallback(data: {name: string, status: number, pic: string}[]){
-		this.listValues = data;
+	changeStatus(newStatus: any){
+		this.listValues.forEach(friend => {
+			if(friend.intra == newStatus.intra)
+			{
+				friend.status == newStatus.status;
+				return;
+			}
+		});
+	}
+
+	newFriend(friend: {name: string, intra: string, status: number, pic: string}){
+		this.listValues.push(friend)
+	}
+
+	getListCallback(data: {name: string, intra: string, status: number, pic: string}[]){
+		data.forEach(friend => this.listValues.push(friend));
 	}
 
 }

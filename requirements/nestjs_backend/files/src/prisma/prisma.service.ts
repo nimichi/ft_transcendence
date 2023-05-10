@@ -22,19 +22,24 @@ export class PrismaService extends PrismaClient {
 
 	if (existing_entry) {
 		console.log("User already exist - logging in...");
-		return (existing_entry);
+		return ({ type: 'existing', value: existing_entry });
 	}
 
 	const new_entry = await this.user.create({ data });
+
 	console.log("User did not exist - creating and signing up User...");
-	return (new_entry);
+	return ({ type: 'new', value: new_entry });
+  }
+
+  async getAllUsers(){
+	return await this.user.findMany();
   }
 
   async findUserByIntra(intra_name: string): Promise<User | null> {
 	const user = await this.user.findUnique({ where: { intra_name } });
 	return (user || null);
   }
-  
+
   async updateFullname(intra_name: string, full_name: string) {
 	if (this.findUserByIntra(intra_name) === null) {
 		console.log("User not found.");
