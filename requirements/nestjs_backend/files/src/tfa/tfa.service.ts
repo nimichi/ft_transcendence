@@ -5,32 +5,32 @@ import * as qrcode from 'qrcode';
 @Injectable()
 export class TfaService {
 
-	genTfaSecret() {
+	async genTfaSecret(login: string) {
 		const secret = speakeasy.generateSecret({
 			length: 20,
-			name: "Mighty RMMLD"
+			name: "Mighty RMMLD for " + login
 		});
 
 		return (secret);
 	}
 
 	async genQrCode(secret: any): Promise<string> {
+		console.log(secret.otpauth_url);
 		return new Promise<string>((resolve, reject) => {
 			qrcode.toDataURL(secret.otpauth_url, (err, data_url) => {
 				if (err) {
 					reject(err);
 				} else {
-					// console.log("QR Code: " + data_url);
 					resolve(data_url);
 				}
 			});
 		});
 	}
-	verifyTFA(secret: string, token: string): boolean {
 
+	verifyTFA(secret: string, token: string): boolean {
 		return ( speakeasy.totp.verify({
 			secret: secret,
-			encoding: 'ascii',
+			encoding: 'base32',
 			token: token
 		}) );
 	}

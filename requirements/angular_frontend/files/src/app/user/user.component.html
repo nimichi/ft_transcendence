@@ -1,17 +1,17 @@
 <!-- <app-nav></app-nav> -->
 
 <!-- register tfa modal-->
-<form #tfaForm="ngForm" (ngSubmit)="registerTFA()">
+<form #tfaForm="ngForm">
 <app-modal modalID="registerTFA">
   <p class="text-2xl font-bold" heading>Scan QR code</p>
   <div class="mb-3">
-    <img class="w-32 h-32 mb-8 mx-auto rounded-md" src="data:image/png;base64,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">
-    
+    <img class="w-32 h-32 mb-8 mx-auto rounded-md" [src]="qrCode">
+
     <input class="block w-full py-1.5 px-3 text-gray-200 border border-gray-400 transition
     duration-500 focus:outline-none rounded bg-transparent
     focus:border-indigo-400"
-    placeholder="Enter code ..." required>
-    <button type="submit"
+    placeholder="Enter code ..." required [(ngModel)]="tfaToken" name="pinInputTextbox">
+    <button type="submit" (click)="verifyTFA()"
     class="mt-6 block w-full bg-indigo-400 text-white py-1.5 px-3 rounded transition
     hover:bg-indigo-500 disabled:opacity-50 disabled:bg-indigo-400">
     Enable
@@ -83,7 +83,7 @@
           <img class="h-32 w-32 rounded-full" [src]="intraPic" alt="">
           <div>
             <h3 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ intraName }}</h3>
-            <button style="color:rgb(255, 255, 255)" 
+            <button style="color:rgb(255, 255, 255)"
             class="py-2 px-16 bg-indigo-400 font-semibold rounded-lg shadow-md hover:bg-indigo-500 focus:outline-none "
             (click)="enableTFA()">
               ENABLE TFA
@@ -109,13 +109,13 @@
     <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{level}}</dd>
   </div>
   <ng-container *ngFor="let badgeLevel of [1, 2, 3, 4, 5]">
-    <span *ngIf="intraBadgeLevel >= badgeLevel" 
+    <span *ngIf="intraBadgeLevel >= badgeLevel"
       class="inline-flex items-center rounded-md bg-indigo-50 px-10 py-5 text-xs font-medium text-indigo-{{100 * badgeLevel}} ring-1 ring-inset ring-indigo-{{900 - (100 * badgeLevel)}}/10">Badge {{badgeLevel}}</span>
   </ng-container>
-  
+
 
 <!-- matchHistory -->
-  
+
   <!-- <ul class="list-none"> -->
     <!-- <li *ngFor="let item of listData"> -->
       <!-- <span class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.versus}} {{item.result}} {{item.level}} </span> -->
@@ -139,6 +139,6 @@
 
   <!-- <app-list></app-list> -->
   <!-- chat -->
-  
+
   <app-chat></app-chat>
 

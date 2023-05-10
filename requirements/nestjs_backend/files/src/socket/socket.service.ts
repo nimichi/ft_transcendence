@@ -11,15 +11,10 @@ export class SocketService {
 	constructor(private readonly httpService: HttpService, private readonly prismaService: PrismaService) {}
 
 	async doAuth(socket: Socket, server: Server) {
-		console.log("TFA");
 		try{
-			console.log('request token');
 			const access = await this.getAccessToken(socket.handshake.auth.token);
-			console.log('recieved access token');
-
 
 			const user_data = await this.requestUserData(access.access_token);
-			console.log('user ' + user_data.login + ' authorized');
 
 			const user_tmp = {
 				intra_name: user_data.login,
@@ -31,7 +26,7 @@ export class SocketService {
 				loss: 0
 			}
 
-			const user = await this.prismaService.findOrCreateUser(user_tmp);
+			let user = await this.prismaService.findOrCreateUser(user_tmp);
 			// await this.prismaService.updateUserName(user.id, "dncmon");
 			// console.log("USER:");
 
@@ -52,11 +47,6 @@ export class SocketService {
 			console.log('Socket authentication failed')
 			return false;
 		}
-	}
-
-	someMethod(callback: (str: string) => void) {
-		// Do some work here
-		callback("sad");
 	}
 
 	async getAccessToken(code: string): Promise<any> {

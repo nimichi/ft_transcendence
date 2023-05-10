@@ -27,7 +27,8 @@ export class UserComponent {
 	//die liste kommt vom backend
 
 	userName: string = String();
-	tfaToken: string = ''
+	public tfaToken: string = ''
+	public qrCode: string = ''
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router,
 		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService, public tokenModal: ModalService) {
@@ -81,17 +82,33 @@ export class UserComponent {
 		this.tfaModal.unregister('registerTFA')
 		this.tokenModal.unregister('loginTFA')
 
-
-	  }
+	}
 
 	enableTFA(){
-		//backend call 
+		let qrCode: string;
+		this.socket.requestEvent("initTFA", null, (res: string) => this.setQrCode(res));
+
+		//backend call
 		//store qr code in varible
 
 		this.tfaModal.toggleModal('registerTFA')
 	}
 
-	registerTFA(){
-		console.log(this.tfaToken)
+	setQrCode(qrCode: string){
+		this.qrCode = qrCode;
 	}
+
+	verifyTFA() {
+		this.socket.requestEvent("verifyTFA", this.tfaToken, (res: boolean) => this.closeTFA(res));
+	}
+
+	closeTFA(verified: boolean){
+		if(verified){
+			this.tfaModal.toggleModal('registerTFA')
+		}
+		else{
+			this.tfaToken = "";
+		}
+	}
+
 }

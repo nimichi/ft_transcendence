@@ -23,8 +23,6 @@ export class SocketService {
 		let socket : any;
 		const backendAdr: string = this.getBackendAdr();
 
-		console.log('Backen is: ' + backendAdr + ':3000')
-
 		socket = io( backendAdr, {
 			transports: ['websocket'],
 			withCredentials: true,
@@ -34,13 +32,10 @@ export class SocketService {
 			auth: { token: code }
 		});
 
-		socket.on('bla', (arg: any) => { this.recievedBla(arg) })
 		socket.on('disconnect', () => this.disconnectSocket())
 		socket.on('connect', () => this.connectedSocket())
 		return socket;
 	}
-
-
 
 	disconnectSocket(){
 		this.isOpen = false;
@@ -52,14 +47,6 @@ export class SocketService {
 		this.isOpen = true;
 		this.router.navigate(['/user']);
 		console.log("Socket connected");
-	}
-
-	recievedBla(arg: any){
-		console.log(arg);
-	}
-
-	recievedUserdata(name: string){
-		console.log("The User Login is: " + name);
 	}
 
 	socketState(): boolean {

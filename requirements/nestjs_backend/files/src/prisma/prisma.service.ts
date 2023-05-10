@@ -34,11 +34,39 @@ export class PrismaService extends PrismaClient {
 	const user = await this.user.findUnique({ where: { intra_name } });
 	return (user || null);
   }
+  
+  async updateFullname(intra_name: string, full_name: string) {
+	if (this.findUserByIntra(intra_name) === null) {
+		console.log("User not found.");
+		return ;
+	}
+	const updatedUser = await this.user.update({
+		where: { intra_name: intra_name},
+		data: {full_name},
+	});
+	console.log("User entry updated.");
+  }
+
+  async updateTFA(intra_name: string, tfa_secret: string) {
+	if (this.findUserByIntra(intra_name) === null) {
+		console.log("User not found.");
+		return ;
+	}
+	const updatedUser = await this.user.update({
+		where: { intra_name: intra_name},
+		data: {
+			tfa: true,
+			tfa_secret: tfa_secret
+		},
+	});
+	console.log("added TFA verification.");
+  }
+
+	async getTfaSecret(intra_name: string): Promise<string> {
+		const user = await this.findUserByIntra(intra_name);
+		return (user.tfa_secret);
+	}
 }
-
-
-
-
 
 //   async updateUserName(id: number, User_Name: string): Promise<void> {
 // 	if (this.findUserById === null) {

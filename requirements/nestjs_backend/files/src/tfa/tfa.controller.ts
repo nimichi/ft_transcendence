@@ -9,9 +9,7 @@ export class TfaController {
 
 	@Get('init')
 	async initTFA() {
-		const secret = this.tfaService.genTfaSecret();
-		// console.log("Secret: " + Object.keys(secret));
-		// console.log("Secret: " + secret.ascii);
+		const secret = await this.tfaService.genTfaSecret("dncxmon");
 		const qrCode = await this.tfaService.genQrCode(secret);
 		const html = `
 		<html>
