@@ -10,11 +10,13 @@ import { SocketModule } from '../socket/socket.module';
 export class ChatComponent {
 	selectedChat: string = "";
 	public chatInput: string = "";
-	public msgList: {msg: string, align: string}[] = [];
-	public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [ { name: 'mnies', msgs: [] }, { name: 'rschleic', msgs: [] },  { name: 'dmontema', msgs: [] }, { name: 'lrosch', msgs: [] }, { name: 'mjeyavat', msgs: [] }]
+	public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [ { name: '!cmd', msgs: [] }]
+	public msgList: {msg: string, align: string}[] = this.chatList[0].msgs;
 
 	constructor(private socket: SocketModule){
 		this.socket.socketSubscribe('chatrecv', (msg: string) => this.recvMessage(msg));
+
+		socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
 	}
 
 	selectChat(chat: {name: string, msgs: {msg: string, align: string}[]}, event: Event){
@@ -25,6 +27,11 @@ export class ChatComponent {
 			(child as HTMLInputElement).classList.remove("selected");
 		});
 		(event.target as HTMLInputElement).classList.add("selected");
+	}
+
+	newChat(chat: {name: string, msgs: {msg: string, align: string}[]}){
+		console.log('testy');
+		this.chatList.push(chat);
 	}
 
 	recvMessage(msg: string){
@@ -43,6 +50,7 @@ export class ChatComponent {
 		this.msgList.unshift( { msg: msg, align: 'right' } );
 		console.log(msg);
 	}
+
 
 
 }
