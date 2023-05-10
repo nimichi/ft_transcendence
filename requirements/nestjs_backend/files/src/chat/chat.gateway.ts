@@ -28,7 +28,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		// 	}
 		// 	client.emit('newchat', {name: 'mnies', msgs: [{msg: "new conversation with", align: "left"}]});
 		// }
-		const responseDTO: chatEmitDTO =  await this.chat.reciveMsg(payload.chat, payload.msg);
+		const responseDTO: chatEmitDTO =  await this.chat.reciveMsg(client, payload.chat, payload.msg);
 		if(payload.chat === "!cmd") {
 			client.emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
 		}

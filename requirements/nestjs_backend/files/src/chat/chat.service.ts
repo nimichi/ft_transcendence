@@ -9,10 +9,10 @@ import { ChannelDTO } from './dtos/ChannelDTO';
 export class ChatService {
 	constructor(private channelArrayProvider: ChannelArrayProvider){};
 
-	async reciveMsg(messageFrom: string, message: string) : Promise<chatEmitDTO>{
+	async reciveMsg(client: any, messageFrom: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
 		if(messageFrom == "!cmd") {
-			if(fullCommand[0].includes("/msg")) {
+			if(fullCommand[0].includes("/new")) {
 				//schau ob nuzer nuzer und ob der bereit vorhanden in der liste vorhanden ist
 				if(!fullCommand[1].includes("#") && !this.checkUserInList(fullCommand[1])){
 					//füge nutzer zur liste hinzu
@@ -23,6 +23,12 @@ export class ChatService {
 				if(fullCommand[1].includes("#") && !this.checkChannelInList(fullCommand[1])) {
 					this.channelArrayProvider.addChannel(fullCommand[1]);
 					console.log(this.channelArrayProvider.getChannels());
+					//logic channel owner & channel admin
+					client.join(fullCommand[1]);
+					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", "left"]);
+				}
+				else if(fullCommand[1].includes("#") && this.checkChannelInList(fullCommand[1])) {
+					client.join(fullCommand[1]);
 					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", "left"]);
 				}
 			}
