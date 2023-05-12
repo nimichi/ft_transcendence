@@ -51,7 +51,6 @@
     </div>
 </app-modal>
 
-<app-searchbar></app-searchbar>
 
 <!-- picture name -->
 
@@ -90,6 +89,7 @@
     <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{level}}</dd>
   </div>
   <ng-container *ngFor="let badgeLevel of [1, 2, 3, 4, 5]">
+    BADGE
     <span *ngIf="intraBadgeLevel >= badgeLevel"
       class="inline-flex items-center rounded-md bg-indigo-50 px-10 py-5 text-xs font-medium text-indigo-{{100 * badgeLevel}} ring-1 ring-inset ring-indigo-{{900 - (100 * badgeLevel)}}/10">Badge {{badgeLevel}}</span>
   </ng-container>
@@ -105,7 +105,24 @@
     <!-- </li> -->
   <!-- </ul> -->
 
-  <div class="table">
+  <!-- <table class="table-auto">
+    <thead>
+      <tr>
+        <th>Versus</th>
+        <th>Result</th>
+        <th>Level</th>
+      </tr>
+    </thead>
+    <tbody>
+      <div class="table-row" *ngFor="let item of listData">
+        <div class="table-cell">{{ item.versus }}</div>
+        <div class="table-cell">{{ item.result }}</div>
+        <div class="table-cell">{{ item.level }}</div>
+      </div>
+    </tbody>
+  </table> -->
+
+  <!-- <div class="table">
     <div class="table-row header">
       <div class="table-cell">Versus</div>
       <div class="table-cell">Result</div>
@@ -116,7 +133,7 @@
       <div class="table-cell">{{ item.result }}</div>
       <div class="table-cell">{{ item.level }}</div>
     </div>
-  </div>
+  </div> -->
 
   <!-- <app-list></app-list> -->
   <!-- chat -->

@@ -14,7 +14,8 @@ import { RedirectComponent } from './redirect/redirect.component';
 import { DisplayComponent } from './display/display.component';
 import { SharedModule } from './shared/shared.module';
 import { ChatModule } from './chat/chat.module';
-// import { SearchbarComponent } from './searchbar/searchbar.component';
+import { HistoryComponent } from './history/history.component';
+
 
 
 @NgModule({
@@ -26,7 +27,7 @@ import { ChatModule } from './chat/chat.module';
     FriendsComponent,
     RedirectComponent,
     DisplayComponent,
-    // SearchbarComponent,
+    HistoryComponent,
   ],
   imports: [
     BrowserModule,
@@ -36,6 +37,7 @@ import { ChatModule } from './chat/chat.module';
     UserModule,
     HttpClientModule,
     BrowserAnimationsModule,
+
     
   ],
   providers: [SocketService],

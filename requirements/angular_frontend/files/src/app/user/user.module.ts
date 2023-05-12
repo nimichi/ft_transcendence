@@ -9,7 +9,6 @@ import { UserComponent } from './user.component';
 import { SocketModule } from '../socket/socket.module';
 import { ChatModule } from '../chat/chat.module';
 import { ChatComponent } from '../chat/chat.component';
-import { SearchbarComponent } from '../searchbar/searchbar.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +16,6 @@ import { SearchbarComponent } from '../searchbar/searchbar.component';
     LoginComponent,
     RegisterComponent,
     UserComponent,
-    SearchbarComponent,
   ],
   imports: [
     CommonModule,
