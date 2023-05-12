@@ -17,12 +17,12 @@ import { SearchbarComponent } from '../searchbar/searchbar.component';
     LoginComponent,
     RegisterComponent,
     UserComponent,
-    ChatComponent,
     SearchbarComponent,
   ],
   imports: [
     CommonModule,
     SharedModule,
+    ChatModule,
 	  SocketModule,
     ReactiveFormsModule,
     FormsModule,

@@ -12,6 +12,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FriendsComponent } from './friends/friends.component';
 import { RedirectComponent } from './redirect/redirect.component';
 import { DisplayComponent } from './display/display.component';
+import { SharedModule } from './shared/shared.module';
+import { ChatModule } from './chat/chat.module';
 // import { SearchbarComponent } from './searchbar/searchbar.component';
 
 
@@ -29,6 +31,8 @@ import { DisplayComponent } from './display/display.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    SharedModule,
+    ChatModule,
     UserModule,
     HttpClientModule,
     BrowserAnimationsModule,
