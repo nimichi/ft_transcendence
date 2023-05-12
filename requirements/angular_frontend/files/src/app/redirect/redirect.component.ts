@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { ModalService } from '../services/modal.service';
+import { ModalComponent } from '../shared/modal/modal.component';
+
 
 @Component({
   selector: 'app-redirect',
@@ -7,4 +10,15 @@ import { Component } from '@angular/core';
 })
 export class RedirectComponent {
 
+    constructor( public tokenModal: ModalService){}
+
+    ngOnInit(){
+
+		  this.tokenModal.register('loginTFA')
+      this.tokenModal.toggleModal('loginTFA')
+    }
+
+    ngOnDestroy(): void {
+      this.tokenModal.unregister('loginTFA')
+    }
 }

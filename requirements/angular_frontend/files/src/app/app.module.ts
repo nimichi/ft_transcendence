@@ -11,6 +11,7 @@ import { SocketService } from './socket/socket.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FriendsComponent } from './friends/friends.component';
 import { RedirectComponent } from './redirect/redirect.component';
+import { DisplayComponent } from './display/display.component';
 // import { SearchbarComponent } from './searchbar/searchbar.component';
 
 
@@ -22,6 +23,7 @@ import { RedirectComponent } from './redirect/redirect.component';
     HomeComponent,
     FriendsComponent,
     RedirectComponent,
+    DisplayComponent,
     // SearchbarComponent,
   ],
   imports: [
@@ -30,6 +32,7 @@ import { RedirectComponent } from './redirect/redirect.component';
     UserModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]

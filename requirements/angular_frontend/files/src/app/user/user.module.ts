@@ -7,9 +7,10 @@ import { RegisterComponent } from './register/register.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { UserComponent } from './user.component';
 import { SocketModule } from '../socket/socket.module';
-// import { ChatModule } from '../chat/chat.module';
+import { ChatModule } from '../chat/chat.module';
 import { ChatComponent } from '../chat/chat.component';
 import { SearchbarComponent } from '../searchbar/searchbar.component';
+
 @NgModule({
   declarations: [
     AuthModalComponent,
@@ -17,12 +18,12 @@ import { SearchbarComponent } from '../searchbar/searchbar.component';
     RegisterComponent,
     UserComponent,
     ChatComponent,
-    SearchbarComponent
+    SearchbarComponent,
   ],
   imports: [
     CommonModule,
     SharedModule,
-	SocketModule,
+	  SocketModule,
     ReactiveFormsModule,
     FormsModule,
   ],

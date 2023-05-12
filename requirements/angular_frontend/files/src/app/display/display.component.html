@@ -1,0 +1,47 @@
+<div class="mx-auto grid max-w-7xl gap-x-8 gap-y-20 px-6 lg:px-8 xl:grid-cols-3">
+    <div class="max-w-2xl">
+    </div>
+    <ul role="list" class="grid gap-x-8 gap-y-12 sm:grid-cols-2 sm:gap-y-16 xl:col-span-2">
+      <li>
+        <div class="flex items-center gap-x-6">
+          <img class="h-32 w-32 rounded-full" [src]="intraPic" alt="">
+          <div>
+            <h3 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ intraName }}</h3>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+
+  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+    <dt class="text-sm font-medium leading-6 text-indigo-400">Wins</dt>
+    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{wins}}</dd>
+  </div>
+  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+    <dt class="text-sm font-medium leading-6 text-indigo-400">Losses</dt>
+    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{losses}}</dd>
+  </div>
+  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+    <dt class="text-sm font-medium leading-6 text-indigo-400">Level</dt>
+    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{level}}</dd>
+  </div>
+  <ng-container *ngFor="let badgeLevel of [1, 2, 3, 4, 5]">
+    <span *ngIf="intraBadgeLevel >= badgeLevel"
+      class="inline-flex items-center rounded-md bg-indigo-50 px-10 py-5 text-xs font-medium text-indigo-{{100 * badgeLevel}} ring-1 ring-inset ring-indigo-{{900 - (100 * badgeLevel)}}/10">Badge {{badgeLevel}}</span>
+  </ng-container>
+
+  <div class="table">
+    <div class="table-row header">
+      <div class="table-cell">Versus</div>
+      <div class="table-cell">Result</div>
+      <div class="table-cell">Level</div>
+    </div>
+    <div class="table-row" *ngFor="let item of listData">
+      <div class="table-cell">{{ item.versus }}</div>
+      <div class="table-cell">{{ item.result }}</div>
+      <div class="table-cell">{{ item.level }}</div>
+    </div>
+  </div>
+
+<app-chat></app-chat>
