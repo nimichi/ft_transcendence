@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { SocketService } from './socket.service';
 
 
-
 @NgModule({
   imports: [CommonModule],
   providers: [SocketService]
@@ -11,8 +10,7 @@ import { SocketService } from './socket.service';
 export class SocketModule {
 	private socket: any;
 
-	private callback: any = null;
-	private eventName: any;
+	private callback: {eventName: string, function: any}[] = [];
 
 
 	constructor(private socketService: SocketService){
@@ -21,11 +19,9 @@ export class SocketModule {
 
 	openSocket(code: string) {
 		this.socket = this.socketService.openSocket(code);
-		if (this.callback)
-		{
-			this.socket.on(this.eventName, this.callback);
-			console.log('subscribed after init')
-		}
+		this.callback.forEach((callback) => {
+			this.socket.on(callback.eventName, callback.function);
+		});
 	}
 
 	socketSubscribe(eventName: string, callback: any){
@@ -36,8 +32,7 @@ export class SocketModule {
 		}
 		else
 		{
-			this.callback = callback;
-			this.eventName = eventName;
+			this.callback.push({eventName: eventName, function: callback})
 		}
 	}
 
