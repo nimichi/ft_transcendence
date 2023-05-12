@@ -1,0 +1,11 @@
+<div class="canvas-container">
+    <canvas tabindex="0" #myCanvas id="myCanvas" (keydown.w)="handleKeyPress($event)"
+    (keydown.s)="handleKeyPress($event)" [style.width.px]="canvasWidth" [style.height.px]="canvasHeight"
+    autofocus></canvas>
+</div>
+<div class="left-bar-container">
+    <div id="left-bar" [style.width.px]="barWidth" [style.height.px]="barHeight"></div>
+</div>
+<div class="right-bar-container">
+    <div id="right-bar" [style.width.px]="barWidth" [style.height.px]="barHeight"></div>
+</div>

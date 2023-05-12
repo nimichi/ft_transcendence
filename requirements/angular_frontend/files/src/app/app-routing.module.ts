@@ -5,6 +5,7 @@ import { LoginComponent } from './login-button/login.component';
 import { UserComponent } from './user/user.component';
 import { FriendsComponent } from './friends/friends.component';
 import { RedirectComponent } from './redirect/redirect.component';
+import { GameComponent } from './game/game.component';
 
 const routes: Routes = [{
 
@@ -26,6 +27,10 @@ const routes: Routes = [{
 {
   path: 'redirect',
   component: RedirectComponent
+},
+{
+  path: 'game',
+  component: GameComponent
 }
 ];
 
