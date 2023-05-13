@@ -38,7 +38,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     UserModule,
     HttpClientModule,
     BrowserAnimationsModule,
-	ReactiveFormsModule,
+	  ReactiveFormsModule,
     FormsModule
   ],
   providers: [SocketService],

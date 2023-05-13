@@ -21,7 +21,7 @@ import { ChatComponent } from '../chat/chat.component';
     CommonModule,
     SharedModule,
     ChatModule,
-	SocketModule,
+	  SocketModule,
     ReactiveFormsModule,
     FormsModule,
   ],

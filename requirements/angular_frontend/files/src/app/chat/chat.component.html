@@ -18,7 +18,8 @@
 
 
 
-<div class="flex justify-center items-center h-screen ">
+<div class="flex justify-center items-center h-screen "
+[ngClass]="{ hidden: !chat.isChatVisible()}">
 
 	<div class="w-40 h-96 bg-white rounded shadow-2xl box">
 
@@ -89,7 +90,7 @@
               <i class="mdi mdi-camera absolute right-2 top-1 text-indigo-400"></i>
         	</div>
         	<div class="w-7 h-7 rounded-full bg-indigo-300 text-center items-center flex justify-center">
-        	    <button class="w-7 h-7 rounded-full text-center items-center flex justify-center focus:outline-none hover:bg-gray-900 hover:text-white" (click)="sendMessage()"><i class="mdi mdi-send"></i></button>
+        	    <button class="w-7 h-7 rounded-full text-center items-center flex justify-center focus:outline-none hover:bg-indigo-900 hover:text-white" (click)="sendMessage()"><i class="mdi mdi-send"></i></button>
         	</div>
         </div>
     </div>

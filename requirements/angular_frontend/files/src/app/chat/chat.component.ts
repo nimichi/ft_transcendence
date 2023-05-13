@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { SocketModule } from '../socket/socket.module';
+import { ChatService } from '../services/chat.service';
 
 @Component({
   selector: 'app-chat',
@@ -13,7 +14,7 @@ export class ChatComponent {
 	public msgList: {msg: string, align: string}[] = this.chatList[0].msgs;
 	selectedChat: string = this.chatList[0].name;
 
-	constructor(private socket: SocketModule){
+	constructor(private socket: SocketModule, public chat: ChatService){
 		this.socket.socketSubscribe('chatrecv', (msg: string) => this.recvMessage(msg));
 
 		socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))

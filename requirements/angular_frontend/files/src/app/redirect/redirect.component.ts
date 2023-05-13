@@ -15,6 +15,8 @@ import { HttpHeaders } from '@angular/common/http';
 })
 export class RedirectComponent {
 
+	verified: boolean = true
+
     constructor(private http: HttpClient, public tokenModal: ModalService, private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router){}
 
 	public tfaToken: string = ""
@@ -61,9 +63,11 @@ export class RedirectComponent {
 
 	closeTFA(verified: boolean){
 		if(verified){
+			this.verified = true
 			this.tokenModal.toggleModal('loginTFA')
 		}
 		else{
+			this.verified = false
 			this.tfaToken = "";
 		}
 	}

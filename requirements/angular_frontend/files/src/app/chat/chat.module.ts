@@ -13,7 +13,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     CommonModule,
     SocketModule,
     ReactiveFormsModule,
-    FormsModule,
+    FormsModule
   ],
   exports: [
     ChatComponent

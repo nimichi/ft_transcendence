@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { ChatComponent } from '../chat/chat.component';
+import { ModalService } from '../services/modal.service';
+import { ChatService } from '../services/chat.service';
 
 @Component({
   selector: 'app-display',
@@ -16,5 +18,9 @@ export class DisplayComponent {
 	losses: number = 0
 	level: number = 0
   listData: any [ ] = []
+
+  constructor(public chat: ChatService){
+    
+  }
 
 }

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { SocketModule } from '../socket/socket.module';
-
+import { ChatService } from '../services/chat.service';
 @Component({
   selector: 'app-friends',
   templateUrl: './friends.component.html',
@@ -12,7 +12,7 @@ export class FriendsComponent {
   // playing 1, offline 2, online 3
   listValues: {name: string, intra: string, status: number, pic: string}[] = [];
 
-	constructor(private socket: SocketModule, private router: Router){}
+	constructor(private socket: SocketModule, private router: Router, public chat: ChatService){}
 
 	ngOnInit() {
 		if (!this.socket.socketState()){

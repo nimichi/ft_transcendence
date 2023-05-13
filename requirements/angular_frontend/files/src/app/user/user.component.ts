@@ -5,6 +5,7 @@ import { ChatComponent } from '../chat/chat.component';
 import { ModalComponent } from '../shared/modal/modal.component';
 import { ModalService } from '../services/modal.service';
 import { Router } from '@angular/router';
+import { ChatService } from '../services/chat.service';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
@@ -24,13 +25,14 @@ export class UserComponent {
 	laddderLevel: number = 100
 	listData: any [ ] = []
 	//die liste kommt vom backend
-
 	userName: string = String();
 	public tfaToken: string = ''
 	public qrCode: string = ''
+	verified:boolean = true
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router,
-		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService) {
+		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService,
+		public chat: ChatService) {
 	}
 
 	ngOnInit() {
@@ -88,11 +90,25 @@ export class UserComponent {
 
 	closeTFA(verified: boolean){
 		if(verified){
+			this.verified = true
 			this.tfaModal.toggleModal('registerTFA')
 		}
 		else{
+			this.verified = false
 			this.tfaToken = "";
 		}
+	}
+
+	openChat($event: Event){
+		this.chat.toggleChat()
+	}
+
+	changeName($event: Event){
+		this.nameModal.toggleModal('chooseName')
+	}
+
+	changePic($event: Event){
+		this.picModal.toggleModal('choosePicture')
 	}
 
 }
