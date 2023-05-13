@@ -1,49 +1,74 @@
 import { Injectable } from '@nestjs/common';
-import { MessageTypeDTO, chatEmitDTO } from './dtos/MessageTypeDTO';
-import { CommandDTO } from './dtos/CommandDTO';
+import { MessageTypeDTO, channelDTO, chatEmitDTO } from './dtos/MessageTypeDTO';
+// import { CommandDTO } from './dtos/CommandDTO';
 import { ChannelArrayProvider } from 'src/commonProvider/ChannelArrayProvider';
-import { ChannelDTO } from './dtos/ChannelDTO';
+import { ChatMode } from './enums/chatMode';
 
 
 @Injectable()
 export class ChatService {
-	private userList: string[];
+	private channelDto: channelDTO[];
 	constructor(private channelArrayProvider: ChannelArrayProvider){
-		this.userList = [];
+		// this.userList = [];
+		// this.chatMode = [ChatMode.CHATRECV, ChatMode.NEWCHAT];
+		this.channelDto = [];
 	};
+
+	private setChannelDTO(owner: string, admin: string, channelName: string): channelDTO {
+		return new channelDTO(owner, channelName, admin);
+	} 
+
 	async reciveMsg(intra: string, client: any, messageFrom: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
-		console.log("intra: "+ intra);
-		
-
+		this.printGroupChannelEntry();
 
 		if(messageFrom == "!cmd") {
 			if(fullCommand[0].includes("/new")) {
 				//schau ob nuzer nuzer und ob der bereit vorhanden in der liste vorhanden ist
-				if(!fullCommand[1].includes("#") && !this.checkUserInList(fullCommand[1])){
-					//füge nutzer zur liste hinzu
+				if (!fullCommand[1].includes("#") && !this.checkUserInList(fullCommand[1])) {
 					this.channelArrayProvider.addUserToList(fullCommand[1]);
 					console.log(this.channelArrayProvider.getUserList());
 					return new chatEmitDTO('newchat', fullCommand[1],["new Conversation", "left"] );
 				}
-				if(fullCommand[1].includes("#") && !this.checkChannelInList(fullCommand[1])) {
+				if (fullCommand[1].includes("#") && !this.checkChannelInList(fullCommand[1])) { //newChannel
+
 					this.channelArrayProvider.addChannel(fullCommand[1]);
 					this.channelArrayProvider.addUserToList(intra);
-					
-					console.log(this.channelArrayProvider.getChannels() + "| user in this channel: " + this.channelArrayProvider.getUserList());
 					this.channelArrayProvider.addChannelEntry([intra], fullCommand[1]);
-					console.log(this.channelArrayProvider.getChannelEntrys())
+
+					const tmpChannelEntrys = this.channelArrayProvider.getChannelEntrys();
+					console.log(tmpChannelEntrys)
 					//logic channel owner & channel admin
+					this.channelDto.push(this.setChannelDTO(intra, intra, fullCommand[1]));
+
 					//falls user joinenen tut wird er in eine map gespeichert
 					
 					client.join(fullCommand[1]);
-					console.log(client.to("#ch1").clients);
 					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", "left"]);
 				}
 				else if(fullCommand[1].includes("#") && this.checkChannelInList(fullCommand[1])) {
 					client.join(fullCommand[1]);
-					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", "left"]);
+					this.channelArrayProvider.addUserToChannel(fullCommand[1], intra);
+					this.channelArrayProvider.addUserToList(intra);
+					// console.log("user list: " + this. channelArrayProvider.getUserList());
+					// this.printGroupChannelEntry();
+					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversiontion", "left"]);
 				}
+			}
+			else if (fullCommand[0].includes("/setadmin")) { // /setadmin mnies #ch1
+				if (fullCommand.length === 3) {
+					const updatedChannelDto: channelDTO = this.setNewAdmin(intra, fullCommand[1], fullCommand[2], this.channelDto);
+					const idx = this.channelDto.findIndex((dto) => dto.channelName === fullCommand[2])
+					if (idx !== -1) {
+						const deletedDto = this.channelDto.splice(idx, 1)[0];
+						this.channelDto.push(updatedChannelDto);
+						console.log("Admin Updated: " + deletedDto + " to: " + updatedChannelDto);
+						return new chatEmitDTO('chatrecv', messageFrom, ["Admin rechte wurden erfolgreich verteilt", "left"]);
+					}
+					console.log("HERE========");
+					return new chatEmitDTO('chatrecv', messageFrom, ["Error:", "left"]);
+				}
+				return new chatEmitDTO('chatrecv', messageFrom, ["Error: Wrong format", "left"]);
 			}
 			
 		}
@@ -79,16 +104,17 @@ export class ChatService {
 		}
 	}
 
-	private parseMessage(channel: string, messageString: string){
-		
+	private setNewAdmin(commandFrom: string, intra: string, channelName: string, channels: channelDTO[]): channelDTO {
+		//check if #ch1 is in channel
+		if (this.checkChannelInList(channelName) && this.checkUserInList(intra)) {
+			//const foundDto = dtoArray.find((dto) => dto.id === desiredId);
+			const channelInfo: channelDTO = channels.find((dto) => dto.channelName == channelName);
+			if (channelInfo.owner === commandFrom || channelInfo.admin === commandFrom) {
+				return new channelDTO(commandFrom, channelName, intra)
+			}
 
-	}
 
-	private parseComand(obj: MessageTypeDTO) : CommandDTO | undefined{
-		if(obj.commandChanel !== undefined) {
-			new CommandDTO(obj.commandChanel, obj.incomingMessage);
 		}
-		return;
 	}
 
 	private checkUserInList(userName: string) : boolean {
@@ -98,8 +124,11 @@ export class ChatService {
 	private checkChannelInList(groupeChannelName: string) : boolean {
 		return this.channelArrayProvider.channelExists(groupeChannelName);
 	}
-	
 
-	//mjeyavat MSG messageTo : was geht
+	private printGroupChannelEntry() {
+		if (this.channelArrayProvider.getChannelEntrys()) {
+			console.log(this.channelArrayProvider.getChannelEntrys());
+		}
+	}
 
 }

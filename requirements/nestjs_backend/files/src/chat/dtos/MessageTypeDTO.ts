@@ -20,7 +20,7 @@ export class chatEmitDTO {
 	constructor (
 		modus: string,
 		messageTo: string,
-		msg: [string, string] | string,
+		msg: [string, string] | string | [string[], string],
 
 	){
 		this.modus = modus;
@@ -30,6 +30,22 @@ export class chatEmitDTO {
 
 	readonly modus: string;
 	readonly messageTo: string;
-	readonly msg: [string, string] | string;
+	readonly msg: [string, string] | string | [string[], string];
+
+}
+
+export class channelDTO {
+	constructor(
+		owner: string,
+		channelName: string,
+		admin: string,
+	){
+		this.owner = owner;
+		this.channelName = channelName;
+		this.admin = admin;
+	}
+	readonly owner: string;
+	channelName: string;
+	admin: string;
 
 }
