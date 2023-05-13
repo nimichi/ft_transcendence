@@ -30,7 +30,7 @@ export class RedirectComponent {
 			console.log(params);
 			// open socket if code param is provide
 			if (params.code){
-				//this.socket.openSocket(params.code);
+				this.socket.openSocket(params.code);
 			}
 			// go to login page
 			else{
@@ -38,8 +38,8 @@ export class RedirectComponent {
 			}
 		});
 
-		this.tokenModal.register('loginTFA')
-		this.tokenModal.toggleModal('loginTFA')
+		// this.tokenModal.register('loginTFA')
+		// this.tokenModal.toggleModal('loginTFA')
     }
 
 	verifyTFA() {
