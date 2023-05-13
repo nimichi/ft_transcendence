@@ -3,8 +3,9 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ChannelArrayProvider {
 	private channels: string[] = [];
-	private channelEntrys: Map<string, string[]> ;
+	private channelEntrys: Map<string, string[]> = new Map<string, string[]>() ;
 	private userList: string[] = [];
+
 
 	getUserList(): string[] {
 		return this.userList;

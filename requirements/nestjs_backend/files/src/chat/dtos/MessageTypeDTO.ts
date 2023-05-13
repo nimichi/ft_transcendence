@@ -15,6 +15,7 @@ export class MessageTypeDTO {
 	readonly directChannelToUserGroupe: string | undefined;
 	readonly incomingMessage: string | undefined;
 }
+
 export class chatEmitDTO {
 	constructor (
 		modus: string,

@@ -7,10 +7,16 @@ import { ChannelDTO } from './dtos/ChannelDTO';
 
 @Injectable()
 export class ChatService {
-	constructor(private channelArrayProvider: ChannelArrayProvider){};
-
-	async reciveMsg(client: any, messageFrom: string, message: string) : Promise<chatEmitDTO>{
+	private userList: string[];
+	constructor(private channelArrayProvider: ChannelArrayProvider){
+		this.userList = [];
+	};
+	async reciveMsg(intra: string, client: any, messageFrom: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
+		console.log("intra: "+ intra);
+		
+
+
 		if(messageFrom == "!cmd") {
 			if(fullCommand[0].includes("/new")) {
 				//schau ob nuzer nuzer und ob der bereit vorhanden in der liste vorhanden ist
@@ -22,9 +28,16 @@ export class ChatService {
 				}
 				if(fullCommand[1].includes("#") && !this.checkChannelInList(fullCommand[1])) {
 					this.channelArrayProvider.addChannel(fullCommand[1]);
-					console.log(this.channelArrayProvider.getChannels());
+					this.channelArrayProvider.addUserToList(intra);
+					
+					console.log(this.channelArrayProvider.getChannels() + "| user in this channel: " + this.channelArrayProvider.getUserList());
+					this.channelArrayProvider.addChannelEntry([intra], fullCommand[1]);
+					console.log(this.channelArrayProvider.getChannelEntrys())
 					//logic channel owner & channel admin
+					//falls user joinenen tut wird er in eine map gespeichert
+					
 					client.join(fullCommand[1]);
+					console.log(client.to("#ch1").clients);
 					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", "left"]);
 				}
 				else if(fullCommand[1].includes("#") && this.checkChannelInList(fullCommand[1])) {
@@ -85,38 +98,7 @@ export class ChatService {
 	private checkChannelInList(groupeChannelName: string) : boolean {
 		return this.channelArrayProvider.channelExists(groupeChannelName);
 	}
-	// private addChannel(obj: MessageTypeDTO) : void {
-	// 	const channe
-	// 	if(!this.channelArrayProvider.channelExists(obj.channel)) {
-	// 		this.channelArrayProvider.addChannel(obj.channel);
-	// 	}
-	// }
-
-	//das ist case mjeyavat /MSG channel "hallpo"
-	// private messageSendToChannel (obj: messageTypeDTO) : ChannelDTO  | string{
-	// 	if(obj.messageCmd.length > 0 && this.channelArrayProvider.channelExists(obj.channel) ) {
-	// 		return new ChannelDTO(obj.incomingMessage, this.channelArrayProvider.getChannelEntrys(), obj.message);
-	// 	} else {
-	// 		return obj.channel + "does not exsists";
-	// 	}
-	// }
-
-	//mjeyavat JOIN #channel
-	// private joinRequestToChannel (obj: messageDTO) : ChannelDTO | string {
-	// 	if(obj.joinCmd.length > 0 && this.channelArrayProvider.channelExists(obj.channel)) {
-	// 		//schau ob user schon da ist
-	// 		this.channelArrayProvider.addUserToChannel(obj.channel, obj.messageFrom);
-	// 		return new ChannelDTO(obj.messageFrom,this.channelArrayProvider.getChannelEntrys(), obj.message);
-	// 	} else {
-	// 		if(!this.channelArrayProvider.channelExists(obj.channel)) {
-	// 			this.channelArrayProvider.addChannel(obj.channel);
-	// 			//erstelle eine userListe
-	// 			const userList: string[] = [obj.messageFrom];
-	// 			this.channelArrayProvider.addChannelEntry(userList, obj.channel);
-	// 			return new ChannelDTO(obj.messageFrom, this.channelArrayProvider.getChannelEntrys(), obj.message);
-	// 		}
-	// 	}
-	// }
+	
 
 	//mjeyavat MSG messageTo : was geht
 
