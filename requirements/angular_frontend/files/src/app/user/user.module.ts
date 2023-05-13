@@ -23,7 +23,7 @@ import { SearchbarComponent } from '../searchbar/searchbar.component';
     CommonModule,
     SharedModule,
     ChatModule,
-	  SocketModule,
+	SocketModule,
     ReactiveFormsModule,
     FormsModule,
   ],

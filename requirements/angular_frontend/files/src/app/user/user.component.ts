@@ -39,25 +39,12 @@ export class UserComponent {
 			this.router.navigate(['']);
 		}
 
-
 		this.nameModal.register('chooseName')
 		this.picModal.register('choosePicture')
 		this.tfaModal.register('registerTFA')
 
-
 		//hier funcion die das modal aktiviert, wenn man auf den button klickt :)
 		//function muss dann im template eingebaut werden
-
-		this.activatedRoute.queryParams.subscribe(params => {
-			console.log(params);
-			if (!params.code){
-				console.log('loaded without code');
-				this.socket.requestEvent("userdata", null, (data: any) => this.callbackUserData(data));
-			}
-			else{
-				this.socket.openSocket(params.code);
-			}
-		});
 
 		this.socket.requestEvent("userdata", null, (data: string) => this.callbackUserData(data));
 	}

@@ -14,6 +14,7 @@ import { RedirectComponent } from './redirect/redirect.component';
 import { DisplayComponent } from './display/display.component';
 import { SharedModule } from './shared/shared.module';
 import { ChatModule } from './chat/chat.module';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 // import { SearchbarComponent } from './searchbar/searchbar.component';
 
 
@@ -36,7 +37,8 @@ import { ChatModule } from './chat/chat.module';
     UserModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    
+	ReactiveFormsModule,
+    FormsModule
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]

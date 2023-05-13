@@ -46,6 +46,7 @@ export class SocketService {
 
 			//join new connection to room
 			socket.join(user_data.login);
+			socket.data.username = user_data.login;
 			return (true);
 		}
 		catch
