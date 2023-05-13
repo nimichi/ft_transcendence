@@ -1,0 +1,44 @@
+<!-- matchHistory -->
+
+  <!-- <ul class="list-none"> -->
+    <!-- <li *ngFor="let item of listData"> -->
+      <!-- <span class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.versus}} {{item.result}} {{item.level}} </span> -->
+      <!-- <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{item.name}}</dd> -->
+
+    <!-- </li> -->
+  <!-- </ul> -->
+
+  <!-- <table class="table-auto">
+    <thead>
+      <tr>
+        <th>Versus</th>
+        <th>Result</th>
+        <th>Level</th>
+      </tr>
+    </thead>
+    <tbody>
+      <div class="table-row" *ngFor="let item of listData">
+        <div class="table-cell">{{ item.versus }}</div>
+        <div class="table-cell">{{ item.result }}</div>
+        <div class="table-cell">{{ item.level }}</div>
+      </div>
+    </tbody>
+  </table> -->
+
+  <div class="table">
+    <div class="table-row header">
+      <div class="table-cell">Versus</div>
+      <div class="table-cell">Result</div>
+      <div class="table-cell">Level</div>
+    </div>
+    <div class="table-row" *ngFor="let item of listData">
+      <div class="table-cell">{{ item.versus }}</div>
+      <div class="table-cell">{{ item.result }}</div>
+      <div class="table-cell">{{ item.level }}</div>
+    </div>
+  </div>
+
+  <!-- <app-list></app-list> -->
+  <!-- chat -->
+
+  <app-chat></app-chat>

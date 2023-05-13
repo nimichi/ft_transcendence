@@ -14,8 +14,8 @@ import { RedirectComponent } from './redirect/redirect.component';
 import { DisplayComponent } from './display/display.component';
 import { SharedModule } from './shared/shared.module';
 import { ChatModule } from './chat/chat.module';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-// import { SearchbarComponent } from './searchbar/searchbar.component';
+import { HistoryComponent } from './history/history.component';
+
 
 
 @NgModule({
@@ -27,7 +27,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     FriendsComponent,
     RedirectComponent,
     DisplayComponent,
-    // SearchbarComponent,
+    HistoryComponent,
   ],
   imports: [
     BrowserModule,
@@ -36,9 +36,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     ChatModule,
     UserModule,
     HttpClientModule,
-    BrowserAnimationsModule,
-	ReactiveFormsModule,
-    FormsModule
+    BrowserAnimationsModule
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]

@@ -5,7 +5,6 @@ import { ChatComponent } from '../chat/chat.component';
 import { ModalComponent } from '../shared/modal/modal.component';
 import { ModalService } from '../services/modal.service';
 import { Router } from '@angular/router';
-import { SearchbarComponent } from '../searchbar/searchbar.component';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',

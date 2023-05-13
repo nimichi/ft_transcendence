@@ -6,6 +6,7 @@ import { UserComponent } from './user/user.component';
 import { FriendsComponent } from './friends/friends.component';
 import { RedirectComponent } from './redirect/redirect.component';
 import { DisplayComponent } from './display/display.component';
+import { HistoryComponent } from './history/history.component';
 
 const routes: Routes = [{
 
@@ -31,6 +32,10 @@ const routes: Routes = [{
 {
   path: 'display',
   component: DisplayComponent
+},
+{
+  path: 'history',
+  component: HistoryComponent
 }
 ];
 
