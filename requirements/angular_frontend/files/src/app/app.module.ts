@@ -15,6 +15,7 @@ import { DisplayComponent } from './display/display.component';
 import { SharedModule } from './shared/shared.module';
 import { ChatModule } from './chat/chat.module';
 import { HistoryComponent } from './history/history.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 
 
@@ -36,7 +37,9 @@ import { HistoryComponent } from './history/history.component';
     ChatModule,
     UserModule,
     HttpClientModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+	ReactiveFormsModule,
+    FormsModule
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]
