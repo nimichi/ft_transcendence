@@ -9,13 +9,13 @@ import { SocketModule } from '../socket/socket.module';
 })
 export class ChatComponent {
 	public chatInput: string = "";
-	public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [ { name: '!cmd', msgs: [] }]
+	public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [ { name: '!cmd', msgs: []}]
 	public msgList: {msg: string, align: string}[] = this.chatList[0].msgs;
 	selectedChat: string = this.chatList[0].name;
 
 	constructor(private socket: SocketModule){
-		this.socket.socketSubscribe('chatrecv', (msg: string) => this.recvMessage(msg));
-
+		this.socket.socketSubscribe('chatrecv', (msg: string) => this.recvMessage(msg, 'left'));
+		this.socket.socketSubscribe('chatrecvR', (msg: string) => this.recvMessage(msg, 'right'));
 		socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
 	}
 
@@ -34,9 +34,18 @@ export class ChatComponent {
 		this.chatList.push(chat);
 	}
 
-	recvMessage(msg: string){
-		this.msgList.unshift( { msg: msg, align: 'left' } );
+	recvMessage(msg: string, align: string){
+		console.log("++++++++++++++RECVMESSAGE+++++++++++++++++++++++++++");
+		console.log("msg: " + msg);
+		this.msgList.unshift( { msg: msg, align: align } );
 		console.log(this.msgList);
+	}
+
+	outputUserList(msg: string[]) {
+		msg.forEach(user => {
+			this.msgList.unshift({msg: user, align: 'left'})
+			console.log(this.msgList);
+		})
 	}
 
 	searchControl = new FormControl ('')

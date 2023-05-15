@@ -12,18 +12,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleRecieveMsg (client: Socket, payload: {chat: string, msg: string}) : Promise<string> {
 		let intra;
 		[intra] = client.rooms;
-		console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + payload.msg);
 		const responseDTO: chatEmitDTO =  await this.chat.reciveMsg(intra ,client, payload.chat, payload.msg);
-		if(payload.chat === "!cmd") {
-			if(responseDTO.modus == 'newchat') {
-				client.emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
-			}else {
-				client.to(payload.chat).emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
+		if(payload.chat === "!cmd" && responseDTO.modus == 'newchat') {
+			client.emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
+		}
+		else if(payload.chat.includes("#") && responseDTO.modus === 'chatrecv' && payload.msg[0] === "/") {
+			if(responseDTO.msg.length == 2) {
+				// JSON.stringify(stringArray)
+				const json = JSON.stringify(responseDTO.msg[0]);
+				console.log("payload chat is: " + payload.chat);
+				console.log("ResponesDTO message json: "+ json);
+				client.emit(responseDTO.modus, json);
+				return "";
 			}
 		}
-	
-		if (payload.chat != "!cmd")
+		else if  (payload.chat != "!cmd") {
+			console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + payload.msg);
 			client.to(payload.chat).emit('chatrecv', payload.msg);
+		}
 		return payload.msg;
 	}
 
@@ -39,3 +45,4 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.chat.connectUser(intra);
 	}
 }
+// /
