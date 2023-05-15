@@ -23,4 +23,9 @@ export class DisplayComponent {
     
   }
 
+	openChat($event: Event){
+		this.chat.toggleChat()
+	}
+
+
 }

@@ -18,10 +18,13 @@
 
 
 
-<div class="flex justify-center items-center h-screen "
-[ngClass]="{ hidden: !chat.isChatVisible()}">
 
-	<div class="w-40 h-96 bg-white rounded shadow-2xl box">
+
+<div class="fixed bottom-0 right-0 p-20 border border-red-400"
+[ngClass]="{ hidden: !chat.isChatVisible()}">
+<div class="flex flex-row">
+
+	<div class="w-40 h-96 bg-white rounded shadow-2xl box" >
 
         <nav class="w-full h-10 bg-indigo-400 rounded-tr rounded-tl flex justify-between items-center">
 
@@ -54,7 +57,6 @@
 
                 <div class="flex justify-center items-center">
                     <i class="mdi mdi-arrow-left font-normal text-indigo-400 ml-1"></i>
-                    <!-- <img src="https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg" class="rounded-full ml-1" width="25" height="25"> -->
                     <span class="text-xs font-medium text-white ml-1">{{ selectedChat }}</span>
                 </div>
 
@@ -71,26 +73,29 @@
 			</ul>
         </div>
 
-        <!-- <div class="flex justify-between items-center p-1 ">
-        <div class="relative">
-            <i class="mdi mdi-emoticon-excited-outline absolute top-1 left-1 text-indigo-400" style="font-size: 17px !important;font-weight: bold;"></i>
-        <input type="text" class="rounded-full pl-6 pr-12 py-2 focus:outline-none  h-auto placeholder-gray-100 bg-indigo-400 text-white" style="font-size: 11px;width: 250px;" placeholder="Type a message..." id="typemsg">
-        <i class="mdi mdi-paperclip absolute right-8 top-1 transform -rotate-45 text-indigo-400"></i>
-        <i class="mdi mdi-camera absolute right-2 top-1 text-indigo-400"></i>
-        </div> -->
-        <!-- <div class="w-7 h-7 rounded-full bg-blue-300 text-center items-center flex justify-center hover:bg-gray-900 hover:text-white">
-            <i class="mdi mdi-microphone "></i>
-        </div> -->
-
+        
         <div class="flex justify-between items-center p-1" style="background: transparent">
             <div class="relative">
-              <i class="mdi mdi-emoticon-excited-outline absolute top-1 left-1 text-indigo-400" style="font-size: 17px !important;font-weight: bold;"></i>
-              <input type="text" class="rounded-full pl-6 pr-12 py-2 focus:outline-none h-auto placeholder-gray-100 bg-indigo-400 text-white" style="font-size: 11px;width: 280px;" [(ngModel)]="chatInput" placeholder="Type a message..." id="typemsg" (keydown.enter)="sendMessage()">
-              <i class="mdi mdi-paperclip absolute right-8 top-1 transform -rotate-45 text-indigo-400"></i>
-              <i class="mdi mdi-camera absolute right-2 top-1 text-indigo-400"></i>
+                <i class="mdi mdi-emoticon-excited-outline absolute top-1 left-1 text-indigo-400" style="font-size: 17px !important;font-weight: bold;"></i>
+                <input type="text" class="rounded-full pl-6 pr-12 py-2 focus:outline-none h-auto placeholder-gray-100 bg-indigo-400 text-white" style="font-size: 11px;width: 280px;" [(ngModel)]="chatInput" placeholder="Type a message..." id="typemsg" (keydown.enter)="sendMessage()">
+                <i class="mdi mdi-paperclip absolute right-8 top-1 transform -rotate-45 text-indigo-400"></i>
+                <i class="mdi mdi-camera absolute right-2 top-1 text-indigo-400"></i>
         	</div>
         	<div class="w-7 h-7 rounded-full bg-indigo-300 text-center items-center flex justify-center">
-        	    <button class="w-7 h-7 rounded-full text-center items-center flex justify-center focus:outline-none hover:bg-indigo-900 hover:text-white" (click)="sendMessage()"><i class="mdi mdi-send"></i></button>
+                <button class="w-7 h-7 rounded-full text-center items-center flex justify-center focus:outline-none hover:bg-indigo-900 hover:text-white" (click)="sendMessage()"><i class="mdi mdi-send"></i></button>
         	</div>
         </div>
     </div>
+    </div>
+
+    <!-- has to be in 74 -->
+    <!-- <div class="flex justify-between items-center p-1 ">
+    <div class="relative">
+        <i class="mdi mdi-emoticon-excited-outline absolute top-1 left-1 text-indigo-400" style="font-size: 17px !important;font-weight: bold;"></i>
+    <input type="text" class="rounded-full pl-6 pr-12 py-2 focus:outline-none  h-auto placeholder-gray-100 bg-indigo-400 text-white" style="font-size: 11px;width: 250px;" placeholder="Type a message..." id="typemsg">
+    <i class="mdi mdi-paperclip absolute right-8 top-1 transform -rotate-45 text-indigo-400"></i>
+    <i class="mdi mdi-camera absolute right-2 top-1 text-indigo-400"></i>
+    </div> -->
+    <!-- <div class="w-7 h-7 rounded-full bg-blue-300 text-center items-center flex justify-center hover:bg-gray-900 hover:text-white">
+        <i class="mdi mdi-microphone "></i>
+    </div> -->

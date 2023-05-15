@@ -15,5 +15,8 @@ export class HistoryComponent {
     
   }
 
+  openChat($event: Event){
+		this.chat.toggleChat()
+	}
 
 }

@@ -15,5 +15,8 @@ export class ChatService {
 
   toggleChat(){
     this.visible = !this.visible
+    console.log('toggle chat')
   }
+
+  
 }

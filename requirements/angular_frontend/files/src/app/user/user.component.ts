@@ -101,6 +101,8 @@ export class UserComponent {
 
 	openChat($event: Event){
 		this.chat.toggleChat()
+		console.log('open chat')
+
 	}
 
 	changeName($event: Event){

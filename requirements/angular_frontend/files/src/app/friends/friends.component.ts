@@ -42,4 +42,9 @@ export class FriendsComponent {
 		data.forEach(friend => this.listValues.push(friend));
 	}
 
+	openChat($event: Event){
+		this.chat.toggleChat()
+	}
+
+
 }
