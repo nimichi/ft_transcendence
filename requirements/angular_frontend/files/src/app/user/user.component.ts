@@ -5,7 +5,6 @@ import { ChatComponent } from '../chat/chat.component';
 import { ModalComponent } from '../shared/modal/modal.component';
 import { ModalService } from '../services/modal.service';
 import { Router } from '@angular/router';
-import { SearchbarComponent } from '../searchbar/searchbar.component';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
@@ -31,7 +30,7 @@ export class UserComponent {
 	public qrCode: string = ''
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router,
-		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService, public tokenModal: ModalService) {
+		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService) {
 	}
 
 	ngOnInit() {
@@ -39,26 +38,12 @@ export class UserComponent {
 			this.router.navigate(['']);
 		}
 
-
 		this.nameModal.register('chooseName')
 		this.picModal.register('choosePicture')
 		this.tfaModal.register('registerTFA')
-		this.tokenModal.register('loginTFA')
-
 
 		//hier funcion die das modal aktiviert, wenn man auf den button klickt :)
 		//function muss dann im template eingebaut werden
-
-		this.activatedRoute.queryParams.subscribe(params => {
-			console.log(params);
-			if (!params.code){
-				console.log('loaded without code');
-				this.socket.requestEvent("userdata", null, (data: any) => this.callbackUserData(data));
-			}
-			else{
-				this.socket.openSocket(params.code);
-			}
-		});
 
 		this.socket.requestEvent("userdata", null, (data: string) => this.callbackUserData(data));
 	}
@@ -80,7 +65,6 @@ export class UserComponent {
 		this.nameModal.unregister('chooseName')
 		this.picModal.unregister('choosePicture')
 		this.tfaModal.unregister('registerTFA')
-		this.tokenModal.unregister('loginTFA')
 
 	}
 
