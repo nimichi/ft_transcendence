@@ -16,6 +16,10 @@ import { HttpHeaders } from '@angular/common/http';
 export class RedirectComponent {
 
 	verified: boolean = true
+	showAlert = false
+	//muss noch an der richtigen Stelle aktiviert werden.
+  	alertMsg = 'Your authentication was not successful!'
+  	alertColor = 'red'
 
     constructor(private http: HttpClient, public tokenModal: ModalService, private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router){}
 

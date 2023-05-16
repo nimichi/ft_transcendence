@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ChatService } from '../services/chat.service';
 
 @Component({
   selector: 'app-home',
@@ -6,5 +7,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
+
+  constructor(public chat: ChatService){
+    
+  }
+  
+	openChat($event: Event){
+		this.chat.toggleChat()
+	}
 
 }
