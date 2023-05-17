@@ -16,37 +16,49 @@ import { HttpHeaders } from '@angular/common/http';
 export class RedirectComponent {
 
 	verified: boolean = true
-	showAlert = false
-	//muss noch an der richtigen Stelle aktiviert werden.
+	showAlert: boolean  = false
   	alertMsg = 'Your authentication was not successful!'
   	alertColor = 'red'
-
-    constructor(private http: HttpClient, public tokenModal: ModalService, private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router){}
-
 	public tfaToken: string = ""
+
+    constructor(private http: HttpClient,
+		public tokenModal: ModalService, public authFailModal: ModalService,
+		private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router){}
+
 
     ngOnInit(){
 
+		this.tokenModal.register('loginTFA')
+		this.authFailModal.register('authFailModal')
+
 		//redirect to user if socket open
-		if (this.socket.socketState()){
-			this.router.navigate(['/user']);
-		}
+		// if (this.socket.socketState()){
+		// 	this.router.navigate(['/user']);
+		// }
 
 		this.activatedRoute.queryParams.subscribe(params => {
 			console.log(params);
 			// open socket if code param is provide
 			if (params.code){
+				this.socket.socketSubscribe('connect_error', () => this.authFailed());
 				this.socket.openSocket(params.code);
 			}
 			// go to login page
-			else{
-				this.router.navigate(['']);
-			}
+			// else{
+			// 	this.router.navigate(['']);
+			// }
 		});
 
 		// this.tokenModal.register('loginTFA')
 		// this.tokenModal.toggleModal('loginTFA')
     }
+
+	authFailed()
+	{
+		console.log('failed')
+		this.showAlert = true
+		this.authFailModal.toggleModal('authFailModal')
+	}
 
 	verifyTFA() {
 		if (this.tfaToken == "111"){
@@ -78,5 +90,7 @@ export class RedirectComponent {
 
     ngOnDestroy(): void {
       this.tokenModal.unregister('loginTFA')
+      this.tokenModal.unregister('authFailModal')
+
     }
 }

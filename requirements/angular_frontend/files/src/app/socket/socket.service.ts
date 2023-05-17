@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class SocketService {
-	private isOpen: boolean;
+	public isOpen: boolean;
 
 	constructor(private router: Router) {
 		this.isOpen = false;

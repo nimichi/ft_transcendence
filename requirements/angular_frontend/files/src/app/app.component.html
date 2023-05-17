@@ -1,4 +1,4 @@
-  <app-nav></app-nav>
+  <app-nav *ngIf="socketService.isOpen"></app-nav>
 <!-- if statement, nur wenn ! auf login -->
 
   <router-outlet></router-outlet>

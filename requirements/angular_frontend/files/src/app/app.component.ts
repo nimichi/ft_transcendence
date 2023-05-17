@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SocketService } from './socket/socket.service';
 // import { HttpClient } from '@angular/common/http';
 // import { HttpHeaders } from '@angular/common/http';
 
@@ -11,5 +12,6 @@ import { Component } from '@angular/core';
 })
 
 export class AppComponent {
-  
+  constructor(public socketService: SocketService){
+  }
 }
