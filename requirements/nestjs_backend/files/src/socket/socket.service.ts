@@ -3,12 +3,13 @@ import { HttpService } from '@nestjs/axios';
 import { throwError, map, catchError, lastValueFrom } from 'rxjs'
 import { Socket, Server } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TfaService } from 'src/tfa/tfa.service';
 
 @Injectable()
 export class SocketService {
 
 
-	constructor(private readonly httpService: HttpService, private readonly prismaService: PrismaService) {}
+	constructor(private readonly httpService: HttpService,private tfaService: TfaService, private readonly prismaService: PrismaService) {}
 
 	async doAuth(socket: Socket, server: Server) {
 		try{
@@ -44,15 +45,41 @@ export class SocketService {
 				});
 			}
 
+			if (user.value.tfa == true){
+				const subtoken: string = socket.handshake.auth.token.substring(0,20);
+				const secret = await this.prismaService.getTfaSecret(user_data.login);
+				let response: string|undefined
+				while (1){
+					console.log('tfa loop')
+					try {
+						const responses = await server.of('/tfa').in(subtoken).timeout(60000).emitWithAck('tfa')
+						if(responses.length == 0)
+						{
+							console.log('length')
+							return 2;
+						}
+						[response] = responses
+					} catch (e) {
+						console.log('tfa error: ' + e.message);
+						return (2) //tfa timeout
+					}
+					console.log('try tfa token: ' + response)
+					if (this.tfaService.verifyTFA(secret, response))
+					{
+						break;
+					}
+				}
+			}
+
 			//join new connection to room
 			socket.join(user_data.login);
 			socket.data.username = user_data.login;
-			return (true);
+			return (0);
 		}
 		catch
 		{
 			console.log('Socket authentication failed')
-			return false;
+			return 1;
 		}
 	}
 

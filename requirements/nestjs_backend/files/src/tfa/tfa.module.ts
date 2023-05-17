@@ -7,6 +7,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 @Module({
   imports: [PrismaModule],
   providers: [TfaService, TfaGateway],
-  controllers: [TfaController]
+  controllers: [TfaController],
+  exports: [TfaService]
 })
 export class TfaModule {}

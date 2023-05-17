@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { ModalService } from '../services/modal.service';
-import { ModalComponent } from '../shared/modal/modal.component';
 import { ActivatedRoute } from '@angular/router';
-import { SocketModule } from '../socket/socket.module';
 import { Router } from '@angular/router';
+import { io, Socket } from 'socket.io-client';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
+import { SocketService } from '../socket/socket.service';
 
 
 @Component({
@@ -20,77 +20,60 @@ export class RedirectComponent {
   	public alertMsg = 'Your authentication was not successful!'
   	public alertColor = 'red'
 	public tfaToken: string = ""
+	public tfa: boolean =  false
+	public callback: ((token: string) => void)|undefined
+	private tfaSocket: Socket|undefined
 
-    constructor(private http: HttpClient,
-		public tokenModal: ModalService, public authFailModal: ModalService,
-		private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router){}
+    constructor(private http: HttpClient, private activatedRoute: ActivatedRoute,
+				private socket: SocketService, private router: Router){}
 
 
     ngOnInit(){
 
-		this.tokenModal.register('loginTFA')
-		this.authFailModal.register('authFailModal')
-
 		//redirect to user if socket open
-		// if (this.socket.socketState()){
-		// 	this.router.navigate(['/user']);
-		// }
+		if (this.socket.socketState()){
+			this.router.navigate(['/user']);
+		}
 
 		this.activatedRoute.queryParams.subscribe(params => {
-			console.log(params);
 			// open socket if code param is provide
 			if (params.code){
-				this.socket.socketSubscribe('connect_error', () => this.authFailed());
-				this.socket.openSocket(params.code);
+				this.socket.socketSubscribe('connect', () => this.connectedSocket());
+				let tfaSocket = this.socket.openSocket(params.code, (err: any) => this.authFailed(err));
+				tfaSocket.on('tfa', (callback: ((token: string) => void)) => this.requestTfa(callback));
 			}
 			// go to login page
-			// else{
-			// 	this.router.navigate(['']);
-			// }
+			else{
+				this.router.navigate(['']);
+			}
 		});
-
-		// this.tokenModal.register('loginTFA')
-		// this.tokenModal.toggleModal('loginTFA')
     }
 
-	authFailed()
+	connectedSocket(){
+		this.tfa = false;
+		this.socket.isOpen = true;
+		this.router.navigate(['/user']);
+		console.log("Socket sconnected");
+	}
+
+	requestTfa(callback: ((token: string) => void)){
+		console.log('Must provide Tfa Token');
+		this.tfaToken = "";
+		this.callback = callback;
+		if(!this.tfa)
+		{
+			this.tfa = true;
+		}
+	}
+
+	authFailed(err: any)
 	{
 		console.log('failed')
 		this.showAlert = true
-		this.authFailModal.toggleModal('authFailModal')
 	}
 
 	verifyTFA() {
-		if (this.tfaToken == "111"){
-			this.closeTFA(false);
-			return;
-		}
-
-		const backendAdr: string = this.socket.getBackendAdr()
-    	const header = new HttpHeaders({
-    	  'Access-Control-Allow-Origin': backendAdr
-    	});
-
-		this.http.get('http://' + backendAdr + '/auth/init', { headers: header, responseType: 'text' }).subscribe(url => {
-			console.log(url);
-			window.location.href = url;
-		});
+		if (this.callback)
+			this.callback(this.tfaToken)
 	}
-
-	closeTFA(verified: boolean){
-		if(verified){
-			this.verified = true
-			this.tokenModal.toggleModal('loginTFA')
-		}
-		else{
-			this.verified = false
-			this.tfaToken = "";
-		}
-	}
-
-    ngOnDestroy(): void {
-      this.tokenModal.unregister('loginTFA')
-      this.tokenModal.unregister('authFailModal')
-
-    }
 }

@@ -1,11 +1,9 @@
 import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { SocketModule } from '../socket/socket.module';
-import { ChatComponent } from '../chat/chat.component';
-import { ModalComponent } from '../shared/modal/modal.component';
 import { ModalService } from '../services/modal.service';
 import { Router } from '@angular/router';
 import { ChatService } from '../services/chat.service';
+import { SocketService } from '../socket/socket.service';
 
 @Component({
   selector: 'app-user',
@@ -16,30 +14,26 @@ export class UserComponent {
 
 
 	@ViewChild('finderInput') finderInput!: ElementRef
-	intraPic: string | ArrayBuffer | null  = ""
-	intraName: string  = ""
-	realName: string = ""
-	wins: number = 0
-	losses: number = 0
-	level: number = 0
-	intraBadgeLevel: number = 5
-	versus: string = "mnies"
-	result:string = "WIN"
-	laddderLevel: number = 100
-	listData: any [ ] = []
-	//die liste kommt vom backend
-	userName: string = String();
+	public intraPic: string | ArrayBuffer | null  = ""
+	public intraName: string  = ""
+	public fullName: string = ""
+	public newName: string = ""
+	public wins: number = 0
+	public losses: number = 0
+	public level: number = 0
+	public badges: number = 5
+	public badgelevel: number = 100;
 	public tfaToken: string = ''
 	public qrCode: string = ''
-	verified:boolean = true
+	public verified: boolean = true
 	// image = <HTMLInputElement>document.querySelector('finderInput')
 	// finderInput = <HTMLInputElement>document.querySelector('finderInput')
 
 
-	constructor(private activatedRoute: ActivatedRoute, private socket: SocketModule, private router: Router,
+	constructor(private activatedRoute: ActivatedRoute, private socket: SocketService, private router: Router,
 		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService,
 		public chat: ChatService,
-		private cd:ChangeDetectorRef) {
+		private cd: ChangeDetectorRef) {
 	}
 
 	ngOnInit() {
@@ -60,13 +54,11 @@ export class UserComponent {
 	callbackUserData(userdata: any){
 		this.intraPic = userdata.picture
 		this.intraName = userdata.intra_name
-		this.realName = userdata.displayname
+		this.fullName = userdata.full_name
 		this.wins = userdata.win
 		this.losses = userdata.loss
 		this.level = userdata.win - userdata.loss
-		this.intraBadgeLevel = this.level / 5
-		this.listData = [{versus: "romy", result: "win", level: 3},{versus: "michi", result: "loss", level: 4}]
-
+		this.badges = this.level / 5
 
 		console.log("This is: " + this.intraName)
 	}
@@ -113,7 +105,17 @@ export class UserComponent {
 
 	}
 
-	changeName($event: Event){
+	initChangeName($event: Event){
+		this.newName = this.fullName;
+		this.nameModal.toggleModal('chooseName')
+	}
+
+	submitName(){
+		this.fullName = this.newName;
+		this.socket.requestEvent('updatefullname', this.fullName, (name: string) => this.changeName(name));
+	}
+
+	changeName(name: string){
 		this.nameModal.toggleModal('chooseName')
 	}
 
@@ -144,7 +146,7 @@ export class UserComponent {
 		  this.finderInput.nativeElement.click();
 
 		}
-		
+
 	}
 
 }

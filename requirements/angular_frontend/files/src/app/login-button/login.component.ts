@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { SocketModule } from '../socket/socket.module';
 import { TargetService } from '../services/target.service';
+import { SocketService } from '../socket/socket.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,7 @@ import { TargetService } from '../services/target.service';
 
 
 export class LoginComponent {
-  constructor(private http: HttpClient, private socket: SocketModule, private target: TargetService) {
+  constructor(private http: HttpClient, private socket: SocketService, private target: TargetService) {
 	console.log("Socket state is: " + this.socket.socketState());
 	console.log(this.target.getTarget());
 	if (this.target.getTarget() != "")

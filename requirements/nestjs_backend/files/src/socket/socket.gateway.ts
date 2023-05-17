@@ -12,11 +12,19 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	constructor(private socketService: SocketService, private prismaService: PrismaService){}
 
 	afterInit(server: Server) {
+		this.server.of('/tfa').use((socket, next) => {
+			socket.join(socket.handshake.auth.token);
+			next();
+		});
 		this.server.use(async (socket, next) => {
 			const authorized = await this.socketService.doAuth(socket, this.server);
-			if (authorized) {
+			if (authorized == 0) {
 				next();
-			} else {
+			}
+			else if(authorized == 2){
+				next(new Error('Tfa Timeout'));
+			}
+			else{
 				next(new Error('Not authorized'));
 			}
 		});
@@ -43,7 +51,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 			// TODO implement status check
 			listValues.push({name: user.full_name, intra: user.intra_name, status: 3, pic: user.picture})
 		})
-		
+
 		return listValues;
 	}
 

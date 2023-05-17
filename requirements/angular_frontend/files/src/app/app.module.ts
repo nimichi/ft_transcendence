@@ -41,7 +41,6 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 	  ReactiveFormsModule,
     FormsModule
   ],
-  providers: [SocketService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

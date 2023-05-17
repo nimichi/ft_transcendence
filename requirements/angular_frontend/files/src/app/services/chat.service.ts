@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { SocketModule } from '../socket/socket.module';
 import { FormControl } from '@angular/forms';
+import { SocketService } from '../socket/socket.service';
 
 
 
@@ -11,13 +11,13 @@ import { FormControl } from '@angular/forms';
 
 export class ChatService {
   private visible = false
-  
+
   public chatInput: string = "";
 	public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [ { name: '!cmd', msgs: [] }]
 	public msgList: {msg: string, align: string}[] = this.chatList[0].msgs;
 	public selectedChat: string = this.chatList[0].name;
 
-	constructor(private socket: SocketModule){
+	constructor(private socket: SocketService){
 		this.socket.socketSubscribe('chatrecv', (msg: string) => this.recvMessage(msg));
 
 		socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
@@ -64,5 +64,5 @@ export class ChatService {
     console.log('toggle chat')
   }
 
-  
+
 }
