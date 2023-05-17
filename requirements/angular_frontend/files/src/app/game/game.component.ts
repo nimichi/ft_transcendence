@@ -7,22 +7,26 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 })
 
 export class GameComponent {
-  canvasWidth: number = 600;
-  canvasHeight: number = 300;
-  AcanvasWidth = this.canvasWidth / 2;
-  AcanvasHeight = this.canvasHeight / 2;
-  barWidth: number = 6;
-  barHeight: number= 30; // need to make them change depending on the size of the window
+  canvasWidth = 800;
+  canvasHeight = 400;
+  barWidth: number = 16;
+  barHeight: number= 80; 
   AbarWidth = this.barWidth / 2;
   AbarHeight = this.barHeight / 2;
-  leftBarY: number = 120;
-  rightBarY: number = this.AcanvasHeight / 2 - this.AbarHeight;
-  ballX: number = this.AcanvasWidth / 2;
-  ballY: number = this.AcanvasHeight / 2;
-  xVel: number = 1;
-  yVel: number = 0;
-  animationFrameiD!: number;
+  leftBarY: number = this.canvasHeight / 2 - this.AbarHeight;
+  leftBarX: number = 40;
+  rightBarY: number = this.canvasHeight / 2 - this.AbarHeight;
+  rightBarX: number = this.canvasWidth - 40 - this.barWidth;
+  ballX: number = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
+  ballY: number = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
+  xVel: number = -0.7;
+  yVel: number = 0.8;
+  hitbox: number = 7;
+  j: number = 0;
+  speed: number = 4;
+  score: number[] = [0,0];
   gameState: boolean = false;
+  bool: boolean = true;
   @ViewChild('myCanvas', { static: true })
   gameCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -39,79 +43,93 @@ export class GameComponent {
   public ngAfterViewInit () {
     this.gameCanvas.nativeElement.focus();
     this.context = this.gameCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
-    // this.context.fillRect(0, 0, this.AcanvasWidth, this.AcanvasHeight);
-    // this.context.fillStyle = 'white';
-    // this.context.fillRect(this.ballX - 1, this.ballY - 1, 3, 3);
-    // this.context.fillRect(0, this.AcanvasHeight / 2 - (this.barHeight / 2), this.barWidth, this.barHeight);
-    // this.context.fillRect(this.AcanvasWidth - this.barWidth, // where its placed x-axis
-    //                       this.AcanvasHeight / 2 - (this.barHeight / 2), // y axis
-    //                       this.barWidth, this.barHeight); // height and width
-    // this.rightBarY = this.AcanvasHeight / 2 - (this.barHeight / 2);
-    // this.leftBarY = this.rightBarY; 
-    // this.gameState = true;
     this.animate();
   }
 
   animate() {
-    this.checkifHit();
-    this.context.clearRect(this.ballX, this.ballY, 5, 5);
-    this.context.clearRect(0, this.leftBarY, this.barWidth, this.AbarHeight);
     this.drawBars();
-    this.drawBall();
-    this.animationFrameiD = requestAnimationFrame(() => this.animate());
+    for (let i = 0; i < this.speed; i++)
+      this.drawBall();
+    requestAnimationFrame(() => this.animate());
   }
 
-  checkifHit() {
-    if (this.xVel > 0)
-      if ((this.ballX + this.xVel) >= this.AcanvasWidth)
-        this.xVel *= -1;
-    if (this.xVel < 0)
-      if ((this.ballX + this.xVel) <= this.AcanvasWidth)
-        this.xVel *= -1;
+  checkifHitPaddle()
+  { 
+    if (Math.round(this.ballX) <= this.leftBarX + this.barWidth && Math.round(this.ballX) >= this.leftBarX)
+    {
+      if (Math.round(this.ballY) <= this.leftBarY + this.barHeight && Math.round(this.ballY) >= this.leftBarY)
+      {
+        if (this.ballY - this.leftBarY > 30)
+          if (this.yVel < 0)
+            this.yVel *= -1;
+        else
+          if (this.yVel > 0)
+            this.yVel *= -1;
+        this.xVel *= -1; // rechne aus wo das paddle von paddle aus gehittet wird, änder yvel und xvel accordingly und mach irgendwie speed höher
+      }
+    }
+    if (Math.round(this.ballX + this.hitbox) >= this.rightBarX && Math.round(this.ballX + 7) <= this.rightBarX + this.barWidth)
+    {
+      if (Math.round(this.ballY) > this.rightBarY && Math.round(this.ballY) < this.rightBarY + this.barHeight)
+        this.xVel *= -1; // right paddle hit algorithm
+    }
+  }
+
+  checkifHitWall() {
+    if (this.ballY + this.yVel > this.canvasHeight)
+      this.yVel *= -1;
+    else if (this.ballY + this.yVel < 0)
+      this.yVel *= -1;
+    if (this.ballX + this.xVel + this.hitbox > this.canvasWidth)
+    {
+      this.score[0]++;
+      console.log(this.score[0], " : ", this.score[1]);
+      this.ballX = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
+      this.ballY = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
+      this.xVel *= -1;
+    }
+    else if (this.ballX + this.xVel < 0)
+    {
+      this.score[1]++;
+      console.log(this.score[0], " : ", this.score[1]);      
+      this.ballX = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
+      this.ballY = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
+      this.xVel *= -1;
+    }
   }
 
   drawBall() {
-    console.log(this.ballX);
-    console.log(this.xVel);
+    this.checkifHitPaddle();
+    this.checkifHitWall();
+    this.context.clearRect(this.ballX, this.ballY, 1 + this.hitbox, 1 + this.hitbox);
     this.ballX += this.xVel;
     this.ballY += this.yVel;
     this.context.fillStyle = 'red';
-    this.context.fillRect(this.ballX, this.ballY, 5, 5);
+    this.context.fillRect(this.ballX, this.ballY, 1 + this.hitbox, 1 + this.hitbox);
   }
 
   drawBars() {
     this.context.fillStyle = 'white';
-    this.context.fillRect(0, this.leftBarY, this.barWidth, this.barHeight);
+    this.context.fillRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
+    this.context.fillRect(this.rightBarX, this.rightBarY, this.barWidth, this.barHeight);
   }
 
   handleKeyPress(event: any) {
-    const step = 1;
     switch (event.key) {
       case 'w':
-        this.context.clearRect(0, this.leftBarY, this.barWidth, this.barHeight);
-        this.leftBarY -= 2;
+        if (this.leftBarY > 0)
+        {
+          this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
+          this.leftBarY -= 10;
+        }
         break ;
       case 's':
-        this.context.clearRect(0, this.leftBarY, this.barWidth, this.barHeight);
-        this.leftBarY += 2;
+        if (this.leftBarY + this.barHeight < this.canvasHeight)
+        {
+          this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
+          this.leftBarY += 10;
+        }
         break ;
     }
   }
-
-  // moveLeftBar(step: number)
-  // {
-  //   if (step > 0)
-  //     if (this.leftBarY + this.barHeight + step > this.AcanvasHeight)
-  //       return ;
-  //   if (step < 0)
-  //     if (this.leftBarY + step < 0)
-  //       return ;
-  //   this.context = this.gameCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
-  //   this.context.fillStyle = 'black';
-  //   this.context.fillRect(0, this.leftBarY, this.barWidth, this.barHeight)
-  //   this.context.fillStyle = 'white';
-  //   this.leftBarY += step;
-  //   this.context.fillRect(0, this.leftBarY, this.barWidth, this.barHeight)
-  //   console.log(this.leftBarY);
-  // }
 }
