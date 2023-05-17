@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { ChatService } from '../services/chat.service';
+import { ChatService } from '../chat/chat.service';
 
 @Component({
   selector: 'app-game',

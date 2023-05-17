@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ChatService } from '../services/chat.service';
+import { ChatService } from '../chat/chat.service';
 import { SocketService } from '../socket/socket.service';
 @Component({
   selector: 'app-friends',

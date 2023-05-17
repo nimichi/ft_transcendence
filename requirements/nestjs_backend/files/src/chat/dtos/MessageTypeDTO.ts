@@ -15,11 +15,12 @@ export class MessageTypeDTO {
 	readonly directChannelToUserGroupe: string | undefined;
 	readonly incomingMessage: string | undefined;
 }
+
 export class chatEmitDTO {
 	constructor (
 		modus: string,
 		messageTo: string,
-		msg: [string, string] | string,
+		msg: [string, string] | string | [string[], string] | string[],
 
 	){
 		this.modus = modus;
@@ -29,6 +30,28 @@ export class chatEmitDTO {
 
 	readonly modus: string;
 	readonly messageTo: string;
-	readonly msg: [string, string] | string;
+	readonly msg: [string, string] | string | [string[], string] | string[];
+
+}
+
+export class channelDTO {
+	constructor(
+		owner: string,
+		channelName: string,
+		admin: string,
+		hidden: boolean, //private heist kommt nicht in der offizielen list vor
+		password: string | undefined, //kann für public und private sein
+	){
+		this.owner = owner;
+		this.channelName = channelName;
+		this.admin = admin;
+		this.hidden = hidden;
+	}
+	readonly owner: string;
+	readonly hidden: boolean;
+	channelName: string;
+	admin: string;
+	password: string | undefined;
+	
 
 }
