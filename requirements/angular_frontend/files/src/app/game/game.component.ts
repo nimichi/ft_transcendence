@@ -1,4 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
+import { ChatService } from '../services/chat.service';
 
 @Component({
   selector: 'app-game',
@@ -10,7 +11,7 @@ export class GameComponent {
   canvasWidth = 800;
   canvasHeight = 400;
   barWidth: number = 16;
-  barHeight: number= 80; 
+  barHeight: number= 80;
   AbarWidth = this.barWidth / 2;
   AbarHeight = this.barHeight / 2;
   leftBarY: number = this.canvasHeight / 2 - this.AbarHeight;
@@ -31,15 +32,15 @@ export class GameComponent {
   gameCanvas!: ElementRef<HTMLCanvasElement>;
 
   private context!: CanvasRenderingContext2D;
-  
-  constructor() { 
+
+  constructor(public chat: ChatService) {
   }
 
   public ngOnInit () {
 
   }
 
-  
+
   public ngAfterViewInit () {
     this.gameCanvas.nativeElement.focus();
     this.context = this.gameCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
@@ -54,7 +55,7 @@ export class GameComponent {
   }
 
   checkifHitPaddle()
-  { 
+  {
     if (Math.round(this.ballX) <= this.leftBarX + this.barWidth && Math.round(this.ballX) >= this.leftBarX)
     {
       if (Math.round(this.ballY) <= this.leftBarY + this.barHeight && Math.round(this.ballY) >= this.leftBarY)
@@ -91,7 +92,7 @@ export class GameComponent {
     else if (this.ballX + this.xVel < 0)
     {
       this.score[1]++;
-      console.log(this.score[0], " : ", this.score[1]);      
+      console.log(this.score[0], " : ", this.score[1]);
       this.ballX = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
       this.ballY = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
       this.xVel *= -1;
@@ -131,5 +132,9 @@ export class GameComponent {
         }
         break ;
     }
+  }
+
+  openChat($event: Event){
+	this.chat.toggleChat()
   }
 }

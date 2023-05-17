@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameComponent } from './game.component';
 import { SocketModule } from '../socket/socket.module';
+import { ChatModule } from '../chat/chat.module';
 
 
 
@@ -10,7 +11,9 @@ import { SocketModule } from '../socket/socket.module';
     GameComponent
   ],
   imports: [
-    CommonModule, SocketModule
+    CommonModule,
+	ChatModule,
+	SocketModule
   ]
 })
 export class GameModule { }
