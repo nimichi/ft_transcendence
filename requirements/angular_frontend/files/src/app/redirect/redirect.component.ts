@@ -15,10 +15,10 @@ import { HttpHeaders } from '@angular/common/http';
 })
 export class RedirectComponent {
 
-	verified: boolean = true
-	showAlert: boolean  = false
-  	alertMsg = 'Your authentication was not successful!'
-  	alertColor = 'red'
+	public verified: boolean = true
+	public showAlert: boolean  = false
+  	public alertMsg = 'Your authentication was not successful!'
+  	public alertColor = 'red'
 	public tfaToken: string = ""
 
     constructor(private http: HttpClient,
