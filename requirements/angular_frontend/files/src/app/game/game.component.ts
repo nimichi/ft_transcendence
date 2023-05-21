@@ -1,4 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
+import { SocketService } from '../socket/socket.service';
 import { ChatService } from '../chat/chat.service';
 
 @Component({
@@ -8,38 +9,67 @@ import { ChatService } from '../chat/chat.service';
 })
 
 export class GameComponent {
+  private gameid: number;
   canvasWidth = 800;
   canvasHeight = 400;
   barWidth: number = 16;
-  barHeight: number= 80;
+  barHeight: number = 80;
   AbarWidth = this.barWidth / 2;
   AbarHeight = this.barHeight / 2;
   leftBarY: number = this.canvasHeight / 2 - this.AbarHeight;
   leftBarX: number = 40;
   rightBarY: number = this.canvasHeight / 2 - this.AbarHeight;
   rightBarX: number = this.canvasWidth - 40 - this.barWidth;
-  ballX: number = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
-  ballY: number = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
-  xVel: number = -0.7;
-  yVel: number = 0.8;
+  ballX: number = -10;
+  ballY: number = -10;
+  xVel: number = 0;
+  yVel: number = 0;
   hitbox: number = 7;
   j: number = 0;
   speed: number = 4;
-  score: number[] = [0,0];
   gameState: boolean = false;
   bool: boolean = true;
   @ViewChild('myCanvas', { static: true })
   gameCanvas!: ElementRef<HTMLCanvasElement>;
 
+  isLeftPlayer: boolean = false
+
   private context!: CanvasRenderingContext2D;
 
-  constructor(public chat: ChatService) {
+  constructor(private socketService: SocketService, public chat: ChatService) {
+	socketService.socketSubscribe('newbarposition', (y: number) => this.newBarPosition(y))
+	socketService.socketSubscribe('newballposition', (pos: {x: number, y: number, xv: number, yv: number}) => this.newBallPosition(pos))
   }
 
   public ngOnInit () {
-
+	this.socketService.requestEvent("initgame", null, (payload: { gameid: number, isleft: boolean }) => this.prepareGame(payload))
   }
 
+  prepareGame(payload: { gameid: number, isleft: boolean }){
+	this.isLeftPlayer = payload.isleft;
+	this.gameid = payload.gameid;
+  }
+
+  newBallPosition(pos: {x: number, y: number, xv: number, yv: number}){
+	this.context.clearRect(this.ballX - 1 , this.ballY - 1, 3 + this.hitbox, 3 + this.hitbox);
+	this.ballX = pos.x;
+	this.ballY = pos.y;
+	this.xVel = pos.xv;
+	this.yVel = pos.yv;
+  }
+
+  newBarPosition(y: number){
+	console.log(y)
+	if (!this.isLeftPlayer){
+		this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
+		this.leftBarY = y;
+	}
+	else{
+		this.context.clearRect(this.rightBarX, this.rightBarY, this.barWidth, this.barHeight);
+		console.log(this.rightBarY)
+		this.rightBarY = y;
+	}
+  }
 
   public ngAfterViewInit () {
     this.gameCanvas.nativeElement.focus();
@@ -56,7 +86,7 @@ export class GameComponent {
 
   checkifHitPaddle()
   {
-    if (Math.round(this.ballX) <= this.leftBarX + this.barWidth && Math.round(this.ballX) >= this.leftBarX)
+    if (this.isLeftPlayer && (Math.round(this.ballX) <= this.leftBarX + this.barWidth && Math.round(this.ballX) >= this.leftBarX))
     {
       if (Math.round(this.ballY) <= this.leftBarY + this.barHeight && Math.round(this.ballY) >= this.leftBarY)
       {
@@ -67,12 +97,16 @@ export class GameComponent {
           if (this.yVel > 0)
             this.yVel *= -1;
         this.xVel *= -1; // rechne aus wo das paddle von paddle aus gehittet wird, änder yvel und xvel accordingly und mach irgendwie speed höher
-      }
+		this.socketService.emitEvent('ballposition', {pos: {x: this.ballX, y: this.ballY, xv: this.xVel, yv: this.yVel}, id: this.gameid});
+	  }
     }
-    if (Math.round(this.ballX + this.hitbox) >= this.rightBarX && Math.round(this.ballX + 7) <= this.rightBarX + this.barWidth)
+    if (!this.isLeftPlayer && (Math.round(this.ballX + this.hitbox) >= this.rightBarX && Math.round(this.ballX + 7) <= this.rightBarX + this.barWidth))
     {
       if (Math.round(this.ballY) > this.rightBarY && Math.round(this.ballY) < this.rightBarY + this.barHeight)
-        this.xVel *= -1; // right paddle hit algorithm
+	  {
+		  this.xVel *= -1; // right paddle hit algorithm
+		  this.socketService.emitEvent('ballposition', {pos: {x: this.ballX, y: this.ballY, xv: this.xVel, yv: this.yVel}, id: this.gameid});
+	  }
     }
   }
 
@@ -81,31 +115,31 @@ export class GameComponent {
       this.yVel *= -1;
     else if (this.ballY + this.yVel < 0)
       this.yVel *= -1;
-    if (this.ballX + this.xVel + this.hitbox > this.canvasWidth)
+    if (!this.isLeftPlayer && this.ballX + this.xVel + this.hitbox > this.canvasWidth + 10)
     {
-      this.score[0]++;
-      console.log(this.score[0], " : ", this.score[1]);
-      this.ballX = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
-      this.ballY = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
-      this.xVel *= -1;
+		console.log('right')
+		this.xVel = 0;
+		this.yVel = 0;
+		this.ballX = -4;
+		this.socketService.emitEvent('scorepoint', this.gameid)
     }
-    else if (this.ballX + this.xVel < 0)
+    else if (this.isLeftPlayer && this.ballX + this.xVel < 0 - 10)
     {
-      this.score[1]++;
-      console.log(this.score[0], " : ", this.score[1]);
-      this.ballX = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
-      this.ballY = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
-      this.xVel *= -1;
+		console.log('left')
+		this.xVel = 0;
+		this.yVel = 0;
+		this.ballX = -4;
+		this.socketService.emitEvent('scorepoint', this.gameid)
     }
   }
 
   drawBall() {
     this.checkifHitPaddle();
     this.checkifHitWall();
-    this.context.clearRect(this.ballX, this.ballY, 1 + this.hitbox, 1 + this.hitbox);
+    this.context.clearRect(this.ballX - 1 , this.ballY - 1, 3 + this.hitbox, 3 + this.hitbox);
     this.ballX += this.xVel;
     this.ballY += this.yVel;
-    this.context.fillStyle = 'red';
+    this.context.fillStyle = 'white';
     this.context.fillRect(this.ballX, this.ballY, 1 + this.hitbox, 1 + this.hitbox);
   }
 
@@ -116,22 +150,44 @@ export class GameComponent {
   }
 
   handleKeyPress(event: any) {
-    switch (event.key) {
-      case 'w':
-        if (this.leftBarY > 0)
-        {
-          this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
-          this.leftBarY -= 10;
-        }
-        break ;
-      case 's':
-        if (this.leftBarY + this.barHeight < this.canvasHeight)
-        {
-          this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
-          this.leftBarY += 10;
-        }
-        break ;
-    }
+	if (this.isLeftPlayer){
+		switch (event.key) {
+		case 'w':
+			if (this.leftBarY > 0)
+			{
+			this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
+			this.leftBarY -= 10;
+			}
+			break ;
+		case 's':
+			if (this.leftBarY + this.barHeight < this.canvasHeight)
+			{
+			this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
+			this.leftBarY += 10;
+			}
+			break ;
+		}
+		this.socketService.emitEvent('barposition', {y: this.leftBarY, id: this.gameid});
+	}
+	else{
+		switch (event.key) {
+		case 'w':
+			if (this.rightBarY > 0)
+			{
+			this.context.clearRect(this.rightBarX, this.rightBarY, this.barWidth, this.barHeight);
+			this.rightBarY -= 10;
+			}
+			break ;
+		case 's':
+			if (this.rightBarY + this.barHeight < this.canvasHeight)
+			{
+			this.context.clearRect(this.rightBarX, this.rightBarY, this.barWidth, this.barHeight);
+			this.rightBarY += 10;
+			}
+			break ;
+		}
+		this.socketService.emitEvent('barposition', {y: this.rightBarY, id: this.gameid});
+	}
   }
 
   openChat($event: Event){

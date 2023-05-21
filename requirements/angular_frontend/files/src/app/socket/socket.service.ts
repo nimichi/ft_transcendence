@@ -77,6 +77,15 @@ export class SocketService {
 		return false;
 	}
 
+	emitEvent(eventName: string, payload: any){
+		if (this.isOpen && this.socket)
+		{
+			this.socket.emit(eventName, payload);
+			return true;
+		}
+		return false;
+	}
+
 	socketSubscribe(eventName: string, callback: any){
 		if (this.socketState() && this.socket)
 		{
