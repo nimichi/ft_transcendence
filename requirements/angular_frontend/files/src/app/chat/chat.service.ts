@@ -19,6 +19,7 @@ export class ChatService {
   constructor(private socket: SocketService){
 	  this.socket.socketSubscribe('chatrecv', (msg: string) => this.recvMessage(msg, 'left'));
 	  this.socket.socketSubscribe('chatrecvR', (msg: string) => this.recvMessage(msg, 'right'));
+    this.socket.socketSubscribe('styledList', (msg: string[]) => this.outputUserList(msg));
 	  socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
   }
 
@@ -43,12 +44,11 @@ export class ChatService {
 	  console.log(this.msgList);
   }
 
-  outputUserList(msg: string[]) {
-	  msg.forEach(user => {
-		  this.msgList.unshift({msg: user, align: 'left'})
-		  console.log(this.msgList);
-	  })
-  }
+  // outputUserList(msg: string[]) {
+	//  const styledList = document.getElementById('styledList');
+  //  styledList?.inerHTML = '';
+
+  // }
 
   searchControl = new FormControl ('')
 

@@ -21,6 +21,7 @@ export class ChatService {
 		this.printGroupChannelEntry();
 
 		if(messageFrom == "!cmd") {
+			console.log(fullCommand);
 			if(fullCommand[0].includes("/new")) {
 				//schau ob nuzer nuzer und ob der bereit vorhanden in der liste vorhanden ist
 				if (!fullCommand[1].includes("#") && !this.checkUserInList(fullCommand[1])) {
@@ -50,6 +51,9 @@ export class ChatService {
 					this.channelArrayProvider.addUserToList(intra);
 					return new chatEmitDTO('newchat', fullCommand[1], [this.channelArrayProvider.getUserList(), 'left']);
 				}
+			}
+			else if(fullCommand[0].includes("/getchanellist")) {
+				return new chatEmitDTO('chatrecv', fullCommand[1], [this.channelArrayProvider.getChannels(), 'left']);
 			}
 			
 		}

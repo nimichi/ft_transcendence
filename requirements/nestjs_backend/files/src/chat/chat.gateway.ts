@@ -12,9 +12,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	async handleRecieveMsg (client: Socket, payload: {chat: string, msg: string}) : Promise<string> {
 		let intra;
 		[intra] = client.rooms;
+		console.log(intra);
 		const responseDTO: chatEmitDTO =  await this.chat.reciveMsg(intra ,client, payload.chat, payload.msg);
-		if(payload.chat === "!cmd" && responseDTO.modus == 'newchat') {
+		if(payload.chat === "!cmd" && responseDTO.modus == 'newchat' && !payload.msg.includes("/getchanellist")) {
 			client.emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
+			return "";
+		}
+		else if(payload.chat === "!cmd" && responseDTO.modus == 'chatrecv' && payload.msg.includes("/getchanellist")) {
+			console.log(responseDTO.msg[0]);
+			const json = JSON.stringify(responseDTO.msg[0]);
+			client.emit(responseDTO.modus, json)
+			return json;
 		}
 		else if(payload.chat.includes("#") && responseDTO.modus === 'chatrecv' && payload.msg[0] === "/") {
 			if(responseDTO.msg.length == 2) {
