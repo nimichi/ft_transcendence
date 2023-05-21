@@ -128,11 +128,12 @@ export class UserComponent {
 		console.log(this.intraPic)
 		const file = (event?.target as  HTMLInputElement).files?.[0]
 
-		if (file){
+		if (file) {
 			const reader = new FileReader()
 			reader.onload = e => this.intraPic = reader.result
 			reader.readAsDataURL(file)
 			this.picModal.toggleModal('choosePicture')
+			this.socket.requestEvent('updatePicture', file, () => {});
 			// this.intraPic = URL.createObjectURL(file)
 			// console.log(this.intraPic)
 			// this.cd.detectChanges()

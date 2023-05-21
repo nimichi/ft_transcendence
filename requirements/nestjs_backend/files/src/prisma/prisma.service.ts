@@ -69,10 +69,26 @@ export class PrismaService extends PrismaClient {
 	console.log("User full name updated to: " + fullName);
   }
 
+  async updatePicture(intra_name: string, picture: string) {
+	if (this.findUserByIntra(intra_name) === null) {
+		console.log("User not found.");
+		return ;
+	}
+	const updatedUser = await this.user.update({
+		where: { intra_name: intra_name},
+		data: {
+			picture: picture
+		},
+	});
+	console.log("User picture updated to path: " + picture);
+  }
+
 	async getTfaSecret(intra_name: string): Promise<string> {
 		const user = await this.findUserByIntra(intra_name);
 		return (user.tfa_secret);
 	}
+
+	
 }
 
 //   async updateUserName(id: number, User_Name: string): Promise<void> {
