@@ -14,6 +14,7 @@
         cursor: pointer;
         background-color: #a0aec0;
                }
+    
 </style>
 
 
@@ -69,7 +70,7 @@
 
         <div class="overflow-auto px-1 py-1" style="height: 298px" id="journal-scroll">
 			<ul>
-				<li *ngFor="let item of chatService.msgList.slice().reverse()" [ngStyle]="{'text-align': item.align}">{{ item.msg }}</li>
+				<li *ngFor="let item of chatService.msgList.slice().reverse()" style="color: black;" [ngStyle]="{'text-align': item.align}">{{ item.msg }}</li>
 			</ul>
         </div>
 

@@ -14,15 +14,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		[intra] = client.rooms;
 		console.log(intra);
 		const responseDTO: chatEmitDTO =  await this.chat.reciveMsg(intra ,client, payload.chat, payload.msg);
-		if(payload.chat === "!cmd" && responseDTO.modus == 'newchat' && !payload.msg.includes("/getchanellist")) {
+		if(payload.chat === "!cmd" && responseDTO.modus == 'newchat') {
 			client.emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
 			return "";
 		}
-		else if(payload.chat === "!cmd" && responseDTO.modus == 'chatrecv' && payload.msg.includes("/getchanellist")) {
+		else if(payload.chat === "!cmd" && responseDTO.modus == 'styledList' && payload.msg.includes("/getchanellist")) {
 			console.log(responseDTO.msg[0]);
 			const json = JSON.stringify(responseDTO.msg[0]);
 			client.emit(responseDTO.modus, json)
-			return json;
+			return "";
 		}
 		else if(payload.chat.includes("#") && responseDTO.modus === 'chatrecv' && payload.msg[0] === "/") {
 			if(responseDTO.msg.length == 2) {
@@ -34,9 +34,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				return "";
 			}
 		}
+		else if(payload.chat != "!cmd" && responseDTO.modus === 'styledList') { //channel general info
+			client.emit(responseDTO.modus, responseDTO.msg);
+			return "";
+		}
 		else if  (payload.chat != "!cmd") {
-			console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + payload.msg);
-			client.to(payload.chat).emit('chatrecv', payload.msg);
+			console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + JSON.stringify(responseDTO.msg));
+			//here msg umbauen in msg from 
+			client.to(payload.chat).emit(responseDTO.modus, responseDTO.msg);
+			return payload.msg;
 		}
 		return payload.msg;
 	}
