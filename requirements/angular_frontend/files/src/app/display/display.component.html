@@ -1,53 +1,67 @@
-<div class="mx-auto grid max-w-7xl gap-x-8 gap-y-20 px-6 lg:px-8 xl:grid-cols-3">
-    <div class="max-w-2xl">
-    </div>
-    <ul role="list" class="grid gap-x-8 gap-y-12 sm:grid-cols-2 sm:gap-y-16 xl:col-span-2">
-      <li>
-        <div class="flex items-center gap-x-6">
-          <img class="h-32 w-32 rounded-full" [src]="intraPic" alt="">
-          <div>
-            <h3 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ intraName }}</h3>
+<div class="flex flex-col ml-8 ">
+  <!-- <div class="container mx-auto py-8 px-4 flex z-0">
+  </div> -->
+  <div class="grid max-w-8xl gap-x-8 gap-y-20 px-6 lg:px-8 xl:grid-cols-3 py-24 sm:py-32">
+    <div class="flex flex-col">
+
+        <img class="object-cover h-48 w-48 rounded-full mb-8" [src]="intraPic" alt="">
+        <div class="flex justify-between items-center">
+          <h3 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ fullName }}</h3>
+        </div>   
+          </div>
+          <div class="table-fixed justify-end">
+            <div class="table-row header">
+              <div class="table-cell text-indigo-400">Versus</div>
+              <div class="table-cell text-indigo-400">Result</div>
+              <div class="table-cell text-indigo-400">Level</div>
+            </div>
+            <div class="table-row" *ngFor="let item of listData">
+              <div class="table-cell">{{ item.versus }}</div>
+              <!-- <div class="table-cell">mnies</div> -->
+              <div class="table-cell">{{ item.result }}</div>
+              <!-- <div class="table-cell">loss</div> -->
+              <div class="table-cell">{{ item.level }}</div>
+              <!-- <div class="table-cell">1</div> -->
+            </div>
           </div>
         </div>
-      </li>
-    </ul>
-  </div>
 
 
-  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-    <dt class="text-sm font-medium leading-6 text-indigo-400">Wins</dt>
-    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{wins}}</dd>
-  </div>
-  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-    <dt class="text-sm font-medium leading-6 text-indigo-400">Losses</dt>
-    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{losses}}</dd>
-  </div>
-  <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-    <dt class="text-sm font-medium leading-6 text-indigo-400">Level</dt>
-    <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0">{{level}}</dd>
-  </div>
-  <ng-container *ngFor="let badgeLevel of [1, 2, 3, 4, 5]">
-    <span *ngIf="intraBadgeLevel >= badgeLevel"
-      class="inline-flex items-center rounded-md bg-indigo-50 px-10 py-5 text-xs font-medium text-indigo-{{100 * badgeLevel}} ring-1 ring-inset ring-indigo-{{900 - (100 * badgeLevel)}}/10">Badge {{badgeLevel}}</span>
-  </ng-container>
+      
+        
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-indigo-400">Wins</dt>
+          <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0 ml-30">{{wins}}</dd>
+        </div>
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-indigo-400">Losses</dt>
+          <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0 ml-30">{{losses}}</dd>
+          
+        </div>
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="text-sm font-medium leading-6 text-indigo-400">Level</dt>
+          <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0 ml-30">{{level}}</dd>
+        </div>
+      </div>
+      <div class="flex justify-self-auto max-w-3xl">
 
-  <div class="table">
-    <div class="table-row header">
-      <div class="table-cell">Versus</div>
-      <div class="table-cell">Result</div>
-      <div class="table-cell">Level</div>
-    </div>
-    <div class="table-row" *ngFor="let item of listData">
-      <div class="table-cell">{{ item.versus }}</div>
-      <div class="table-cell">{{ item.result }}</div>
-      <div class="table-cell">{{ item.level }}</div>
-    </div>
+<ng-container *ngFor="let badgeLevel of [1, 2, 3, 4, 5]" >
+  <div class="flex flex-col items-center px-8 ">
+    <svg class="h-24 w-24 text-indigo-200" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+    </svg>
+    <span class="mt-2">BADGE</span>
   </div>
-
+</ng-container>
+</div>
+  
   <div class="fixed bottom-0 right-0 p-4" style="z-index: 10;" (click)="openChat($event)">
     <svg class="h-12 w-12 text-indigo-200 " aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" stroke-linecap="round" stroke-linejoin="round"></path>
     </svg>
   </div>
+
+  
+  
   
   <app-chat></app-chat>
