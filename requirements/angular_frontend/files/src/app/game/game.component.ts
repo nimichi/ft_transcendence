@@ -9,7 +9,7 @@ import { ChatService } from '../chat/chat.service';
 })
 
 export class GameComponent {
-  private gameid: number;
+  private gamehost: string = "";
   canvasWidth = 800;
   canvasHeight = 400;
   barWidth: number = 16;
@@ -39,15 +39,16 @@ export class GameComponent {
   constructor(private socketService: SocketService, public chat: ChatService) {
 	socketService.socketSubscribe('newbarposition', (y: number) => this.newBarPosition(y))
 	socketService.socketSubscribe('newballposition', (pos: {x: number, y: number, xv: number, yv: number}) => this.newBallPosition(pos))
+	socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
   }
 
   public ngOnInit () {
-	this.socketService.requestEvent("initgame", null, (payload: { gameid: number, isleft: boolean }) => this.prepareGame(payload))
+	this.socketService.requestEvent("initgame", null, (payload: { gamehost: string, isleft: boolean }) => this.prepareGame(payload))
   }
 
-  prepareGame(payload: { gameid: number, isleft: boolean }){
+  prepareGame(payload: { gamehost: string, isleft: boolean }){
 	this.isLeftPlayer = payload.isleft;
-	this.gameid = payload.gameid;
+	this.gamehost = payload.gamehost;
   }
 
   newBallPosition(pos: {x: number, y: number, xv: number, yv: number}){
@@ -59,7 +60,6 @@ export class GameComponent {
   }
 
   newBarPosition(y: number){
-	console.log(y)
 	if (!this.isLeftPlayer){
 		this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
 		this.leftBarY = y;
@@ -86,6 +86,8 @@ export class GameComponent {
 
   checkifHitPaddle()
   {
+	if (this.gamehost == "")
+		return;
     if (this.isLeftPlayer && (Math.round(this.ballX) <= this.leftBarX + this.barWidth && Math.round(this.ballX) >= this.leftBarX))
     {
       if (Math.round(this.ballY) <= this.leftBarY + this.barHeight && Math.round(this.ballY) >= this.leftBarY)
@@ -97,7 +99,7 @@ export class GameComponent {
           if (this.yVel > 0)
             this.yVel *= -1;
         this.xVel *= -1; // rechne aus wo das paddle von paddle aus gehittet wird, änder yvel und xvel accordingly und mach irgendwie speed höher
-		this.socketService.emitEvent('ballposition', {pos: {x: this.ballX, y: this.ballY, xv: this.xVel, yv: this.yVel}, id: this.gameid});
+		this.socketService.emitEvent('ballposition', {pos: {x: this.ballX, y: this.ballY, xv: this.xVel, yv: this.yVel}, host: this.gamehost});
 	  }
     }
     if (!this.isLeftPlayer && (Math.round(this.ballX + this.hitbox) >= this.rightBarX && Math.round(this.ballX + 7) <= this.rightBarX + this.barWidth))
@@ -105,12 +107,14 @@ export class GameComponent {
       if (Math.round(this.ballY) > this.rightBarY && Math.round(this.ballY) < this.rightBarY + this.barHeight)
 	  {
 		  this.xVel *= -1; // right paddle hit algorithm
-		  this.socketService.emitEvent('ballposition', {pos: {x: this.ballX, y: this.ballY, xv: this.xVel, yv: this.yVel}, id: this.gameid});
+		  this.socketService.emitEvent('ballposition', {pos: {x: this.ballX, y: this.ballY, xv: this.xVel, yv: this.yVel}, host: this.gamehost});
 	  }
     }
   }
 
   checkifHitWall() {
+	if (this.gamehost == "")
+		return;
     if (this.ballY + this.yVel > this.canvasHeight)
       this.yVel *= -1;
     else if (this.ballY + this.yVel < 0)
@@ -121,7 +125,7 @@ export class GameComponent {
 		this.xVel = 0;
 		this.yVel = 0;
 		this.ballX = -4;
-		this.socketService.emitEvent('scorepoint', this.gameid)
+		this.socketService.emitEvent('scorepoint', this.gamehost)
     }
     else if (this.isLeftPlayer && this.ballX + this.xVel < 0 - 10)
     {
@@ -129,7 +133,7 @@ export class GameComponent {
 		this.xVel = 0;
 		this.yVel = 0;
 		this.ballX = -4;
-		this.socketService.emitEvent('scorepoint', this.gameid)
+		this.socketService.emitEvent('scorepoint', this.gamehost)
     }
   }
 
@@ -167,7 +171,8 @@ export class GameComponent {
 			}
 			break ;
 		}
-		this.socketService.emitEvent('barposition', {y: this.leftBarY, id: this.gameid});
+		if (this.gamehost != "")
+			this.socketService.emitEvent('barposition', {y: this.leftBarY, host: this.gamehost});
 	}
 	else{
 		switch (event.key) {
@@ -186,11 +191,26 @@ export class GameComponent {
 			}
 			break ;
 		}
-		this.socketService.emitEvent('barposition', {y: this.rightBarY, id: this.gameid});
+		if (this.gamehost != "")
+			this.socketService.emitEvent('barposition', {y: this.rightBarY, host: this.gamehost});
 	}
   }
 
   openChat($event: Event){
 	this.chat.toggleChat()
+  }
+
+  gameInteruption(){
+	this.xVel = 0;
+	this.yVel = 0;
+	this.ballX = -8;
+	this.gamehost = ""
+	console.log("game interruption")
+	//TODO game interuption
+  }
+
+  ngOnDestroy(){
+	if (this.gamehost != "")
+		this.socketService.emitEvent('interuptgame', this.gamehost)
   }
 }

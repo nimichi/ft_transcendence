@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
 import { SocketGateway } from './socket.gateway';
 import { SocketService } from './socket.service';
 import { HttpModule } from '@nestjs/axios';
-import { TfaModule } from 'src/tfa/tfa.module';
+import { TfaModule } from '../tfa/tfa.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 
 @Module({

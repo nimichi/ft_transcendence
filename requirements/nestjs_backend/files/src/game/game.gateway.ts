@@ -1,81 +1,114 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { GameService } from './game.service';
+type Game = {left: string, right: string, scoreleft: number, scoreright: number, serveleft: boolean};
 
 @WebSocketGateway()
 export class GameGateway {
-  private games: {left: string, right: string, scoreleft: number, scoreright: number, serveleft: boolean}[] = []
 
+  private games: Map<string, Game> = new Map<string, Game>()
   constructor(private GameService: GameService) {}
 
   @SubscribeMessage('barposition')
-  tansmitBarPosition(client: any, payload: {y: number, id: number}) {
+  private async tansmitBarPosition(client: any, payload: {y: number, host: string}){
 	const [intra] = client.rooms;
-	if (this.games[payload.id].left == intra)
-    	client.to(this.games[payload.id].right).emit('newbarposition', payload.y)
-	else if (this.games[payload.id].right == intra)
-    	client.to(this.games[payload.id].left).emit('newbarposition', payload.y)
+	if (!this.games.get(payload.host)){
+		client.emit('gameinteruption');
+		return;
+	}
+	if (this.games.get(payload.host).left == intra)
+    	client.to(this.games.get(payload.host).right).emit('newbarposition', payload.y)
+	else if (this.games.get(payload.host).right == intra)
+    	client.to(this.games.get(payload.host).left).emit('newbarposition', payload.y)
   }
 
   @SubscribeMessage('ballposition')
-  tansmitBallPosition(client: any, payload: {pos: {x: number, y: number, xv: number, xy: number}, id: number}) {
+  private async tansmitBallPosition(client: any, payload: {pos: {x: number, y: number, xv: number, xy: number}, host: string}){
 	const [intra] = client.rooms;
-	if (this.games[payload.id].left == intra)
-		client.to(this.games[payload.id].right).emit('newballposition', payload.pos)
-	else if (this.games[payload.id].right == intra)
-		client.to(this.games[payload.id].left).emit('newballposition', payload.pos)
+	if (!this.games.get(payload.host)){
+		client.emit('gameinteruption');
+		return;
+	}
+	if (this.games.get(payload.host).left == intra)
+		client.to(this.games.get(payload.host).right).emit('newballposition', payload.pos)
+	else if (this.games.get(payload.host).right == intra)
+		client.to(this.games.get(payload.host).left).emit('newballposition', payload.pos)
   }
 
   @SubscribeMessage('initgame')
-  initGame(client: any, payload: {x: number, y: number, xv: number, xy: number}) {
+  private async initGame(client: any){
 	const [intra] = client.rooms;
-	if(this.games.length == 0){
-		this.games.push({left: intra, right: "", scoreleft: 0, scoreright: 0, serveleft: true})
-		return { gameid: 0, isleft: true };
+	for(let game of this.games) {
+		if(game[0] == intra || game[1].right == intra){
+			this.games.delete(game[0]);
+			console.log('Close old game');
+		}
+		if (game[1].right == ""){
+			game[1].right = intra;
+			this.startBall(client, game[0]);
+			return { gamehost: game[0], isleft: false };
+		}
 	}
-	else if(this.games[this.games.length - 1].right == ""){
-		this.games[this.games.length - 1].right = intra;
-		this.startBall(client, this.games.length - 1);
-		return { gameid: this.games.length - 1, isleft: false };
-	}
-	else{
-		this.games.push({left: intra, right: "", scoreleft: 0, scoreright: 0, serveleft: true})
-		return { gameid: this.games.length - 1, isleft: true };
-	}
+	this.games.set(intra, {left: intra, right: "", scoreleft: 0, scoreright: 0, serveleft: true})
+	return { gamehost: intra, isleft: true };
   }
 
   @SubscribeMessage('scorepoint')
-  scorePoint(client: any, gameid: number){
+  private async scorePoint(client: any, gamehost: string): Promise<boolean>{
 	const [intra] = client.rooms;
-	if (this.games[gameid].left == intra)
-	{
-		this.games[gameid].serveleft = false;
-		this.games[gameid].scoreright++;
+	if (gamehost == "")
+		return;
+	if (!this.games.get(gamehost)){
+		client.emit('gameinteruption');
+		return;
 	}
-	else if (this.games[gameid].right == intra){
-		this.games[gameid].serveleft = true;
-		this.games[gameid].scoreleft++;
+	if (this.games.get(gamehost).left == intra)
+	{
+		this.games.get(gamehost).serveleft = false;
+		this.games.get(gamehost).scoreright++;
+	}
+	else if (this.games.get(gamehost).right == intra){
+		this.games.get(gamehost).serveleft = true;
+		this.games.get(gamehost).scoreleft++;
 	}
 	else{
 		console.log('error')
 		return
 	}
-	console.log('Left: ' + this.games[gameid].scoreleft + ' Right: ' + this.games[gameid].scoreright)
-	this.startBall(client, gameid);
+	console.log('Left: ' + this.games.get(gamehost).scoreleft + ' Right: ' + this.games.get(gamehost).scoreright)
+	this.startBall(client, gamehost);
   }
 
-  private startBall(client: any, gameid: number){
+  private async startBall(client: any, gamehost: string){
 	const randX = Math.floor(Math.random() * 150)
 	const Y = Math.floor(Math.random() * 100) + 150
 	const randRad = Math.random() * 1.5708
 	let start
-	if (this.games[gameid].serveleft)
+	if (!this.games.get(gamehost)){
+		client.emit('gameinteruption');
+		return;
+	}
+	if (this.games.get(gamehost).serveleft)
 		start = {x: 400 + randX, y: Y, xv: -Math.sin(randRad + 0.7853), yv: Math.cos(randRad + 0.7853)}
 	else
 		start = {x: 400 - randX, y: Y, xv: Math.sin(randRad + 0.7853), yv: Math.cos(randRad + 0.7853)}
 	client.emit('newballposition', start)
-	console.log('Angle: ' + Math.asin(start.xv) * (180/Math.PI))
-	client.to(this.games[gameid].left).emit('newballposition', start)
-	client.to(this.games[gameid].right).emit('newballposition', start)
+	client.to(this.games.get(gamehost).left).emit('newballposition', start)
+	client.to(this.games.get(gamehost).right).emit('newballposition', start)
+  }
+
+  @SubscribeMessage('interuptgame')
+  private async interuptGame(client: any, gamehost: string){
+	const [intra] = client.rooms;
+	for(let game of this.games) {
+		if (intra == game[1].left){
+			client.to(game[1].right).emit('gameinteruption');
+			this.games.delete(gamehost);
+		}
+		else if (intra == game[1].right){
+			client.to(game[1].left).emit('gameinteruption');
+			this.games.delete(gamehost);
+		}
+	}
   }
 }
 

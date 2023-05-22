@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { throwError, map, catchError, lastValueFrom } from 'rxjs'
 import { Socket, Server } from 'socket.io';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { TfaService } from 'src/tfa/tfa.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { TfaService } from '../tfa/tfa.service';
 
 @Injectable()
 export class SocketService {
