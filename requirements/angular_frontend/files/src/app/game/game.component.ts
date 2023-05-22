@@ -19,14 +19,15 @@ export class GameComponent {
   rightBarX: number = this.canvasWidth - 40 - this.barWidth;
   ballX: number = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
   ballY: number = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
-  xVel: number = -0.7;
-  yVel: number = 0.8;
+  xVel: number = 1;
+  yVel: number = 1;
   hitbox: number = 7;
   j: number = 0;
   speed: number = 4;
   score: number[] = [0,0];
   gameState: boolean = false;
   bool: boolean = true;
+  dif: number;
   @ViewChild('myCanvas', { static: true })
   gameCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -55,23 +56,67 @@ export class GameComponent {
 
   checkifHitPaddle()
   { 
-    if (Math.round(this.ballX) <= this.leftBarX + this.barWidth && Math.round(this.ballX) >= this.leftBarX)
+    if (Math.round(this.ballX) == this.leftBarX + this.barWidth)
     {
-      if (Math.round(this.ballY) <= this.leftBarY + this.barHeight && Math.round(this.ballY) >= this.leftBarY)
+      if (Math.round(this.ballY) >= (this.leftBarY - this.hitbox) && Math.round(this.ballY) <= (this.leftBarY + this.barHeight + this.hitbox))
       {
-        if (this.ballY - this.leftBarY > 30)
-          if (this.yVel < 0)
-            this.yVel *= -1;
+        this.dif = this.ballY - this.leftBarY;
+        if (this.dif < 20)
+        {
+          this.xVel *= -1;
+          this.yVel = ((-1 * Math.sin(-15)) * this.xVel) + (Math.cos(-15) * this.yVel);
+          this.speed *= 1.1;
+        }
+        else if (this.dif < 40)
+        {
+          this.xVel *= -1;
+          this.yVel = (-1 * Math.sin(-10)) * this.xVel + Math.cos(-10) * this.yVel;
+          this.speed *= 0.9;
+        }
+        else if (this.dif < 60)
+        {
+          this.xVel *= -1;
+          this.yVel = (-1 * Math.sin(10)) * this.xVel + Math.cos(10) * this.yVel;
+          this.speed *= 0.9;
+        }
         else
-          if (this.yVel > 0)
-            this.yVel *= -1;
-        this.xVel *= -1; // rechne aus wo das paddle von paddle aus gehittet wird, änder yvel und xvel accordingly und mach irgendwie speed höher
+        {
+          this.xVel *= -1;
+          this.yVel = (-1 * Math.sin(15)) * this.xVel + Math.cos(15) * this.yVel;
+          this.speed *= 1.1;
+        }
       }
     }
-    if (Math.round(this.ballX + this.hitbox) >= this.rightBarX && Math.round(this.ballX + 7) <= this.rightBarX + this.barWidth)
+    if (Math.round(this.ballX) == this.rightBarX)
     {
-      if (Math.round(this.ballY) > this.rightBarY && Math.round(this.ballY) < this.rightBarY + this.barHeight)
-        this.xVel *= -1; // right paddle hit algorithm
+      if (Math.round(this.ballY) >= (this.rightBarY - this.hitbox) && Math.round(this.ballY) <= (this.rightBarY + this.barHeight + this.hitbox))
+      {
+        this.dif = this.ballY - this.rightBarY;
+        if (this.dif < 20)
+        {
+          this.xVel *= -1;
+          this.yVel = ((-1 * Math.sin(-15)) * this.xVel) + (Math.cos(-15) * this.yVel);
+          this.speed *= 1.1;
+        }
+        else if (this.dif < 40)
+        {
+          this.xVel *= -1;
+          this.yVel = (-1 * Math.sin(-10)) * this.xVel + Math.cos(-10) * this.yVel;
+          this.speed *= 0.9;
+        }
+        else if (this.dif < 60)
+        {
+          this.xVel *= -1;
+          this.yVel = (-1 * Math.sin(10)) * this.xVel + Math.cos(10) * this.yVel;
+          this.speed *= 0.9;
+        }
+        else
+        {
+          this.xVel *= -1;
+          this.yVel = (-1 * Math.sin(15)) * this.xVel + Math.cos(15) * this.yVel;
+          this.speed *= 1.1;
+        }
+      }
     }
   }
 
@@ -86,7 +131,9 @@ export class GameComponent {
       console.log(this.score[0], " : ", this.score[1]);
       this.ballX = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
       this.ballY = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
-      this.xVel *= -1;
+      this.xVel = -1;
+      this.yVel = 1;
+      this.speed = 4;
     }
     else if (this.ballX + this.xVel < 0)
     {
@@ -94,7 +141,9 @@ export class GameComponent {
       console.log(this.score[0], " : ", this.score[1]);      
       this.ballX = Math.floor(Math.random() * (600 - 200 + 1)) + 200;
       this.ballY = Math.floor(Math.random() * (350 - 50 + 1)) + 50;
-      this.xVel *= -1;
+      this.xVel = -1;
+      this.yVel = 1;
+      this.speed = 4;
     }
   }
 
