@@ -23,6 +23,7 @@ export class UserComponent {
 	public level: number = 0
 	public badges: number = 5
 	public badgelevel: number = 100;
+	//brauchen wir das? 
 	public tfaToken: string = ''
 	public qrCode: string = ''
 	public verified: boolean = true

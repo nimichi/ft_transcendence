@@ -33,6 +33,30 @@ export class GameComponent {
   gameCanvas!: ElementRef<HTMLCanvasElement>;
 
   isLeftPlayer: boolean = false
+  player: string = "https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg"
+  opponent: string = "https://cdn.intra.42.fr/users/f39c95b440a7892a13fd0815fdc4ed78/mnies.jpg"
+  playerScore: number = 1
+  opponentScore: number = 0
+  value: number = 24
+  showButton: boolean = true
+
+  // @ViewChild('countdownValue', { static: true })
+  // countdownValue!: ElementRef<HTMLSpanElement>;
+
+  // startCountdown() {
+  //   let value = 24;
+  //   const countdownElement = this.countdownValue.nativeElement;
+
+  //   const countdownInterval = setInterval(() => {
+  //     countdownElement.style.setProperty('--value', String(value));
+
+  //     if (value === 0) {
+  //       clearInterval(countdownInterval);
+  //     } else {
+  //       value--;
+  //     }
+  //   }, 1000);
+  // }
 
   private context!: CanvasRenderingContext2D;
 
@@ -198,6 +222,11 @@ export class GameComponent {
 
   openChat($event: Event){
 	this.chat.toggleChat()
+  }
+
+
+  waitForGame(){
+    this.showButton = false
   }
 
   gameInteruption(){
