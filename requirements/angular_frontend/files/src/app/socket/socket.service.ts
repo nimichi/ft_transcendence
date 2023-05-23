@@ -96,4 +96,9 @@ export class SocketService {
 			this.callback.push({eventName: eventName, function: callback})
 		}
 	}
+
+	socketUnsubscribe(eventName: string){
+		if (this.socket)
+			this.socket.off(eventName);
+	}
 }

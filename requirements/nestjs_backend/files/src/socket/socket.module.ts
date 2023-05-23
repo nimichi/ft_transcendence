@@ -9,5 +9,9 @@ import { PrismaModule } from '../prisma/prisma.module';
 @Module({
 	imports: [HttpModule, PrismaModule, TfaModule],
 	providers: [SocketGateway, SocketService],
+	exports: [SocketGateway]
+
 })
-export class SocketModule {}
+export class SocketModule {
+
+}

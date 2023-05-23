@@ -8,24 +8,38 @@ import { TfaService } from '../tfa/tfa.service';
 @Injectable()
 export class SocketService {
 
-
 	constructor(private readonly httpService: HttpService,private tfaService: TfaService, private readonly prismaService: PrismaService) {}
 
 	async doAuth(socket: Socket, server: Server) {
 		try{
-			const access = await this.getAccessToken(socket.handshake.auth.token);
+			let user_tmp: any
+			if (socket.handshake.auth.token.length != 8 ){
+				const access = await this.getAccessToken(socket.handshake.auth.token);
 
-			const user_data = await this.requestUserData(access.access_token);
+				const user_data = await this.requestUserData(access.access_token);
 
-			const user_tmp = {
-				intra_name: user_data.login,
-				full_name: user_data.displayname,
-				picture: user_data.image.versions.medium,
-				tfa: false,
-				tfa_secret: null,
-				win: 0,
-				loss: 0
+				user_tmp = {
+					intra_name: user_data.login,
+					full_name: user_data.displayname,
+					picture: user_data.image.versions.medium,
+					tfa: false,
+					tfa_secret: null,
+					win: 0,
+					loss: 0
+				}
 			}
+			else{
+				user_tmp = {
+					intra_name: socket.handshake.auth.token,
+					full_name: socket.handshake.auth.token + " fullname",
+					picture: "https://cataas.com/cat",
+					tfa: false,
+					tfa_secret: null,
+					win: 0,
+					loss: 0
+				}
+			}
+
 
 			let user = await this.prismaService.findOrCreateUser(user_tmp);
 			// await this.prismaService.updateUserName(user.id, "dncmon");
@@ -38,7 +52,7 @@ export class SocketService {
 			}
 
 			//disconnect old connection for this intra
-			const clients = server.sockets.adapter.rooms.get(user_data.login);
+			const clients = server.sockets.adapter.rooms.get(user_tmp.intra_name);
 			if (clients){
 				clients.forEach((client) => {
 					server.sockets.sockets.get(client).disconnect();
@@ -47,7 +61,7 @@ export class SocketService {
 
 			if (user.value.tfa == true){
 				const subtoken: string = socket.handshake.auth.token.substring(0,20);
-				const secret = await this.prismaService.getTfaSecret(user_data.login);
+				const secret = await this.prismaService.getTfaSecret(user_tmp.intra_name);
 				let response: string|undefined
 				while (1){
 					console.log('tfa loop')
@@ -72,8 +86,8 @@ export class SocketService {
 			}
 
 			//join new connection to room
-			socket.join(user_data.login);
-			socket.data.username = user_data.login;
+			socket.join(user_tmp.intra_name);
+			socket.data.username = user_tmp.intra_name;
 			return (0);
 		}
 		catch

@@ -1,135 +1,151 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { GameService } from './game.service';
-import { PrismaService } from 'src/prisma/prisma.service';
-type Game = {left: string, right: string, scoreleft: number, scoreright: number, serveleft: boolean};
+import { Socket, Server } from 'socket.io';
+import { PrismaService } from '../prisma/prisma.service';
+import { SocketGateway } from '../socket/socket.gateway';
+type Game = {left: string, right: string, scoreleft: number, scoreright: number, serveleft: boolean, powup: boolean};
 
 @WebSocketGateway()
 export class GameGateway {
-
+  private queue: Socket|null = null;
+  private powupqueue: Socket|null = null;
   private games: Map<string, Game> = new Map<string, Game>()
-  constructor(private GameService: GameService, private prismaService: PrismaService) {}
+  private gamecounter: number = 0;
+  constructor(private GameService: GameService, private prismaService: PrismaService, private socketGateway: SocketGateway) {
+  }
 
-  @SubscribeMessage('barposition')
-  private async tansmitBarPosition(client: any, payload: {y: number, host: string}){
-	const [intra] = client.rooms;
-	if (!this.games.get(payload.host)){
-		client.emit('gameinteruption');
+  private async startGame(left: Socket, right: Socket, powup: boolean){
+	this.gamecounter++;
+	while (this.games.get('!game' + this.gamecounter.toString())){
+		this.gamecounter++;
+	}
+	const gameid: string = '!game' + this.gamecounter.toString();
+	left.join(gameid);
+	right.join(gameid);
+	this.socketGateway.setUserState(left.data.username, 1);
+	this.socketGateway.setUserState(right.data.username, 1);
+	this.games.set(gameid, {left: left.data.username, right: right.data.username, scoreleft: 0, scoreright: 0, serveleft: true, powup: powup})
+	this.socketGateway.getServer().in(gameid).emit('countdown', {left: left.data.username, right: right.data.username, gameid: gameid });
+	await new Promise(r => setTimeout(r, 3100));
+	this.startBall(left, gameid);
+  }
+
+  private async stopGame(gameid: string){
+	const game = this.games.get(gameid)
+	if (!game){
 		return;
 	}
-	if (this.games.get(payload.host).left == intra)
-    	client.to(this.games.get(payload.host).right).emit('newbarposition', payload.y)
-	else if (this.games.get(payload.host).right == intra)
-    	client.to(this.games.get(payload.host).left).emit('newbarposition', payload.y)
+	this.socketGateway.getServer().in(gameid).emit('gameinteruption');
+	this.socketGateway.getServer().socketsLeave(gameid);
+	this.socketGateway.setUserState(game.left, 1);
+	this.socketGateway.setUserState(game.right, 1);
+	this.games.delete(gameid)
+  }
+
+  @SubscribeMessage('barposition')
+  private async tansmitBarPosition(client: any, payload: {y: number, gameid: string}){
+	const [intra] = client.rooms;
+	if (!this.games.get(payload.gameid)){
+		client.emit('gameinteruption');
+		client.leave(payload.gameid);
+		return;
+	}
+	client.to(payload.gameid).emit('newbarposition', payload.y)
   }
 
   @SubscribeMessage('ballposition')
-  private async tansmitBallPosition(client: any, payload: {pos: {x: number, y: number, xv: number, xy: number}, host: string}){
+  private async tansmitBallPosition(client: any, payload: {pos: {x: number, y: number, xv: number, xy: number}, gameid: string}){
 	const [intra] = client.rooms;
-	if (!this.games.get(payload.host)){
+	if (!this.games.get(payload.gameid)){
 		client.emit('gameinteruption');
+		client.leave(payload.gameid);
 		return;
 	}
-	if (this.games.get(payload.host).left == intra)
-		client.to(this.games.get(payload.host).right).emit('newballposition', payload.pos)
-	else if (this.games.get(payload.host).right == intra)
-		client.to(this.games.get(payload.host).left).emit('newballposition', payload.pos)
+	client.to(payload.gameid).emit('newballposition', payload.pos)
   }
 
   @SubscribeMessage('initgame')
-  private async initGame(client: any){
-	const [intra] = client.rooms;
-	for(let game of this.games) {
-		if(game[0] == intra || game[1].right == intra){
-			client.to(game[1].right).emit('gameinteruption');
-			client.to(game[1].left).emit('gameinteruption');
-			this.games.delete(game[0]);
-			console.log('Close old game');
-		}
-		if (game[1].right == ""){
-			game[1].right = intra;
-			client.emit('countdown', {left: game[1].left, right: game[1].right});
-			client.to(game[1].left).emit('countdown', {left: game[1].left, right: game[1].right});
-			await new Promise(r => setTimeout(r, 3100));
-			this.startBall(client, game[0]);
-			return { gamehost: game[0], isleft: false };
-		}
+  private async initGame(client: any, powup: boolean): Promise<boolean>{
+	if (powup && !this.powupqueue){
+		this.powupqueue = client;
+		return true;
 	}
-	this.games.set(intra, {left: intra, right: "", scoreleft: 0, scoreright: 0, serveleft: true})
-	return { gamehost: intra, isleft: true };
+	else if (powup){
+		this.startGame(this.powupqueue, client, true);
+		this.powupqueue = null;
+		return false;
+	}
+	else if (!powup && !this.queue){
+		this.queue = client;
+		return true;
+	}
+	else{
+		this.startGame(this.queue, client, true);
+		this.queue = null;
+		return false;
+	}
   }
 
   @SubscribeMessage('scorepoint')
-  private async scorePoint(client: any, gamehost: string): Promise<boolean>{
-	const [intra] = client.rooms;
-	if (gamehost == "")
-		return;
-	let game = this.games.get(gamehost);
-	if (!game){
+  private async scorePoint(client: any, gameid: string): Promise<boolean>{
+	let game = this.games.get(gameid);
+	if (!this.games.get(gameid)){
 		client.emit('gameinteruption');
+		client.leave(gameid);
 		return;
 	}
-	if (game.left == intra)
+	if (game.left == client.data.username)
 	{
 		game.serveleft = false;
 		game.scoreright++;
 	}
-	else if (game.right == intra){
+	else{
 		game.serveleft = true;
 		game.scoreleft++;
 	}
-	else{
-		console.log('error')
-		return
-	}
 	if (game.scoreleft >= 11 && game.scoreleft > game.scoreright + 1)
-		this.finishGame(client, game, game.left)
+		this.finishGame(gameid, game.left)
 	if (game.scoreright >= 11 && game.scoreright > game.scoreleft + 1)
-		this.finishGame(client, game, game.right)
+		this.finishGame(gameid, game.right)
 	const score = {left: game.scoreleft, right: game.scoreright};
-	client.emit('score', score)
-	client.to(game.left).emit('score', score)
-	client.to(game.right).emit('score', score)
-	this.startBall(client, gamehost);
+	this.socketGateway.getServer().in(gameid).emit('score', score)
+	this.startBall(client, gameid);
   }
 
-  private async finishGame(client: any, game: any, intra: string){
+  private async finishGame(gameid: string, intra: string){
 	  const name = (await this.prismaService.findUserByIntra(intra)).full_name
-	  client.emit('gameresult', name)
-	  client.to(game.left).emit('gameresult', name)
-	  client.to(game.right).emit('gameresult', name)
-	  this.games.delete(game.left);
+	  this.socketGateway.getServer().in(gameid).emit('gameresult', name)
+	  this.stopGame(gameid)
   }
 
-  private async startBall(client: any, gamehost: string){
+  private async startBall(client: any, gameid: string){
+	if (!this.games.get(gameid)){
+		client.emit('gameinteruption');
+		client.leave(gameid);
+		return;
+	}
 	const randX = Math.floor(Math.random() * 150)
 	const Y = Math.floor(Math.random() * 100) + 150
 	const randRad = Math.random() * 1.5708
 	let start
-	if (!this.games.get(gamehost)){
-		client.emit('gameinteruption');
-		return;
-	}
-	if (this.games.get(gamehost).serveleft)
+	if (this.games.get(gameid).serveleft)
 		start = {x: 400 + randX, y: Y, xv: -Math.sin(randRad + 0.7853), yv: Math.cos(randRad + 0.7853)}
 	else
 		start = {x: 400 - randX, y: Y, xv: Math.sin(randRad + 0.7853), yv: Math.cos(randRad + 0.7853)}
-	client.emit('newballposition', start)
-	client.to(this.games.get(gamehost).left).emit('newballposition', start)
-	client.to(this.games.get(gamehost).right).emit('newballposition', start)
+	this.socketGateway.getServer().in(gameid).emit('newballposition', start)
   }
 
-  @SubscribeMessage('interuptgame')
-  private async interuptGame(client: any, gamehost: string){
-	const [intra] = client.rooms;
-	for(let game of this.games) {
-		if (intra == game[1].left){
-			client.to(game[1].right).emit('gameinteruption');
-			this.games.delete(gamehost);
-		}
-		else if (intra == game[1].right){
-			client.to(game[1].left).emit('gameinteruption');
-			this.games.delete(gamehost);
-		}
+  @SubscribeMessage('leftgamepage')
+  private async interuptGame(client: any, gameid: string){
+	if (gameid != ""){
+		client.to(gameid).emit('gameinteruption');
+		this.stopGame(gameid);
+	}
+	else if(this.queue == client){
+		this.queue = null;
+	}
+	else if(this.powupqueue == client){
+		this.powupqueue = null;
 	}
   }
 }
