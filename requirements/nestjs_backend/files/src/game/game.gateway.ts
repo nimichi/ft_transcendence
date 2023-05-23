@@ -138,7 +138,6 @@ export class GameGateway {
   @SubscribeMessage('leftgamepage')
   private async interuptGame(client: any, gameid: string){
 	if (gameid != ""){
-		client.to(gameid).emit('gameinteruption');
 		this.stopGame(gameid);
 	}
 	else if(this.queue == client){
