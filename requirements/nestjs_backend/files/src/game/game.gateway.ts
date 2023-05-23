@@ -1,12 +1,13 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { GameService } from './game.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 type Game = {left: string, right: string, scoreleft: number, scoreright: number, serveleft: boolean};
 
 @WebSocketGateway()
 export class GameGateway {
 
   private games: Map<string, Game> = new Map<string, Game>()
-  constructor(private GameService: GameService) {}
+  constructor(private GameService: GameService, private prismaService: PrismaService) {}
 
   @SubscribeMessage('barposition')
   private async tansmitBarPosition(client: any, payload: {y: number, host: string}){
@@ -39,11 +40,16 @@ export class GameGateway {
 	const [intra] = client.rooms;
 	for(let game of this.games) {
 		if(game[0] == intra || game[1].right == intra){
+			client.to(game[1].right).emit('gameinteruption');
+			client.to(game[1].left).emit('gameinteruption');
 			this.games.delete(game[0]);
 			console.log('Close old game');
 		}
 		if (game[1].right == ""){
 			game[1].right = intra;
+			client.emit('countdown', {left: game[1].left, right: game[1].right});
+			client.to(game[1].left).emit('countdown', {left: game[1].left, right: game[1].right});
+			await new Promise(r => setTimeout(r, 3100));
 			this.startBall(client, game[0]);
 			return { gamehost: game[0], isleft: false };
 		}
@@ -57,25 +63,41 @@ export class GameGateway {
 	const [intra] = client.rooms;
 	if (gamehost == "")
 		return;
-	if (!this.games.get(gamehost)){
+	let game = this.games.get(gamehost);
+	if (!game){
 		client.emit('gameinteruption');
 		return;
 	}
-	if (this.games.get(gamehost).left == intra)
+	if (game.left == intra)
 	{
-		this.games.get(gamehost).serveleft = false;
-		this.games.get(gamehost).scoreright++;
+		game.serveleft = false;
+		game.scoreright++;
 	}
-	else if (this.games.get(gamehost).right == intra){
-		this.games.get(gamehost).serveleft = true;
-		this.games.get(gamehost).scoreleft++;
+	else if (game.right == intra){
+		game.serveleft = true;
+		game.scoreleft++;
 	}
 	else{
 		console.log('error')
 		return
 	}
-	console.log('Left: ' + this.games.get(gamehost).scoreleft + ' Right: ' + this.games.get(gamehost).scoreright)
+	if (game.scoreleft >= 11 && game.scoreleft > game.scoreright + 1)
+		this.finishGame(client, game, game.left)
+	if (game.scoreright >= 11 && game.scoreright > game.scoreleft + 1)
+		this.finishGame(client, game, game.right)
+	const score = {left: game.scoreleft, right: game.scoreright};
+	client.emit('score', score)
+	client.to(game.left).emit('score', score)
+	client.to(game.right).emit('score', score)
 	this.startBall(client, gamehost);
+  }
+
+  private async finishGame(client: any, game: any, intra: string){
+	  const name = (await this.prismaService.findUserByIntra(intra)).full_name
+	  client.emit('gameresult', name)
+	  client.to(game.left).emit('gameresult', name)
+	  client.to(game.right).emit('gameresult', name)
+	  this.games.delete(game.left);
   }
 
   private async startBall(client: any, gamehost: string){

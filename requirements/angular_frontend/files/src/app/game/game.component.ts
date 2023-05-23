@@ -2,6 +2,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { SocketService } from '../socket/socket.service';
 import { ChatService } from '../chat/chat.service';
 import { ModalService } from '../services/modal.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -35,36 +36,53 @@ export class GameComponent {
   gameCanvas!: ElementRef<HTMLCanvasElement>;
 
   isLeftPlayer: boolean = false
-  playerPic: string = ""
-  opponentPic: string = ""
-  playerScore: number = 0
-  opponentScore: number = 0
+  leftPic: string = ""
+  rightPic: string = ""
+  leftScore: number = 0
+  rightScore: number = 0
   showButton: boolean = true
   showCountdown: boolean = false
   countdownValue: number  = 4
   message: string = "Game ended unexpectedly"
-  
+
   private context!: CanvasRenderingContext2D;
-  
-  constructor(private socketService: SocketService, public chat: ChatService, public gameEndModal: ModalService) {
+
+  constructor(private socketService: SocketService, private router: Router, public chat: ChatService, public gameEndModal: ModalService) {
     socketService.socketSubscribe('newbarposition', (y: number) => this.newBarPosition(y))
-	  socketService.socketSubscribe('newballposition', (pos: {x: number, y: number, xv: number, yv: number}) => this.newBallPosition(pos))
-	  socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
+	socketService.socketSubscribe('newballposition', (pos: {x: number, y: number, xv: number, yv: number}) => this.newBallPosition(pos))
+	socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
+	socketService.socketSubscribe('score', (score: {left: number, right: number}) => this.updateScore(score))
+	socketService.socketSubscribe('countdown', (pic: {left: number, right: number}) => this.startCountdown(pic))
+	socketService.socketSubscribe('gameresult', (name: string) => this.getResult(name))
   }
-  
+
   public ngOnInit () {
+	if (!this.socketService.socketState()){
+		this.router.navigate(['']);
+		return;
+	}
+
     this.gameEndModal.register('gameEnd')
-    this.gameEndModal.toggleModal("gameEnd")
-	  this.socketService.requestEvent("initgame", null, (payload: { gamehost: string, isleft: boolean }) => this.prepareGame(payload))
     // this.startCountdown()
   }
-  
-  startCountdown() {
+
+  updateScore(score: {left: number, right: number}){
+	this.leftScore = score.left;
+	this.rightScore = score.right;
+  }
+
+  startCountdown(pic: {left: number, right: number}) {
+	this.socketService.requestEvent('getpic', pic.left, (pic: string) => this.setLeftPic(pic));
+	this.socketService.requestEvent('getpic', pic.right, (pic: string) => this.setRightPic(pic));
+	this.countdown();
+  }
+
+  countdown(){
     this.showButton = false
     this.showCountdown = true
     this.countdownValue--
     if (this.countdownValue > 0){
-      setTimeout(this.startCountdown.bind(this), 1000)
+      setTimeout(this.countdown.bind(this), 1000)
       console.log(this.countdownValue)
     }
     else{
@@ -72,6 +90,15 @@ export class GameComponent {
       this.countdownValue = 4
     }
   }
+
+  private setLeftPic(pic: string){
+	this.leftPic = pic;
+  }
+
+  private setRightPic(pic: string){
+	this.rightPic = pic;
+  }
+
   prepareGame(payload: { gamehost: string, isleft: boolean }){
 	  this.isLeftPlayer = payload.isleft;
 	  this.gamehost = payload.gamehost;
@@ -228,23 +255,43 @@ export class GameComponent {
 
 
   waitForGame(){
+	this.socketService.requestEvent("initgame", null, (payload: { gamehost: string, isleft: boolean }) => this.prepareGame(payload))
     this.showButton = false
   }
 
   gameInteruption(){
-	  this.xVel = 0;
-	  this.yVel = 0;
-	  this.ballX = -8;
-	  this.gamehost = ""
-	  console.log("game interruption")
-	//TODO game interuption
+	this.resetField()
+	console.log("game interruption")
+	this.message = "connection lost";
+	this.gameEndModal.toggleModal("gameEnd")
+  }
+
+  getResult(name: string){
+	this.resetField()
+	this.message = name + ' won!'
+	this.gameEndModal.toggleModal("gameEnd")
+  }
+
+  resetField(){
+	this.context.clearRect(this.ballX - 1 , this.ballY - 1, 3 + this.hitbox, 3 + this.hitbox);
+	this.xVel = 0;
+	this.yVel = 0;
+	this.ballX = -8;
+	this.gamehost = ""
+	this.leftPic = ""
+	this.rightPic = ""
+	this.leftScore = 0
+	this.rightScore = 0
+	this.context.clearRect(this.leftBarX, this.leftBarY, this.barWidth, this.barHeight);
+	this.context.clearRect(this.rightBarX, this.rightBarY, this.barWidth, this.barHeight);
+	this.leftBarY = this.canvasHeight / 2 - this.AbarHeight;
+	this.rightBarY = this.canvasHeight / 2 - this.AbarHeight;
+	this.showButton = true;
   }
 
   endGame(){
     this.gameEndModal.toggleModal("gameEnd")
   }
-
-
 
   ngOnDestroy(){
     this.gameEndModal.unregister('gameEnd')
