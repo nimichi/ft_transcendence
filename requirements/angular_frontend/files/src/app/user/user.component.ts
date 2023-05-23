@@ -21,8 +21,8 @@ export class UserComponent {
 	public wins: number = 0
 	public losses: number = 0
 	public level: number = 0
-	public badges: number = 5
-	public badgelevel: number = 100;
+	// public badges: number = 5
+	// public badgelevel: number = 3;
 	//brauchen wir das? 
 	public tfaToken: string = ''
 	public qrCode: string = ''
@@ -49,7 +49,7 @@ export class UserComponent {
 		//hier funcion die das modal aktiviert, wenn man auf den button klickt :)
 		//function muss dann im template eingebaut werden
 
-		this.socket.requestEvent("userdata", null, (data: string) => this.callbackUserData(data))
+		this.socket.requestEvent("userdata", null, (data: any) => this.callbackUserData(data))
 	}
 
 	callbackUserData(userdata: any){
@@ -59,7 +59,7 @@ export class UserComponent {
 		this.wins = userdata.win
 		this.losses = userdata.loss
 		this.level = userdata.win - userdata.loss
-		this.badges = this.level / 5
+		// this.badges = this.level / 5
 
 		console.log("This is: " + this.intraName)
 	}

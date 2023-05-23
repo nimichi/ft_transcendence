@@ -41,8 +41,10 @@ export class GameComponent {
   opponentScore: number = 0
   showButton: boolean = true
   showCountdown: boolean = false
+  showPowerUps: boolean = false
   countdownValue: number  = 4
   message: string = "Game ended unexpectedly"
+  waiting: boolean = true
   
   private context!: CanvasRenderingContext2D;
   
@@ -72,6 +74,12 @@ export class GameComponent {
       this.countdownValue = 4
     }
   }
+
+  addPowerUps(){
+    this.showButton = false
+    this.showPowerUps = true
+  }
+
   prepareGame(payload: { gamehost: string, isleft: boolean }){
 	  this.isLeftPlayer = payload.isleft;
 	  this.gamehost = payload.gamehost;
@@ -243,6 +251,8 @@ export class GameComponent {
   endGame(){
     this.gameEndModal.toggleModal("gameEnd")
   }
+
+
 
 
 
