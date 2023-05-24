@@ -42,8 +42,10 @@ export class GameComponent {
   rightScore: number = 0
   showButton: boolean = true
   showCountdown: boolean = false
+  showPowerUps: boolean = false
   countdownValue: number  = 4
   message: string = "Game ended unexpectedly"
+  waiting: boolean = false
 
   private context!: CanvasRenderingContext2D;
 
@@ -66,10 +68,11 @@ export class GameComponent {
   }
 
   initializeGameObjects() {
+	  this.Ball.x = -8;
     this.Ball.width = 7;
     this.LeftBar.height = 80;
     this.LeftBar.width = 16;
-	  this.Ball.speed = 3;
+	  this.Ball.speed = 4;
     this.LeftBar.x = 40;
     this.LeftBar.y = this.canvasHeight / 2 - this.LeftBar.height / 2;
     this.RightBar.height = 80;
@@ -78,6 +81,7 @@ export class GameComponent {
     this.RightBar.y = this.canvasHeight / 2 - this.LeftBar.height / 2;
     this.PowerUp.height = 30;
     this.PowerUp.width = 30;
+	this.PowerUp.x = -100;
     // this.LeftBar.speed =
   }
 
@@ -87,6 +91,7 @@ export class GameComponent {
   }
 
   startCountdown(data: {left: string, right: string, gameid: string}) {
+	this.waiting = false;
 	this.gameid = data.gameid
 	this.socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
 	this.socketService.requestEvent('getpic', data.left, (pic: string) => this.setLeftPic(pic));
@@ -105,6 +110,8 @@ export class GameComponent {
     else{
       this.showCountdown = false
       this.countdownValue = 4
+	  if (this.showPowerUps)
+	  	this.socketService.socketSubscribe('spawnpowerup', (pos: {x: number, y: number}) => this.spawnPowerUp(pos))
     }
   }
 
@@ -148,15 +155,28 @@ export class GameComponent {
     for (let i = 0; i < this.Ball.speed; i++)
       this.drawBall();
     requestAnimationFrame(() => this.animate());
+    // if (this.cooldown == false)
+    // {
+    //   this.cooldown = true;
+    //   setTimeout(() => this.rollPowerUp(), 5000);
+    // }
   }
 
-  SpawnPowerUp(x: number, y: number)
+//   rollPowerUp()
+//   {
+//     this.cooldown = false;
+//     if (Math.floor(Math.random() * 5) == 0)
+//       this.SpawnPowerUp(Math.floor(Math.random() * (700 - 100 + 1)) + 100, Math.floor(Math.random() * (380 - 20 + 1)) + 20);
+//   }
+
+  spawnPowerUp(pos: {x: number, y: number})
   {
-    this.PowerUp.x = x;
-    this.PowerUp.y = y;
+	this.context.clearRect(this.PowerUp.x, this.PowerUp.y, this.PowerUp.width, this.PowerUp.height);
+    this.PowerUp.x = pos.x;
+    this.PowerUp.y = pos.y;
     this.cooldown = true;
     this.context.fillStyle = 'gold';
-    this.context.fillRect(x, y, this.PowerUp.width, this.PowerUp.height);
+    this.context.fillRect(pos.x, pos.y, this.PowerUp.width, this.PowerUp.height);
   }
 
   hitboxCollider(ball: IObject, object: IObject)
@@ -368,8 +388,16 @@ export class GameComponent {
 
 
   waitForGame(){
-	this.socketService.requestEvent("initgame", null, (isLeft: boolean) => this.setIsLeft(isLeft))
+	this.socketService.requestEvent("initgame", false, (isLeft: boolean) => this.setIsLeft(isLeft))
     this.showButton = false
+	this.waiting = true
+  }
+
+  waitForPowupGame(){
+	this.socketService.requestEvent("initgame", true, (isLeft: boolean) => this.setIsLeft(isLeft))
+    this.showButton = false
+	this.showPowerUps = true
+	this.waiting = true
   }
 
   setIsLeft(isLeft: boolean){
@@ -378,21 +406,23 @@ export class GameComponent {
   }
 
   gameInteruption(){
-	this.socketService.socketUnsubscribe('gameinteruption');
-	this.resetField()
-	console.log("game interruption")
 	this.message = "connection lost";
-	this.gameEndModal.toggleModal("gameEnd")
+	this.gameEndModal.showModal("gameEnd")
+	this.socketService.socketUnsubscribe('gameinteruption');
+	this.resetField();
+	console.log("gameInteruption called")
   }
 
   getResult(name: string){
+	this.socketService.socketUnsubscribe('gameinteruption');
 	console.log("gaame finished")
-	this.resetField()
 	this.message = name + ' won!'
-	this.gameEndModal.toggleModal("gameEnd")
+	this.gameEndModal.showModal("gameEnd")
   }
 
   resetField(){
+	this.context.clearRect(this.PowerUp.x, this.PowerUp.y, this.PowerUp.width, this.PowerUp.height);
+	this.socketService.socketUnsubscribe('spawnpowerup')
 	this.context.clearRect(this.Ball.x - 1 , this.Ball.y - 1, 3 + this.Ball.width, 3 + this.Ball.width);
 	this.Ball.xv = 0;
 	this.Ball.yv = 0;
@@ -407,15 +437,18 @@ export class GameComponent {
 	this.LeftBar.y = this.canvasHeight / 2 - this.LeftBar.height / 2;
 	this.RightBar.y = this.canvasHeight / 2 - this.RightBar.height / 2;
 	this.showButton = true;
+	this.showPowerUps = false;
   }
 
   endGame(){
-    this.gameEndModal.toggleModal("gameEnd")
+    this.gameEndModal.hideModal("gameEnd")
+	this.resetField();
   }
 
   ngOnDestroy(){
+	this.socketService.emitEvent('leftgamepage', this.gameid);
+	this.resetField()
 	this.socketService.socketUnsubscribe('gameinteruption');
     this.gameEndModal.unregister('gameEnd');
-	this.socketService.emitEvent('leftgamepage', this.gameid);
   }
 }
