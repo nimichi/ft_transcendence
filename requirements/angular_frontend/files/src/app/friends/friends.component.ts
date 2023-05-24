@@ -48,5 +48,9 @@ export class FriendsComponent {
 		this.chat.toggleChat()
 	}
 
+	ngOnDestroy(){
+		this.socket.socketUnsubscribe('newfriend');
+		this.socket.socketUnsubscribe('status');
+	}
 
 }

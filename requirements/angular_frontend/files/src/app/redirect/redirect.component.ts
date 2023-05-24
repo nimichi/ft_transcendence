@@ -76,4 +76,8 @@ export class RedirectComponent {
 		if (this.callback)
 			this.callback(this.tfaToken)
 	}
+
+	ngOnDestroy(){
+		this.socket.socketUnsubscribe('connect')
+	}
 }

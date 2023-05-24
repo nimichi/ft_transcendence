@@ -91,6 +91,7 @@ export class GameComponent {
   }
 
   startCountdown(data: {left: string, right: string, gameid: string}) {
+	console.log("start coundown " + Math.random())
 	this.waiting = false;
 	this.gameid = data.gameid
 	this.socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
@@ -214,6 +215,7 @@ export class GameComponent {
             this.Ball.yv *= -1;
         this.Ball.xv *= -1; // rechne aus wo das paddle von paddle aus gehittet wird, änder Ball.yv und Ball.xv accordingly und mach irgendwie speed höher
 		this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
+		console.log('emit ballpos left')
 	  }
     }
     if (!this.isLeftPlayer && (Math.round(this.Ball.x + this.Ball.width) >= this.RightBar.x && Math.round(this.Ball.x + 7) <= this.RightBar.x + this.RightBar.width))
@@ -222,7 +224,8 @@ export class GameComponent {
 	  {
 		  this.Ball.xv *= -1; // right paddle hit algorithm
 		  this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
-	  }
+		  console.log('emit ballpos right')
+		}
     }
   }
 
@@ -233,20 +236,20 @@ export class GameComponent {
       this.Ball.yv *= -1;
     else if (this.Ball.y + this.Ball.yv < 0)
       this.Ball.yv *= -1;
-    if (!this.isLeftPlayer && this.Ball.x + this.Ball.xv + this.Ball.width > this.canvasWidth + 10)
+    if (!this.isLeftPlayer && this.Ball.x + this.Ball.width > this.canvasWidth + 15)
     {
-		  console.log('right')
 		  this.Ball.xv = 0;
 		  this.Ball.yv = 0;
 		  this.Ball.x = -4;
+		  console.log('score right' + Math.random())
 		  this.socketService.emitEvent('scorepoint', this.gameid)
     }
-    else if (this.isLeftPlayer && this.Ball.x + this.Ball.xv < 0 - 10)
+    else if (this.isLeftPlayer && this.Ball.x < 0 - 15)
     {
-		  console.log('left')
 		  this.Ball.xv = 0;
 		  this.Ball.yv = 0;
 		  this.Ball.x = -4;
+		  console.log('score left' + Math.random())
 		  this.socketService.emitEvent('scorepoint', this.gameid)
     }
   }
@@ -359,6 +362,7 @@ export class GameComponent {
 
 
   waitForGame(){
+	console.log('emit initgame ' + Math.random() )
 	this.socketService.requestEvent("initgame", false, (isLeft: boolean) => this.setIsLeft(isLeft))
     this.showButton = false
 	this.waiting = true
@@ -366,13 +370,14 @@ export class GameComponent {
 
   waitForPowupGame(){
 	this.socketService.requestEvent("initgame", true, (isLeft: boolean) => this.setIsLeft(isLeft))
+	console.log('emit initgame w powup ' + Math.random() )
     this.showButton = false
 	this.showPowerUps = true
 	this.waiting = true
   }
 
   setIsLeft(isLeft: boolean){
-	console.log('set is left')
+	console.log('set is left: ' + isLeft)
 	this.isLeftPlayer = isLeft;
   }
 
@@ -419,7 +424,12 @@ export class GameComponent {
   ngOnDestroy(){
 	this.socketService.emitEvent('leftgamepage', this.gameid);
 	this.resetField()
-	this.socketService.socketUnsubscribe('gameinteruption');
     this.gameEndModal.unregister('gameEnd');
+	this.socketService.socketUnsubscribe('gameinteruption');
+	this.socketService.socketUnsubscribe('newbarposition')
+	this.socketService.socketUnsubscribe('newballposition')
+	this.socketService.socketUnsubscribe('score')
+	this.socketService.socketUnsubscribe('countdown')
+	this.socketService.socketUnsubscribe('gameresult')
   }
 }

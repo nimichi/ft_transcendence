@@ -16,10 +16,12 @@ export class GameGateway {
 
   private async startGame(left: Socket, right: Socket, powup: boolean){
 	this.gamecounter++;
+	console.log('run start game function')
 	while (this.games.get('!game' + this.gamecounter.toString())){
 		this.gamecounter++;
 	}
 	const gameid: string = '!game' + this.gamecounter.toString();
+	console.log("Game create! id: " + gameid)
 	left.join(gameid);
 	right.join(gameid);
 	this.socketGateway.setUserState(left.data.username, 1);
@@ -73,6 +75,7 @@ export class GameGateway {
 		return;
 	}
 	client.to(payload.gameid).emit('newballposition', payload.pos)
+	console.log('emit new ball position to ' + payload.gameid)
   }
 
   @SubscribeMessage('initgame')
@@ -99,6 +102,7 @@ export class GameGateway {
 
   @SubscribeMessage('scorepoint')
   private async scorePoint(client: any, gameid: string): Promise<boolean>{
+	console.log(client.data.username + ' scored in game ' + gameid)
 	let game = this.games.get(gameid);
 	if (!this.games.get(gameid)){
 		client.emit('gameinteruption');
@@ -116,11 +120,11 @@ export class GameGateway {
 	}
 	const score = {left: game.scoreleft, right: game.scoreright};
 	this.socketGateway.getServer().in(gameid).emit('score', score)
-	if (game.scoreleft >= 4 && game.scoreleft > game.scoreright + 1){
+	if (game.scoreleft >= 40 && game.scoreleft > game.scoreright + 1){
 		this.finishGame(gameid, game.left)
 		return;
 	}
-	if (game.scoreright >= 4 && game.scoreright > game.scoreleft + 1){
+	if (game.scoreright >= 40 && game.scoreright > game.scoreleft + 1){
 		this.finishGame(gameid, game.right)
 		return;
 	}
@@ -148,6 +152,7 @@ export class GameGateway {
 	else
 		start = {x: 400 - randX, y: Y, xv: Math.sin(randRad + 0.7853), yv: Math.cos(randRad + 0.7853)}
 	this.socketGateway.getServer().in(gameid).emit('newballposition', start)
+	console.log('emit new ball position to ' + gameid)
   }
 
   @SubscribeMessage('leftgamepage')
