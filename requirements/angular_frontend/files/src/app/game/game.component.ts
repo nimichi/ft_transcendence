@@ -69,7 +69,7 @@ export class GameComponent {
     this.Ball.width = 7;
     this.LeftBar.height = 80;
     this.LeftBar.width = 16;
-	this.Ball.speed = 1;
+	  this.Ball.speed = 3;
     this.LeftBar.x = 40;
     this.LeftBar.y = this.canvasHeight / 2 - this.LeftBar.height / 2;
     this.RightBar.height = 80;
@@ -148,18 +148,6 @@ export class GameComponent {
     for (let i = 0; i < this.Ball.speed; i++)
       this.drawBall();
     requestAnimationFrame(() => this.animate());
-    if (this.cooldown == false)
-    {
-      this.cooldown = true;
-      setTimeout(() => this.rollPowerUp(), 5000);
-    }
-  }
-
-  rollPowerUp()
-  {
-    this.cooldown = false;
-    if (Math.floor(Math.random() * 5) == 0)
-      this.SpawnPowerUp(Math.floor(Math.random() * (700 - 100 + 1)) + 100, Math.floor(Math.random() * (380 - 20 + 1)) + 20);
   }
 
   SpawnPowerUp(x: number, y: number)
@@ -190,31 +178,60 @@ export class GameComponent {
     return (radian);
   }
 
+  changeBallDirection(Bar: IObject)
+  {
+    let relativeIntersectY = (Bar.y + Bar.height / 2) - this.Ball.y;
+    let normalizedIntersectY = (relativeIntersectY / Bar.height / 2 );
+    let bounceAngle = normalizedIntersectY * this.radian(60);
+    this.Ball.xv = Math.cos(bounceAngle);
+    this.Ball.yv = Math.sin(bounceAngle) * -1;
+  }
+  
+  collisionDetection(Bar:IObject)
+  {
+    if (this.Ball.xv > 0 && this.Ball.yv >= 0) // nach rechts unten
+    {
+      if (this.Ball.y + this.Ball.width == Bar.y)
+        this.Ball.yv *= -1;
+      else
+        this.changeBallDirection(Bar);
+    }
+    else if (this.Ball.xv > 0 && this.Ball.yv <= 0) // nach rechts oben
+    {
+      if (this.Ball.y == Bar.y + Bar.height)
+        this.Ball.yv *= -1;
+      else
+        this.changeBallDirection(Bar);
+    }
+    else if (this.Ball.xv < 0 && this.Ball.yv >= 0) // nach links unten
+    {
+      if (this.Ball.y + this.Ball.width == Bar.y)
+        this.Ball.yv *= -1;
+      else
+        this.changeBallDirection(Bar);
+    }
+    else if (this.Ball.xv < 0 && this.Ball.yv <= 0) // nach links oben
+    {
+      if (this.Ball.y == Bar.y + Bar.height)
+        this.Ball.yv *= -1;
+      else
+        this.changeBallDirection(Bar);
+    }
+  }
+
   checkifHitPaddle()
   {
-	if (this.gameid == "")
-		return;
-    if (this.isLeftPlayer && (Math.round(this.Ball.x) <= this.LeftBar.x + this.LeftBar.width && Math.round(this.Ball.x) >= this.LeftBar.x))
+	  if (this.gameid == "")
+		  return;
+    if (this.isLeftPlayer && this.hitboxCollider(this.Ball, this.LeftBar) == true)
     {
-      if (Math.round(this.Ball.y) <= this.LeftBar.y + this.LeftBar.height && Math.round(this.Ball.y) >= this.LeftBar.y)
-      {
-        if (this.Ball.y - this.LeftBar.y > 30)
-          if (this.Ball.yv < 0)
-            this.Ball.yv *= -1;
-        else
-          if (this.Ball.yv > 0)
-            this.Ball.yv *= -1;
-        this.Ball.xv *= -1; // rechne aus wo das paddle von paddle aus gehittet wird, änder Ball.yv und Ball.xv accordingly und mach irgendwie speed höher
-		this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
-	  }
-    }
-    if (!this.isLeftPlayer && (Math.round(this.Ball.x + this.Ball.width) >= this.RightBar.x && Math.round(this.Ball.x + 7) <= this.RightBar.x + this.RightBar.width))
-    {
-      if (Math.round(this.Ball.y) > this.RightBar.y && Math.round(this.Ball.y) < this.RightBar.y + this.RightBar.height)
-	  {
-		  this.Ball.xv *= -1; // right paddle hit algorithm
+      this.collisionDetection(this.LeftBar);
 		  this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
 	  }
+    if (!this.isLeftPlayer && this.hitboxCollider(this.Ball, this.RightBar) == true)
+    {
+		  this.collisionDetection(this.RightBar);
+		  this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
     }
   }
 
