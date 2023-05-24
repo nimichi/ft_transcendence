@@ -28,6 +28,18 @@ export class GameGateway {
 	this.socketGateway.getServer().in(gameid).emit('countdown', {left: left.data.username, right: right.data.username, gameid: gameid });
 	await new Promise(r => setTimeout(r, 3100));
 	this.startBall(left, gameid);
+	if (powup)
+ 		this.placePowerUps(gameid);
+  }
+
+  private async placePowerUps(gameid: string){
+	while (this.games.get(gameid)){
+		const timeout = 10000 + 10000 * Math.random() // delay zwischen 10 und 20 sek
+		await new Promise(r => setTimeout(r, timeout));
+		const x = Math.floor(Math.random() * (700 - 100 + 1)) + 100;
+		const y = Math.floor(Math.random() * (380 - 20 + 1)) + 20;
+		this.socketGateway.getServer().in(gameid).emit('spawnpowerup', {x: x, y: y});
+	}
   }
 
   private async stopGame(gameid: string){
@@ -35,7 +47,6 @@ export class GameGateway {
 	if (!game){
 		return;
 	}
-	this.socketGateway.getServer().in(gameid).emit('gameinteruption');
 	this.socketGateway.getServer().socketsLeave(gameid);
 	this.socketGateway.setUserState(game.left, 1);
 	this.socketGateway.setUserState(game.right, 1);
@@ -103,12 +114,16 @@ export class GameGateway {
 		game.serveleft = true;
 		game.scoreleft++;
 	}
-	if (game.scoreleft >= 11 && game.scoreleft > game.scoreright + 1)
-		this.finishGame(gameid, game.left)
-	if (game.scoreright >= 11 && game.scoreright > game.scoreleft + 1)
-		this.finishGame(gameid, game.right)
 	const score = {left: game.scoreleft, right: game.scoreright};
 	this.socketGateway.getServer().in(gameid).emit('score', score)
+	if (game.scoreleft >= 4 && game.scoreleft > game.scoreright + 1){
+		this.finishGame(gameid, game.left)
+		return;
+	}
+	if (game.scoreright >= 4 && game.scoreright > game.scoreleft + 1){
+		this.finishGame(gameid, game.right)
+		return;
+	}
 	this.startBall(client, gameid);
   }
 
@@ -138,6 +153,7 @@ export class GameGateway {
   @SubscribeMessage('leftgamepage')
   private async interuptGame(client: any, gameid: string){
 	if (gameid != ""){
+		client.in(gameid).emit('gameinteruption');
 		this.stopGame(gameid);
 	}
 	else if(this.queue == client){
