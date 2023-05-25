@@ -45,14 +45,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			return "";
 		}
 		else if  (payload.chat != "!cmd") {
-			//here msg umbauen in msg from 
-			const messageN: {to: string, msg: string} = {
-				to: responseDTO.messageTo,
-				msg: payload.msg
-			};
-			console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + messageN);
-			client.to(payload.chat).emit(responseDTO.modus, messageN);
-			return messageN.msg;
+		
+			console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + responseDTO.msg);
+			client.to(payload.chat).emit(responseDTO.modus, {to:intra, msg:responseDTO.msg});
+			return "";
 		}
 		return payload.msg;
 	}

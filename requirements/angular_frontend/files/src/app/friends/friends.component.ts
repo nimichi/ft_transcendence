@@ -12,6 +12,8 @@ export class FriendsComponent {
   // playing 1, offline 2, online 3
   listValues: {name: string, intra: string, status: number, pic: string}[] = [];
 
+
+
 	constructor(private socket: SocketService, private router: Router, public chat: ChatService){}
 
 	ngOnInit() {
@@ -46,5 +48,9 @@ export class FriendsComponent {
 		this.chat.toggleChat()
 	}
 
+	ngOnDestroy(){
+		this.socket.socketUnsubscribe('newfriend');
+		this.socket.socketUnsubscribe('status');
+	}
 
 }

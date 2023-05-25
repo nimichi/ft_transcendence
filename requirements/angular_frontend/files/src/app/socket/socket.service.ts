@@ -17,7 +17,7 @@ export class SocketService {
 	}
 
 	getBackendAdr() : string {
-		return 'localhost:3000'
+		return window.location.hostname + ':3000';
 	}
 
 	openSocket(code: string, failCallback: (err: any) => void) {
@@ -77,6 +77,15 @@ export class SocketService {
 		return false;
 	}
 
+	emitEvent(eventName: string, payload: any){
+		if (this.isOpen && this.socket)
+		{
+			this.socket.emit(eventName, payload);
+			return true;
+		}
+		return false;
+	}
+
 	socketSubscribe(eventName: string, callback: any){
 		if (this.socketState() && this.socket)
 		{
@@ -86,5 +95,10 @@ export class SocketService {
 		{
 			this.callback.push({eventName: eventName, function: callback})
 		}
+	}
+
+	socketUnsubscribe(eventName: string){
+		if (this.socket)
+			this.socket.off(eventName);
 	}
 }

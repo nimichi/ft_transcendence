@@ -42,10 +42,16 @@ export class ChatService {
   recvMessage(msg: {to: string, msg: string}, align: string){
 	  console.log("++++++++++++++RECVMESSAGE+++++++++++++++++++++++++++");
 	  console.log("msg: " + msg);
-    this.chatList.forEach(chat => {
-      if(chat.name == msg.to)
+    for(let chat of this.chatList){
+      if(chat.name == msg.to){
         chat.msgs.unshift( { msg: msg.msg, align: align } );
-    });
+        return;
+      }
+    }
+    let msgList: {msg: string, align: string}[] = [];
+    msgList.push({msg: msg.msg, align: align});
+    const chat = {name: msg.to, msgs: msgList};
+    this.chatList.push(chat);
 	  console.log(this.msgList);
   }
 
