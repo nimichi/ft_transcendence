@@ -23,7 +23,6 @@ export class ChatService {
 		if(MessageTo == "!cmd") {
 			console.log(fullCommand);
 			if(fullCommand[0].includes("/new")) {
-				//schau ob nuzer nuzer und ob der bereit vorhanden in der liste vorhanden ist
 				if (!fullCommand[1].includes("#") && !this.checkUserInList(fullCommand[1])) {
 					this.channelArrayProvider.addUserToList(fullCommand[1]);
 					console.log(this.channelArrayProvider.getUserList());
@@ -108,8 +107,8 @@ export class ChatService {
 			to: MessageTo,
 			msg: message
 		};
-		// const jsonMessage = JSON.parse(finalMessage);
-		return new chatEmitDTO('chatrecv', finalMessage.to, finalMessage.msg);
+		
+		return new chatEmitDTO('chatrecv', MessageTo, {MessageTo, message});
 	}
 
 	async disconnectUser(intra: string) {

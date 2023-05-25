@@ -15,6 +15,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(intra);
 		const responseDTO: chatEmitDTO =  await this.chat.reciveMsg(intra ,client, payload.chat, payload.msg);
 		if(payload.chat === "!cmd" && responseDTO.modus == 'newchat') {
+			console.log("Response message in new: " + responseDTO.msg)
 			client.emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
 			return "";
 		}
@@ -25,24 +26,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			return "";
 		}
 		else if(payload.chat.includes("#") && responseDTO.modus === 'chatrecv' && payload.msg[0] === "/") {
-			if(responseDTO.msg.length == 2) {
+			// if(responseDTO.msg. == 2) {
 				// JSON.stringify(stringArray)
 				const json = JSON.stringify(responseDTO.msg[0]);
 				console.log("payload chat is: " + payload.chat);
 				console.log("ResponesDTO message json: "+ json);
 				client.emit(responseDTO.modus, json);
 				return "";
-			}
+			// }
 		}
 		else if(payload.chat != "!cmd" && responseDTO.modus === 'styledList') { //channel general info
-			client.emit(responseDTO.modus, responseDTO.msg);
+	
+			console.log("Message: "+ JSON.stringify(responseDTO.msg));
+			const finalMessage: {to: string, msg: string} = {
+				to: responseDTO.messageTo,
+				msg: JSON.stringify(responseDTO.msg)}
+			client.emit(responseDTO.modus, finalMessage);
 			return "";
 		}
 		else if  (payload.chat != "!cmd") {
-			console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + JSON.stringify(responseDTO.msg));
 			//here msg umbauen in msg from 
-			client.to(payload.chat).emit(responseDTO.modus, responseDTO.msg);
-			return payload.msg;
+			const messageN: {to: string, msg: string} = {
+				to: responseDTO.messageTo,
+				msg: payload.msg
+			};
+			console.log("For Chat: \'" + payload.chat + "\', Recieved message: " + messageN);
+			client.to(payload.chat).emit(responseDTO.modus, messageN);
+			return messageN.msg;
 		}
 		return payload.msg;
 	}
@@ -59,4 +69,3 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		this.chat.connectUser(intra);
 	}
 }
-// /
