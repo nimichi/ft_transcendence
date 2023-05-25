@@ -17,7 +17,7 @@ export class SocketService {
 	}
 
 	getBackendAdr() : string {
-		return 'localhost:3000'
+		return window.location.hostname + ':3000';
 	}
 
 	openSocket(code: string, failCallback: (err: any) => void) {
