@@ -20,9 +20,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			return "";
 		}
 		else if(payload.chat === "!cmd" && responseDTO.modus == 'styledList' && payload.msg.includes("/getchanellist")) {
-			console.log(responseDTO.msg[0]);
+			console.log("responseDTO.msg[0]: " + responseDTO.msg[0]);
 			const json = JSON.stringify(responseDTO.msg[0]);
-			client.emit(responseDTO.modus, json)
+			client.emit(responseDTO.modus, {to: responseDTO.messageTo, json});
 			return "";
 		}
 		else if(payload.chat.includes("#") && responseDTO.modus === 'chatrecv' && payload.msg[0] === "/") {
@@ -31,7 +31,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 				const json = JSON.stringify(responseDTO.msg[0]);
 				console.log("payload chat is: " + payload.chat);
 				console.log("ResponesDTO message json: "+ json);
-				client.emit(responseDTO.modus, json);
+				client.emit(responseDTO.modus, {to: responseDTO.messageTo, msg: json});
 				return "";
 			// }
 		}

@@ -108,7 +108,7 @@ export class ChatService {
 			msg: message
 		};
 		
-		return new chatEmitDTO('chatrecv', MessageTo, {MessageTo, message});
+		return new chatEmitDTO('chatrecv', MessageTo, message);
 	}
 
 	async disconnectUser(intra: string) {

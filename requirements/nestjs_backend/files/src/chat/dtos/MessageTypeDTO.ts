@@ -20,7 +20,7 @@ export class chatEmitDTO {
 	constructor (
 		modus: string,
 		messageTo: string,
-		msg: [string, string] | string | [string[], string] | string[] | {to: string, message: string},
+		msg: [string, string] | string | [string[], string] | string[],
 
 	){
 		this.modus = modus;
@@ -30,7 +30,7 @@ export class chatEmitDTO {
 
 	readonly modus: string;
 	readonly messageTo: string;
-	readonly msg: [string, string] | string | [string[], string] | string[] | {to: string, message: string};
+	readonly msg: [string, string] | string | [string[], string] | string[];
 
 }
 
