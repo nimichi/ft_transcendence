@@ -7,11 +7,9 @@ import { writeFile } from "fs";
 export class PrismaGateway {
 	constructor(private prismaService: PrismaService) {}
 
-  @SubscribeMessage('getUserNamePicture')
-  async getUserName(client: any, payload: any): Promise<string> {
-	const [login] = client.rooms;
-
-	const user = await this.prismaService.findUserByIntra(login);
+  @SubscribeMessage('getpic')
+  async getUserName(client: any, intra: string): Promise<string> {
+	const user = await this.prismaService.findUserByIntra(intra);
 
     return (user.picture);
   }

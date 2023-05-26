@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MessageTypeDTO, channelDTO, chatEmitDTO } from './dtos/MessageTypeDTO';
 // import { CommandDTO } from './dtos/CommandDTO';
-import { ChannelArrayProvider } from 'src/commonProvider/ChannelArrayProvider';
+import { ChannelArrayProvider } from '../commonProvider/ChannelArrayProvider';
 import { ChatMode } from './enums/chatMode';
 
 
@@ -14,7 +14,7 @@ export class ChatService {
 
 	private setChannelDTO(owner: string, admin: string, channelName: string): channelDTO {
 		return new channelDTO(owner, channelName, admin, false, "ssss");
-	} 
+	}
 
 	async reciveMsg(intra: string, client: any, messageFrom: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
@@ -40,7 +40,7 @@ export class ChatService {
 					this.channelDto.push(this.setChannelDTO(intra, intra, fullCommand[1]));
 
 					//falls user joinenen tut wird er in eine map gespeichert
-					
+
 					client.join(fullCommand[1]);
 					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", 'left']);
 				}
@@ -51,7 +51,7 @@ export class ChatService {
 					return new chatEmitDTO('newchat', fullCommand[1], [this.channelArrayProvider.getUserList(), 'left']);
 				}
 			}
-			
+
 		}
 		else if(this.checkChannelInList(messageFrom)) {
 			if (fullCommand[0].includes("/setadmin")) { // /setadmin mnies #ch1
@@ -75,7 +75,7 @@ export class ChatService {
 		}
 		else if(fullCommand[0].includes("/msg")) {
 			if(fullCommand[1].includes("#")) {
-				//ist ein Channel 
+				//ist ein Channel
 			}
 			else {
 				//ist ein UserName

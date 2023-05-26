@@ -11,8 +11,9 @@ import { ChatService } from '../chat/chat.service';
 
 export class DisplayComponent {
 
-  intraPic: string  = ""
+  intraPic: string  = "https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg"
 	intraName: string  = ""
+  fullName: string = "Romy Schleicher"
   intraBadgeLevel: number = 5
   wins: number = 0
 	losses: number = 0

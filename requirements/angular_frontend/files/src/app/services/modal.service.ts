@@ -20,7 +20,7 @@ export class ModalService {
     })
   }
 
-  
+
 
   unregister(id: string){
     this.modals = this.modals.filter(
@@ -37,10 +37,20 @@ export class ModalService {
   }
 
   toggleModal(id: string){
-
     const modal = this.modals.find(element => element.id === id)
     if(modal)
     modal.visible = !modal.visible
   }
+
+  showModal(id: string){
+    const modal = this.modals.find(element => element.id === id)
+    if(modal)
+    	modal.visible = true
+  }
+
+  hideModal(id: string){
+    const modal = this.modals.find(element => element.id === id)
+    if(modal)
+    	modal.visible = false
+  }
 }
- 
