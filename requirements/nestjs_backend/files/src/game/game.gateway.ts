@@ -1,9 +1,18 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { GameService } from './game.service';
+import { Match } from '@prisma/client';
 import { Socket, Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
 import { SocketGateway } from '../socket/socket.gateway';
-type Game = {left: string, right: string, scoreleft: number, scoreright: number, serveleft: boolean, powup: boolean};
+type Game = {
+	left:			string,
+	right:			string,
+	scoreleft:		number,
+	scoreright:		number,
+	serveleft:		boolean,
+	powup:			boolean
+};
+
 
 @WebSocketGateway()
 export class GameGateway {
@@ -24,8 +33,8 @@ export class GameGateway {
 	console.log("Game create! id: " + gameid)
 	left.join(gameid);
 	right.join(gameid);
-	this.socketGateway.setUserState(left.data.username, 1);
-	this.socketGateway.setUserState(right.data.username, 1);
+	this.socketGateway.setUserState(left.data.username, 2);
+	this.socketGateway.setUserState(right.data.username, 2);
 	this.games.set(gameid, {left: left.data.username, right: right.data.username, scoreleft: 0, scoreright: 0, serveleft: true, powup: powup})
 	this.socketGateway.getServer().in(gameid).emit('countdown', {left: left.data.username, right: right.data.username, gameid: gameid });
 	await new Promise(r => setTimeout(r, 3100));
@@ -75,7 +84,6 @@ export class GameGateway {
 		return;
 	}
 	client.to(payload.gameid).emit('newballposition', payload.pos)
-	console.log('emit new ball position to ' + payload.gameid)
   }
 
   @SubscribeMessage('initgame')
@@ -94,7 +102,7 @@ export class GameGateway {
 		return true;
 	}
 	else{
-		this.startGame(this.queue, client, true);
+		this.startGame(this.queue, client, false);
 		this.queue = null;
 		return false;
 	}
@@ -102,7 +110,6 @@ export class GameGateway {
 
   @SubscribeMessage('scorepoint')
   private async scorePoint(client: any, gameid: string): Promise<boolean>{
-	console.log(client.data.username + ' scored in game ' + gameid)
 	let game = this.games.get(gameid);
 	if (!this.games.get(gameid)){
 		client.emit('gameinteruption');
@@ -120,20 +127,31 @@ export class GameGateway {
 	}
 	const score = {left: game.scoreleft, right: game.scoreright};
 	this.socketGateway.getServer().in(gameid).emit('score', score)
-	if (game.scoreleft >= 40 && game.scoreleft > game.scoreright + 1){
-		this.finishGame(gameid, game.left)
+	if (game.scoreleft >= 4 && game.scoreleft > game.scoreright + 1){
+		this.finishGame(gameid, game.left, game)
 		return;
 	}
-	if (game.scoreright >= 40 && game.scoreright > game.scoreleft + 1){
-		this.finishGame(gameid, game.right)
+	if (game.scoreright >= 4 && game.scoreright > game.scoreleft + 1){
+		this.finishGame(gameid, game.right, game)
 		return;
 	}
 	this.startBall(client, gameid);
   }
 
-  private async finishGame(gameid: string, intra: string){
-	  const name = (await this.prismaService.findUserByIntra(intra)).full_name
-	  this.socketGateway.getServer().in(gameid).emit('gameresult', name)
+  private async finishGame(gameid: string, intra: string, game: Game){
+	  const leftuser = (await this.prismaService.findUserByIntra(game.left))
+	  const rightuser = (await this.prismaService.findUserByIntra(game.right))
+	  const result = {
+		left_intra:		game.left,
+		right_intra:	game.right,
+		left_score:		game.scoreleft,
+		right_score:	game.scoreright,
+		powerup:		game.powup,
+		left_level:		await this.prismaService.getUserLevel(game.left),
+		right_level:	await this.prismaService.getUserLevel(game.right),
+	  }
+	  this.prismaService.addMatchResult(result);
+	  this.socketGateway.getServer().in(gameid).emit('gameresult', intra == game.left ? leftuser.full_name : rightuser.full_name)
 	  this.stopGame(gameid)
   }
 

@@ -5,7 +5,6 @@ RUN npm install -g @nestjs/cli && npm install -g @prisma/client
 WORKDIR /ft_transcendence
 COPY ./files/package*.json ./
 COPY ./files/prisma ./prisma/
-COPY ./files/.env ./
 RUN npm install
 RUN npx prisma generate
 

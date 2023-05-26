@@ -1,10 +1,8 @@
 import { Component } from '@angular/core';
-import { ModalService } from '../services/modal.service';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
 import { io, Socket } from 'socket.io-client';
 import { HttpClient } from '@angular/common/http';
-import { HttpHeaders } from '@angular/common/http';
 import { SocketService } from '../socket/socket.service';
 
 

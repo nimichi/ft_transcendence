@@ -33,12 +33,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	}
 
 	@SubscribeMessage('state')
-	async getState(client: any, intra: string): Promise< 0 | 1 | 2> {
+	async getState(client: any, intra: string): Promise<{intra: string, state: 0 | 1 | 2 }> {
 		let user = this.userStates.get(intra)
 		if(user)
-			return user[1];
+			return {intra: intra, state: user};
 		else
-			return 0;
+			return {intra: intra, state: 0};
 	}
 
 	getServer(): Server{
@@ -46,22 +46,19 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	}
 
 	async setUserState(intra: string, newState: 0 | 1 | 2){
-		let user = this.userStates.get(intra)
-		if(user)
-			user = newState;
-		else
-			this.userStates.set(intra, newState)
-		this.server.to(intra + 'state').emit(intra + 'state', newState);
+		this.userStates.set(intra, newState);
+		this.server.emit(intra + 'state', {intra: intra, state: newState});
+		//to(intra + 'state')
 	}
 
-	handleConnection(client: Socket, ...args: any[]) {
+	async handleConnection(client: Socket, ...args: any[]) {
 		let login;
 		[login] = client.rooms;
 		this.setUserState(client.data.username, 1);
 		console.log(`Client connected! id: ${client.id} login: ${login}`);
 	}
 
-	handleDisconnect(client: Socket) {
+	async handleDisconnect(client: Socket) {
 		this.setUserState(client.data.username, 0);
 		console.log(`Client disconnected! id: ${client.id} name: ${client.data.username}`);
 	}
@@ -79,14 +76,5 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 		})
 
 		return listValues;
-	}
-
-	@SubscribeMessage('userdata')
-	async handleUserDataMessage(client: any, payload: any) {
-
-		const [name] = client.rooms;
-		let user_data = await this.prismaService.findUserByIntra(name);
-
-		return user_data;
 	}
 }

@@ -1,6 +1,15 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { PrismaService } from './prisma.service';
 
+type User = {
+	pic:		String | ArrayBuffer | null;
+	intra:		String;
+	fullName:	String;
+	wins:		number;
+	losses:		number;
+	level:		number;
+}
+
 @WebSocketGateway()
 export class PrismaGateway {
 	constructor(private prismaService: PrismaService) {}
@@ -18,5 +27,19 @@ export class PrismaGateway {
 
 	this.prismaService.updateFullName(login, payload)
 	return payload
+  }
+
+  @SubscribeMessage('gethistory')
+  async getHistory(client: any, intra: string|null){
+	if (intra == null)
+		intra = client.data.username;
+	return await this.prismaService.getHistory(intra);
+  }
+
+  @SubscribeMessage('userdata')
+  async handleUserDataMessage(client: any, intra: string|null): Promise<User> {
+	  if (!intra)
+	  	intra = client.data.username;
+	  return await this.prismaService.getUserdata(intra);
   }
 }

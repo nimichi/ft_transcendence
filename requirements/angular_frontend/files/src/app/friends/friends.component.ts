@@ -23,17 +23,6 @@ export class FriendsComponent {
 		}
 		this.socket.requestEvent('friendlist', null, (data: {name: string, intra: string, status: number, pic: string}[]) => this.getListCallback(data))
 		this.socket.socketSubscribe('newfriend', (friend: {name: string, intra: string, status: number, pic: string}) => this.newFriend(friend));
-		this.socket.socketSubscribe('status', (status: any) => this.changeStatus(status));
-	}
-
-	changeStatus(newStatus: any){
-		this.listValues.forEach(friend => {
-			if(friend.intra == newStatus.intra)
-			{
-				friend.status == newStatus.status;
-				return;
-			}
-		});
 	}
 
 	newFriend(friend: {name: string, intra: string, status: number, pic: string}){
@@ -41,7 +30,20 @@ export class FriendsComponent {
 	}
 
 	getListCallback(data: {name: string, intra: string, status: number, pic: string}[]){
-		data.forEach(friend => this.listValues.push(friend));
+		data.forEach(friend => {
+			this.socket.requestEvent('state', friend.intra, (data: {intra: string, state: 0 | 1 | 2 }) => this.setState(data));
+			this.socket.socketSubscribe(friend.intra + 'state', (data: {intra: string, state: 0 | 1 | 2 }) => this.setState(data));
+			this.listValues.push(friend);
+		});
+	}
+
+	setState(user: {intra: string, state: 0 | 1 | 2 }){
+		for (let item of this.listValues){
+			if(item.intra == user.intra){
+				item.status = user.state
+				return;
+			}
+		}
 	}
 
 	openChat($event: Event){
@@ -50,7 +52,9 @@ export class FriendsComponent {
 
 	ngOnDestroy(){
 		this.socket.socketUnsubscribe('newfriend');
-		this.socket.socketUnsubscribe('status');
+		for (let item of this.listValues){
+			this.socket.socketUnsubscribe(item.intra + 'state');
+		}
 	}
 
 }

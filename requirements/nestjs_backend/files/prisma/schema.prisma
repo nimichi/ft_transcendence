@@ -18,16 +18,21 @@ model User {
 	picture			String?
 	tfa				Boolean
 	tfa_secret		String?
-	win				Int
-	loss			Int
-	match_history	Match[]
+	friends			String[]
+	matches_left	Match[] @relation("left")
+	matches_right	Match[] @relation("right")
 }
 
 model Match {
-	user		User @relation(fields: [user_name], references: [intra_name])
-	user_name	String
-	versus		String
-	match_id	Int @id @default(autoincrement())
-	outcome		Boolean
-	result		Int[] @default([0,0])
+	match_id		Int @id @default(autoincrement())
+	timestamp		DateTime @default(now())
+	left_intra		String
+	left_user		User @relation("left", references: [intra_name], fields: [left_intra])
+	right_intra		String
+	right_user		User @relation("right", references: [intra_name], fields: [right_intra])
+	left_score		Int
+	right_score		Int
+	powerup			Boolean
+	left_level		Int
+	right_level 	Int
 }
