@@ -42,10 +42,27 @@ export class SocketService {
 
 			let user = await this.prismaService.findOrCreateUser(user_tmp);
 			
-			console.log("USER");
-			this.prismaService.getAllUsers().then((users) => {
-				console.log(users);
+			// console.log("USER");
+			// this.prismaService.findUserByIntra(user_tmp.intra_name).then((res) => {
+			// 	console.log(JSON.stringify(user, null, 2));
+			// })
+			// this.prismaService.findUserByIntraWithAll(user_tmp.intra_name).then((res) => {
+			// 	console.log(JSON.stringify(user, null, 2));
+			// 	// console.log(Object.keys(res));
+			// 	console.log(res['friends']);
+			// })
+			// this.prismaService.getAllUsers().then((res) => {
+			// 	console.log(res);
+			// })
+			// this.prismaService.addFriend(user_tmp.intra_name, "dmontema");
+			this.prismaService.getFriends(user_tmp.intra_name).then((res) => {
+				console.log("Friends");
+				console.log(JSON.stringify(res, null, 2));
 			});
+			this.prismaService.getFriendsCount(user_tmp.intra_name).then((res) => {
+				console.log(`Friends count: ${res}`);
+			});
+			
 
 			if(user.type == 'new'){
 				socket.emit('newfriend', {name: user.value.full_name, intra: user.value.intra_name, status: 3, pic: user.value.picture})

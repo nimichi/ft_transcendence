@@ -16,7 +16,7 @@ export class PrismaService extends PrismaClient {
 	}
 
 	/* ------------------------------ METHODS: USER ----------------------------- */
-	async findOrCreateUser(data: User) {
+	async findOrCreateUser(data: any) {
 		const existing_entry = await this.user.findFirst({
 			where: { intra_name: data.intra_name, },
 		});
@@ -32,27 +32,31 @@ export class PrismaService extends PrismaClient {
 	}
 
 	async addFriend(user_intra: string, friend_intra: string) {
-		const user = await this.prisma.user.findUnique({ where: { intra_name: user_intra }, include: { friends: true } });
-		const friend = this.findUserByIntra(friend_intra);
+		const user = await this.findUserByIntraWithFriends(user_intra);
+		const friend = await this.findUserByIntra(friend_intra);
 
 		if (!user || !friend) {
 			console.log("Error adding friend: User or Friend doesn't exist.");
 			return (false);
 		}
-		const is_friend_already_added = user.friends.some(friend => friend.intra_name === friend_intra);
+		if (user_intra == friend_intra) {
+			console.log("Can not be friends with themselves.");
+			return (false);
+		}
+		const is_friend_already_added = user['friends'].some(friend => friend.intra_name === friend_intra);
 		if (is_friend_already_added) {
 			console.log("Error adding friend: Friend already exist.");
 			return (false);
 		}
-		const updatedUser = await this.prisma.user.update({
-      where: { intra_name: user_intra },
-      data: {
-        friends: {
-          connect: { intra_name: friend_intra },
-        },
-      },
-      include: { friends: true },
-    });
+		const updatedUser = await this.user.update({
+			where: { intra_name: user_intra },
+			data: {
+				friends: {
+					connect: { intra_name: friend_intra },
+				},
+			},
+			include: { friends: true },
+		});
 		console.log(`${user_intra} succesfully added ${friend_intra} as friend.`);
 		return (true);
 	}
@@ -90,7 +94,8 @@ export class PrismaService extends PrismaClient {
 			where: { intra_name },
 			include: {
 				match_history: true,
-				friends: true }
+				friends: true
+			}
 		});
 		return (user || null);
 	}
@@ -104,20 +109,6 @@ export class PrismaService extends PrismaClient {
 		const user = await this.findUserByIntra(intra_name);
 		return (user.tfa);
 	}
-
-  async updatePicture(intra_name: string, picture: string) {
-	if (this.findUserByIntra(intra_name) === null) {
-		console.log("User not found.");
-		return ;
-	}
-	const updatedUser = await this.user.update({
-		where: { intra_name: intra_name},
-		data: {
-			picture: picture
-		},
-	});
-	console.log("User picture updated to path: " + picture);
-  }
 
 	async getTfaSecret(intra_name: string): Promise<string> {
 		const user = await this.findUserByIntra(intra_name);
@@ -134,22 +125,22 @@ export class PrismaService extends PrismaClient {
 		return (user.loss);
 	}
 
-	async getMatchHistory(intra_name: string): {
-		const user = await this.findUserByIntraWithMatchHistory(intra_name);
-		return (user.match_history);
-	}
-	async getMatchHistoryCount(intra_name: string): {
-		const user = await this.findUserByIntraWithMatchHistory(intra_name);
-		return (user.match_history.length);
-	}
+	// async getMatchHistory(intra_name: string) {
+	// 	const user = await this.findUserByIntraWithMatchHistory(intra_name);
+	// 	return (user.match_history);
+	// }
+	// async getMatchHistoryCount(intra_name: string) {
+	// 	const user = await this.findUserByIntraWithMatchHistory(intra_name);
+	// 	return (user.match_history.length);
+	// }
 
-	async getFriends(intra_name: string): {
+	async getFriends(intra_name: string) {
 		const user = await this.findUserByIntraWithFriends(intra_name);
-		return (user.friends);
+		return (user['friends']);
 	}
-	async getFriendsCount(intra_name: string): {
+	async getFriendsCount(intra_name: string) {
 		const user = await this.findUserByIntraWithFriends(intra_name);
-		return (user.friends.length);
+		return (user['friends'].length);
 	}
 
 	/* ----------------------- UPDATE/SETTER METHODS: USER ---------------------- */
@@ -179,6 +170,20 @@ export class PrismaService extends PrismaClient {
 			},
 		});
 		console.log("User full name updated to: " + full_name);
+	}
+
+	async updatePicture(intra_name: string, picture: string) {
+		if (this.findUserByIntra(intra_name) === null) {
+			console.log("User not found.");
+			return ;
+		}
+		const updatedUser = await this.user.update({
+			where: { intra_name: intra_name},
+			data: {
+				picture: picture
+			},
+		});
+		console.log("User picture updated to path: " + picture);
 	}
 
 	async updateTFA(intra_name: string, tfa_secret: string) {
