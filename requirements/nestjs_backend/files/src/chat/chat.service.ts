@@ -19,19 +19,18 @@ export class ChatService {
 	async reciveMsg(intra: string, client: any, MessageTo: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
 		this.printGroupChannelEntry();
-		console.log("message from:" + MessageTo);
 		if(MessageTo == "!cmd") {
-			console.log(fullCommand);
+			console.log("fullComand: " + fullCommand);
 			if(fullCommand[0].includes("/new")) {
-				if (!fullCommand[1].includes("#") && !this.checkUserInList(fullCommand[1])) {
-					this.channelArrayProvider.addUserToList(fullCommand[1]);
+				if (!fullCommand[1].includes("#")) {
+					console.log("message from:" + MessageTo);
+					// this.channelArrayProvider.addUserToList(fullCommand[1]);
 					console.log(this.channelArrayProvider.getUserList());
 					return new chatEmitDTO('newchat', fullCommand[1],['new channel',  'left'] );
 				}
 				else if (fullCommand[1].includes("#") && !this.checkChannelInList(fullCommand[1])) { //newChannel
 
 					this.channelArrayProvider.addChannel(fullCommand[1]);
-					this.channelArrayProvider.addUserToList(intra);
 					this.channelArrayProvider.addChannelEntry([intra], fullCommand[1]);
 
 					const tmpChannelEntrys = this.channelArrayProvider.getChannelEntrys();
@@ -40,7 +39,6 @@ export class ChatService {
 					this.channelDto.push(this.setChannelDTO(intra, intra, fullCommand[1]));
 
 					//falls user joinenen tut wird er in eine map gespeichert
-
 					client.join(fullCommand[1]);
 					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", 'left']);
 				}
@@ -51,16 +49,16 @@ export class ChatService {
 					return new chatEmitDTO('newchat', fullCommand[1], [this.channelArrayProvider.getUserList(), 'left']);
 				}
 			}
-
 			else if(fullCommand[0].includes("/getchanellist")) {
 				return new chatEmitDTO('styledList', fullCommand[1], [this.channelArrayProvider.getChannels(), 'left']);
 			}
 		}
-		else if(this.checkChannelInList(MessageTo)) {
+		else if(this.checkChannelInList(MessageTo)) {//TODO:
 			if(fullCommand[0] === "/getinfo") {
-				const channelInfo : string = JSON.stringify (this.channelDto.find((dto) => dto.channelName === MessageTo));
-				console.log("HERE");
-				return new chatEmitDTO('styledList', fullCommand[1], [channelInfo, 'left']);
+				if(this.hasRights(intra, fullCommand[1])) {
+					const channelInfo : string = JSON.stringify (this.channelDto.find((dto) => dto.channelName === MessageTo));
+					return new chatEmitDTO('styledList', fullCommand[1], [channelInfo, 'left']);
+				}
 			}
 			else if (fullCommand[0].includes("/setadmin")) { // /setadmin mnies #ch1
 				if (fullCommand.length === 3) {
@@ -74,7 +72,7 @@ export class ChatService {
 							(dto.channelName === fullCommand[2])
 						));
 					const updatedChannelDto: channelDTO = this.setNewAdmin(intra, fullCommand[1], fullCommand[2], this.channelDto);
-					if (checkIdx !== -1) {
+					if (this.hasRights(intra, fullCommand[2]) === true) {
 						this.channelDto.splice(checkIdx, 1)[0];
 						this.channelDto.push(updatedChannelDto);
 						return new chatEmitDTO('chatrecv', fullCommand[1], ["New Admin" + fullCommand[1], "left"]);
@@ -84,9 +82,11 @@ export class ChatService {
 				}
 				return new chatEmitDTO('chatrecv', MessageTo, ["Error: Wrong format", "left"]);
 			}
-			else if (fullCommand[0].includes("/getuserlist")) {
+			else if (fullCommand[0].includes("/getuserlist") && this.hasRights(intra, fullCommand[2])) {
 				console.log("get userList is accessed MessageTo: "+ MessageTo);
 				return new chatEmitDTO('chatrecv', MessageTo, [this.channelArrayProvider.getChannelEntrys().get(MessageTo), 'right']);
+			}else {
+				return new chatEmitDTO('chatrecv', MessageTo, ["Error: not Authorized", 'left']);
 			}
 		}
 		else if(fullCommand[0].includes("/msg")) {
@@ -125,6 +125,13 @@ export class ChatService {
 		if(this.channelArrayProvider.getUserList.length !== 0 && !this.channelArrayProvider.userExists(intra)) {
 			this.channelArrayProvider.addUserToList(intra);
 		}
+	}
+
+	private hasRights(askingClient: string, channelName:string) :boolean {
+		const idx = this.channelDto.findIndex((dto) => (
+			(dto.owner === askingClient || dto.admin === askingClient) && (dto.channelName === channelName)
+			));
+		return idx !== -1 ? true : false;
 	}
 
 	private setNewAdmin(commandFrom: string, intra: string, channelName: string, channels: channelDTO[]): channelDTO {
