@@ -15,9 +15,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		console.log(intra);
 		const responseDTO: chatEmitDTO =  await this.chat.reciveMsg(intra ,client, payload.chat, payload.msg);
 		if(payload.chat === "!cmd" && responseDTO.modus == 'newchat') {
-			console.log("Response message in new: " + responseDTO.msg)
+			console.log("Response message in new: " + responseDTO.msg);
 			client.emit(responseDTO.modus, {name: responseDTO.messageTo, msgs: responseDTO.msg});
-			return "";
+			return this.responder(client, responseDTO.modus, responseDTO.messageTo, intra);
 		}
 		else if(payload.chat === "!cmd" && responseDTO.modus == 'styledList' && payload.msg.includes("/getchanellist")) {
 			console.log("responseDTO.msg[0]: " + responseDTO.msg[0]);
@@ -63,5 +63,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		let intra;
 		[intra] = client.rooms;
 		this.chat.connectUser(intra);
+	}
+
+	private responder(client: Socket, modus: string, MessageToRoom: string, intra: string): string {
+		console.log(MessageToRoom.includes("#"))
+		if(MessageToRoom.includes("#")) {
+			client.to(MessageToRoom).emit('chatrecv', {to: MessageToRoom, msg: intra + " joind"});
+			return  ""; 
+		}
+		return intra + " new Conversation with:  " + MessageToRoom;
 	}
 }
