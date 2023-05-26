@@ -67,6 +67,7 @@ export class UserComponent {
 		this.picModal.unregister('choosePicture')
 		this.tfaModal.unregister('registerTFA')
 
+		
 	}
 
 	enableTFA(){

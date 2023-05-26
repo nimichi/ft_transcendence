@@ -10,10 +10,9 @@
         <div class="table-row header font-bold">
           <div class="table-cell text-indigo-400">Player 1</div>
           <div class="table-cell text-indigo-400">Lvl.</div>
-		  <div class="table-cell text-indigo-400">Player</div>
+		  <div class="table-cell text-indigo-400">Player 2</div>
 		  <div class="table-cell text-indigo-400">Lvl.</div>
           <div class="table-cell text-indigo-400">Result</div>
-		  <div class="table-cell text-indigo-400"> </div>
 		  <div class="table-cell text-indigo-400">Powerups</div>
         </div>
         <div class="table-row" *ngFor="let item of matches">
@@ -22,8 +21,7 @@
 		  <div class="table-cell">{{ item.right_intra }}</div>
 		  <div class="table-cell">{{ item.right_level }}</div>
           <!-- <div class="table-cell">mnies</div> -->
-          <div class="table-cell">{{ item.left_score }}</div>
-		  <div class="table-cell">{{ item.right_score }}</div>
+		  <div class="table-cell">{{ item.left_score + ' - ' + item.right_score}}</div>
           <!-- <div class="table-cell">loss</div> -->
           <!-- <div class="table-cell">1</div> -->
 		  <div class="table-cell">{{ item.powerup }}</div>

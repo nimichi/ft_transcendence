@@ -21,11 +21,12 @@ export class FriendsComponent {
 			this.router.navigate(['']);
 			return;
 		}
-		this.socket.requestEvent('friendlist', null, (data: {name: string, intra: string, status: number, pic: string}[]) => this.getListCallback(data))
+		this.socket.requestEvent('getfriends', null, (data: {name: string, intra: string, status: number, pic: string}[]) => this.getListCallback(data))
 		this.socket.socketSubscribe('newfriend', (friend: {name: string, intra: string, status: number, pic: string}) => this.newFriend(friend));
 	}
 
 	newFriend(friend: {name: string, intra: string, status: number, pic: string}){
+		this.socket.requestEvent('state', friend.intra, (data: {intra: string, state: 0 | 1 | 2 }) => this.setState(data));
 		this.listValues.push(friend)
 	}
 

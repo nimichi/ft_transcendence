@@ -36,6 +36,13 @@ export class PrismaGateway {
 	return await this.prismaService.getHistory(intra);
   }
 
+  @SubscribeMessage('getfriends')
+  async getFriends(client: any, payload: null){
+
+	const intra = client.data.username;
+	return await this.prismaService.getFriends(intra);
+  }
+
   @SubscribeMessage('userdata')
   async handleUserDataMessage(client: any, intra: string|null): Promise<User> {
 	  if (!intra)

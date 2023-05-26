@@ -3,12 +3,13 @@ import { MessageTypeDTO, channelDTO, chatEmitDTO } from './dtos/MessageTypeDTO';
 // import { CommandDTO } from './dtos/CommandDTO';
 import { ChannelArrayProvider } from '../commonProvider/ChannelArrayProvider';
 import { ChatMode } from './enums/chatMode';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 
 @Injectable()
 export class ChatService {
 	private channelDto: channelDTO[];
-	constructor(private channelArrayProvider: ChannelArrayProvider){
+	constructor(private channelArrayProvider: ChannelArrayProvider, private prismaService: PrismaService){
 		this.channelDto = [];
 	};
 
@@ -52,10 +53,16 @@ export class ChatService {
 			else if(fullCommand[0].includes("/getchanellist")) {
 				return new chatEmitDTO('styledList', fullCommand[1], [this.channelArrayProvider.getChannels(), 'left']);
 			}
-			else if(fullCommand[0].includes("/invite")) {
-				const intra: string = fullCommand[1];
+			else if(fullCommand[0].includes("/friend")) {
+				const intra2: string = fullCommand[1];
 				//TODO: Type youre code here
-				console.log("invite here: intra" + intra);
+				this.prismaService.addFriend(client, intra2);
+				console.log("friends: " + intra + " " + intra2);
+			}
+			else if(fullCommand[0].includes("/game")) {
+				const intra2: string = fullCommand[1];
+				//TODO: Type youre code here
+				console.log("play game: " + intra + " vs " + intra2);
 			}
 		}
 		else if(this.checkChannelInList(MessageTo)) {//TODO:
