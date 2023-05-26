@@ -52,11 +52,17 @@ export class ChatService {
 			else if(fullCommand[0].includes("/getchanellist")) {
 				return new chatEmitDTO('styledList', fullCommand[1], [this.channelArrayProvider.getChannels(), 'left']);
 			}
+			else if(fullCommand[0].includes("/invite")) {
+				const intra: string = fullCommand[1];
+				//TODO: Type youre code here
+				console.log("invite here: intra" + intra);
+			}
 		}
 		else if(this.checkChannelInList(MessageTo)) {//TODO:
 			if(fullCommand[0] === "/getinfo") {
 				if(this.hasRights(intra, fullCommand[1])) {
 					const channelInfo : string = JSON.stringify (this.channelDto.find((dto) => dto.channelName === MessageTo));
+					console.log("channelInfo : " + channelInfo);
 					return new chatEmitDTO('styledList', fullCommand[1], [channelInfo, 'left']);
 				}
 			}

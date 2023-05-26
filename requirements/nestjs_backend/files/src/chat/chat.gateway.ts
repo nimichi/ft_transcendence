@@ -26,10 +26,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 			return "";
 		}
 		else if(payload.chat.includes("#") && responseDTO.modus === 'chatrecv' && payload.msg[0] === "/") {
-				const json = JSON.stringify(responseDTO.msg[0]);
+				const json = JSON.stringify(responseDTO.msg[1]);
 				console.log("payload chat is: " + payload.chat);
 				console.log("ResponesDTO message json: "+ json);
-				client.emit(responseDTO.modus, {to: responseDTO.messageTo, msg: json});
+				client.emit(responseDTO.modus, {to: payload.chat, msg: json});
 				return "";
 		}
 		else if(payload.chat != "!cmd" && responseDTO.modus === 'styledList') { //channel general info
