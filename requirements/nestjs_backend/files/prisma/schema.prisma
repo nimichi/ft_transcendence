@@ -13,14 +13,16 @@ datasource db {
 // prisma/schema.prisma
 
 model User {
-	intra_name		String @unique
-	full_name		String
-	picture			String?
-	tfa				Boolean
+	intra_name		String		@id @unique
+	full_name			String
+	picture				String?
+	tfa						Boolean
 	tfa_secret		String?
-	win				Int
-	loss			Int
+	win						Int
+	loss					Int
 	match_history	Match[]
+	friends				User[]		@relation("UserFriends")
+	friendsOf			User[]		@relation("UserFriends")
 }
 
 model Match {

@@ -40,10 +40,13 @@ export class SocketService {
 				}
 			}
 
-
 			let user = await this.prismaService.findOrCreateUser(user_tmp);
-			// await this.prismaService.updateUserName(user.id, "dncmon");
-			// console.log("USER:");
+			
+			console.log("USER");
+			this.prismaService.getAllUsers().then((users) => {
+				console.log(users);
+			});
+
 			if(user.type == 'new'){
 				socket.emit('newfriend', {name: user.value.full_name, intra: user.value.intra_name, status: 3, pic: user.value.picture})
 			}
