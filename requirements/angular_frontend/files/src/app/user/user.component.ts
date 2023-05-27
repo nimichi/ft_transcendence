@@ -5,6 +5,15 @@ import { Router } from '@angular/router';
 import { ChatService } from '../chat/chat.service';
 import { SocketService } from '../socket/socket.service';
 
+type User = {
+	pic:		string | ArrayBuffer | null;
+	intra:		string;
+	fullName:	string;
+	wins:		number;
+	losses:		number;
+	level:		number;
+}
+
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
@@ -12,29 +21,26 @@ import { SocketService } from '../socket/socket.service';
 })
 export class UserComponent {
 
+	public user: User
 
 	@ViewChild('finderInput') finderInput!: ElementRef
-	public intraPic: string | ArrayBuffer | null  = ""
-	public intraName: string  = ""
-	public fullName: string = ""
 	public newName: string = ""
-	public wins: number = 0
-	public losses: number = 0
-	public level: number = 0
-	// public badges: number = 5
-	// public badgelevel: number = 3;
-	//brauchen wir das? 
+
 	public tfaToken: string = ''
 	public qrCode: string = ''
 	public verified: boolean = true
-	// image = <HTMLInputElement>document.querySelector('finderInput')
-	// finderInput = <HTMLInputElement>document.querySelector('finderInput')
-
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketService, private router: Router,
 		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService,
-		public chat: ChatService,
-		private cd: ChangeDetectorRef) {
+		public chat: ChatService, private cd: ChangeDetectorRef) {
+		this.user = {
+			pic: null,
+			intra: "",
+			fullName: "",
+			wins: 0,
+			losses: 0,
+			level: 0
+		}
 	}
 
 	ngOnInit() {
@@ -49,19 +55,11 @@ export class UserComponent {
 		//hier funcion die das modal aktiviert, wenn man auf den button klickt :)
 		//function muss dann im template eingebaut werden
 
-		this.socket.requestEvent("userdata", null, (data: any) => this.callbackUserData(data))
+		this.socket.requestEvent("userdata", null, (data: User) => this.callbackUserData(data))
 	}
 
-	callbackUserData(userdata: any){
-		this.intraPic = userdata.picture
-		this.intraName = userdata.intra_name
-		this.fullName = userdata.full_name
-		this.wins = userdata.win
-		this.losses = userdata.loss
-		this.level = userdata.win - userdata.loss
-		// this.badges = this.level / 5
-
-		console.log("This is: " + this.intraName)
+	callbackUserData(userdata: User){
+		this.user = userdata
 	}
 
 	ngOnDestroy(): void {
@@ -69,6 +67,7 @@ export class UserComponent {
 		this.picModal.unregister('choosePicture')
 		this.tfaModal.unregister('registerTFA')
 
+		
 	}
 
 	enableTFA(){
@@ -107,13 +106,13 @@ export class UserComponent {
 	}
 
 	initChangeName($event: Event){
-		this.newName = this.fullName;
+		this.newName = this.user.fullName;
 		this.nameModal.toggleModal('chooseName')
 	}
 
 	submitName(){
-		this.fullName = this.newName;
-		this.socket.requestEvent('updatefullname', this.fullName, (name: string) => this.changeName(name));
+		this.user.fullName = this.newName;
+		this.socket.requestEvent('updatefullname', this.user.fullName, (name: string) => this.changeName(name));
 	}
 
 	changeName(name: string){
@@ -126,12 +125,12 @@ export class UserComponent {
 	}
 
 	uploadPicture(e: Event){
-		console.log(this.intraPic)
+		console.log(this.user.pic)
 		const file = (event?.target as  HTMLInputElement).files?.[0]
 
 		if (file) {
 			const reader = new FileReader()
-			reader.onload = e => this.intraPic = reader.result
+			reader.onload = e => this.user.pic = reader.result
 			reader.readAsDataURL(file)
 			this.picModal.toggleModal('choosePicture')
 			this.socket.requestEvent('updatePicture', file, () => {});

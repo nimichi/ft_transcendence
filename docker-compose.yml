@@ -11,7 +11,9 @@ services:
     volumes:
       - ./requirements/nestjs_backend/files:/ft_transcendence
       - /ft_transcendence/node_modules
-    env_file: .env
+      - /ft_transcendence/prisma/migrations
+    env_file:
+      - .env
     networks:
       - network
     depends_on:
@@ -26,8 +28,8 @@ services:
     volumes:
       - ./requirements/angular_frontend/files:/ft_transcendence
       - /ft_transcendence/node_modules
-      - /ft_transcendence/prisma/migrations
-    env_file: .env
+    env_file:
+      - .env
     networks:
       - network
   postgres:

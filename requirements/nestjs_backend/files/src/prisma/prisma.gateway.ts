@@ -3,6 +3,15 @@ import { PrismaService } from './prisma.service';
 // import { File } from 'express';
 import { writeFile } from "fs";
 
+type User = {
+	pic:		String | ArrayBuffer | null;
+	intra:		String;
+	fullName:	String;
+	wins:		number;
+	losses:		number;
+	level:		number;
+}
+
 @WebSocketGateway()
 export class PrismaGateway {
 	constructor(private prismaService: PrismaService) {}
@@ -22,15 +31,24 @@ export class PrismaGateway {
 	return payload
   }
 
-  @SubscribeMessage('updatePicture')
-  async updatePicture(client: any, payload: Buffer): Promise<any> {
-	const [login] = client.rooms;
-	const user = await this.prismaService.findUserByIntra(login);
-	const file_path = `./upload/pic/${user.intra_name}.jpeg`; // TODO: replace hard-coded path and ext?, mkdir upload/pic if it doesn't exist
-	console.log(payload);
-	writeFile(file_path, payload, () => {});
+  @SubscribeMessage('gethistory')
+  async getHistory(client: any, intra: string|null){
+	if (intra == null)
+		intra = client.data.username;
+	return await this.prismaService.getHistory(intra);
+  }
 
-	// this.prismaService.updatePicture(login, file_path);
-	return "updatePicture()";
+  @SubscribeMessage('getfriends')
+  async getFriends(client: any, payload: null){
+
+	const intra = client.data.username;
+	return await this.prismaService.getFriends(intra);
+  }
+
+  @SubscribeMessage('userdata')
+  async handleUserDataMessage(client: any, intra: string|null): Promise<User> {
+	  if (!intra)
+	  	intra = client.data.username;
+	  return await this.prismaService.getUserdata(intra);
   }
 }

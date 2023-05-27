@@ -23,9 +23,7 @@ export class SocketService {
 					full_name: user_data.displayname,
 					picture: user_data.image.versions.medium,
 					tfa: false,
-					tfa_secret: null,
-					win: 0,
-					loss: 0
+					tfa_secret: null
 				}
 			}
 			else{
@@ -34,9 +32,7 @@ export class SocketService {
 					full_name: socket.handshake.auth.token + " fullname",
 					picture: "https://cataas.com/cat",
 					tfa: false,
-					tfa_secret: null,
-					win: 0,
-					loss: 0
+					tfa_secret: null
 				}
 			}
 

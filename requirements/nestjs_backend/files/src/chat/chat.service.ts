@@ -3,12 +3,13 @@ import { MessageTypeDTO, channelDTO, chatEmitDTO } from './dtos/MessageTypeDTO';
 // import { CommandDTO } from './dtos/CommandDTO';
 import { ChannelArrayProvider } from '../commonProvider/ChannelArrayProvider';
 import { ChatMode } from './enums/chatMode';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 
 @Injectable()
 export class ChatService {
 	private channelDto: channelDTO[];
-	constructor(private channelArrayProvider: ChannelArrayProvider){
+	constructor(private channelArrayProvider: ChannelArrayProvider, private prismaService: PrismaService){
 		this.channelDto = [];
 	};
 
@@ -16,22 +17,21 @@ export class ChatService {
 		return new channelDTO(owner, channelName, admin, false, "ssss");
 	}
 
-	async reciveMsg(intra: string, client: any, messageFrom: string, message: string) : Promise<chatEmitDTO>{
+	async reciveMsg(intra: string, client: any, MessageTo: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
 		this.printGroupChannelEntry();
-
-		if(messageFrom == "!cmd") {
+		if(MessageTo == "!cmd") {
+			console.log("fullComand: " + fullCommand);
 			if(fullCommand[0].includes("/new")) {
-				//schau ob nuzer nuzer und ob der bereit vorhanden in der liste vorhanden ist
-				if (!fullCommand[1].includes("#") && !this.checkUserInList(fullCommand[1])) {
-					this.channelArrayProvider.addUserToList(fullCommand[1]);
+				if (!fullCommand[1].includes("#")) {
+					console.log("message from:" + MessageTo);
+					// this.channelArrayProvider.addUserToList(fullCommand[1]);
 					console.log(this.channelArrayProvider.getUserList());
 					return new chatEmitDTO('newchat', fullCommand[1],['new channel',  'left'] );
 				}
 				else if (fullCommand[1].includes("#") && !this.checkChannelInList(fullCommand[1])) { //newChannel
 
 					this.channelArrayProvider.addChannel(fullCommand[1]);
-					this.channelArrayProvider.addUserToList(intra);
 					this.channelArrayProvider.addChannelEntry([intra], fullCommand[1]);
 
 					const tmpChannelEntrys = this.channelArrayProvider.getChannelEntrys();
@@ -40,7 +40,6 @@ export class ChatService {
 					this.channelDto.push(this.setChannelDTO(intra, intra, fullCommand[1]));
 
 					//falls user joinenen tut wird er in eine map gespeichert
-
 					client.join(fullCommand[1]);
 					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", 'left']);
 				}
@@ -51,26 +50,56 @@ export class ChatService {
 					return new chatEmitDTO('newchat', fullCommand[1], [this.channelArrayProvider.getUserList(), 'left']);
 				}
 			}
-
-		}
-		else if(this.checkChannelInList(messageFrom)) {
-			if (fullCommand[0].includes("/setadmin")) { // /setadmin mnies #ch1
-				if (fullCommand.length === 3) {
-					const updatedChannelDto: channelDTO = this.setNewAdmin(intra, fullCommand[1], fullCommand[2], this.channelDto);
-					const idx = this.channelDto.findIndex((dto) => dto.channelName === fullCommand[2])
-					if (idx !== -1) {
-						const deletedDto = this.channelDto.splice(idx, 1)[0];
-						this.channelDto.push(updatedChannelDto);
-						console.log("Admin Updated: " + deletedDto + " to: " + updatedChannelDto);
-						return new chatEmitDTO('chatrecv', messageFrom, ["Admin rechte wurden erfolgreich verteilt", "left"]);
-					}
-					return new chatEmitDTO('chatrecv', messageFrom, ["Error:", "left"]);
-				}
-				return new chatEmitDTO('chatrecv', messageFrom, ["Error: Wrong format", "left"]);
+			else if(fullCommand[0].includes("/getchanellist")) {
+				return new chatEmitDTO('styledList', fullCommand[1], [this.channelArrayProvider.getChannels(), 'left']);
 			}
-			else if (fullCommand[0].includes("/getuserlist")) {
-				console.log("get userList is accessed messageFrom: "+ messageFrom);
-				return new chatEmitDTO('chatrecv', messageFrom, [this.channelArrayProvider.getChannelEntrys().get(messageFrom), 'right']);
+			else if(fullCommand[0].includes("/friend")) {
+				const intra2: string = fullCommand[1];
+				//TODO: Type youre code here
+				this.prismaService.addFriend(client, intra2);
+				console.log("friends: " + intra + " " + intra2);
+			}
+			else if(fullCommand[0].includes("/game")) {
+				const intra2: string = fullCommand[1];
+				//TODO: Type youre code here
+				console.log("play game: " + intra + " vs " + intra2);
+			}
+		}
+		else if(this.checkChannelInList(MessageTo)) {//TODO:
+			if(fullCommand[0] === "/getinfo") {
+				if(this.hasRights(intra, fullCommand[1])) {
+					const channelInfo : string = JSON.stringify (this.channelDto.find((dto) => dto.channelName === MessageTo));
+					console.log("channelInfo : " + channelInfo);
+					return new chatEmitDTO('styledList', fullCommand[1], [channelInfo, 'left']);
+				}
+			}
+			else if (fullCommand[0].includes("/setadmin")) { // /setadmin mnies #ch1
+				if (fullCommand.length === 3) {
+					// console.log("fullcomand 0: "+ fullCommand[0]);
+					// console.log("fullcomand 1: "+ fullCommand[1]);
+					// console.log("fullcomand 2: "+ fullCommand[2]);
+					// console.log("message from sender: "+ intra);
+					//schau ob es erlaubt ist command sollte von admin oder
+					const checkIdx = this.channelDto.findIndex((dto) =>
+						((dto.owner === intra || dto.admin === intra) &&
+							(dto.channelName === fullCommand[2])
+						));
+					const updatedChannelDto: channelDTO = this.setNewAdmin(intra, fullCommand[1], fullCommand[2], this.channelDto);
+					if (this.hasRights(intra, fullCommand[2]) === true) {
+						this.channelDto.splice(checkIdx, 1)[0];
+						this.channelDto.push(updatedChannelDto);
+						return new chatEmitDTO('chatrecv', fullCommand[1], ["New Admin" + fullCommand[1], "left"]);
+					}
+					else if (checkIdx === -1)
+						return new chatEmitDTO('chatrecv', MessageTo, ["Error: no Rights to set Admin", "left"]);
+				}
+				return new chatEmitDTO('chatrecv', MessageTo, ["Error: Wrong format", "left"]);
+			}
+			else if (fullCommand[0].includes("/getuserlist") && this.hasRights(intra, fullCommand[2])) {
+				console.log("get userList is accessed MessageTo: "+ MessageTo);
+				return new chatEmitDTO('chatrecv', MessageTo, [this.channelArrayProvider.getChannelEntrys().get(MessageTo), 'right']);
+			}else {
+				return new chatEmitDTO('chatrecv', MessageTo, ["Error: not Authorized", 'left']);
 			}
 		}
 		else if(fullCommand[0].includes("/msg")) {
@@ -82,12 +111,18 @@ export class ChatService {
 				const intraNameTo: string = fullCommand[1];
 				if(this.checkUserInList(intraNameTo)) {
 					const finalMessage: string = fullCommand[2].length !== 0 ? fullCommand[2] : "";
-					return new chatEmitDTO('chatrecv', messageFrom, finalMessage);
+					return new chatEmitDTO('chatrecv', MessageTo, finalMessage);
 				}
 			}
 
 		}
-		return new chatEmitDTO('chatrecv', messageFrom, message); //TODO FEHELRE
+		// console.log("direct message to: "+ MessageTo);
+		const finalMessage = {
+			to: MessageTo,
+			msg: message
+		};
+
+		return new chatEmitDTO('chatrecv', MessageTo, message);
 	}
 
 	async disconnectUser(intra: string) {
@@ -105,17 +140,25 @@ export class ChatService {
 		}
 	}
 
+	private hasRights(askingClient: string, channelName:string) :boolean {
+		const idx = this.channelDto.findIndex((dto) => (
+			(dto.owner === askingClient || dto.admin === askingClient) && (dto.channelName === channelName)
+			));
+		return idx !== -1 ? true : false;
+	}
+
 	private setNewAdmin(commandFrom: string, intra: string, channelName: string, channels: channelDTO[]): channelDTO {
 		//check if #ch1 is in channel
+		console.log("HERE in setNewAdmin\nchannelName: " + channelName + "\nintra: " + intra);
 		if (this.checkChannelInList(channelName) && this.checkUserInList(intra)) {
 			//const foundDto = dtoArray.find((dto) => dto.id === desiredId);
 			const channelInfo: channelDTO = channels.find((dto) => dto.channelName == channelName);
+			console.log("in Set new Admin: channelInfo: " + channelInfo);
 			if (channelInfo.owner === commandFrom || channelInfo.admin === commandFrom) {
 				return new channelDTO(commandFrom, channelName, intra, false, "ssss");
 			}
-
-
 		}
+		return new channelDTO(commandFrom, channelName, commandFrom, false, "ssss");
 	}
 
 	private checkUserInList(userName: string) : boolean {
