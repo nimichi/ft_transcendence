@@ -33,6 +33,7 @@ export class HistoryComponent {
 			return;
 		}
 		this.socketService.requestEvent('gethistory', null, (data: Match[]) => this.recieveHistory(data))
+		this.socketService.requestEvent('fetchUserpic', null, (data: any) => this.recievePicture(data))
 	}
 
 	recieveHistory(data: Match[]){
@@ -40,6 +41,10 @@ export class HistoryComponent {
 			this.matches = data
 	}
 
+	recievePicture(picture: any){
+		console.log(picture);
+		this.intraPic = picture;
+	}
 
 	openChat($event: Event){
 		this.chat.toggleChat()

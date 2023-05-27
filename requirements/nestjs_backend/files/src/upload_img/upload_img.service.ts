@@ -1,7 +1,9 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import {	writeFile as fsWriteFile,
+			readFile as fsReadFile,
 			existsSync as fsExistsSync,
-			mkdirSync as fsMkdirSync } from 'fs';
+			mkdirSync as fsMkdirSync,
+			promises as fsPromises } from 'fs';
 import { HttpService } from '@nestjs/axios';
 import { Buffer } from 'buffer'
 import { throwError, map, catchError, lastValueFrom } from 'rxjs'
@@ -26,27 +28,39 @@ export class UploadImgService implements OnModuleInit {
 		return (extension.substring(extension.indexOf('/') + 1));
 	}
 
-	uploadImg(intra: string, image: any) {
+	async uploadImg(intra: string, image: any) {
 		this.mkdirPath();
 		const file_name = `${intra}.${this.getExtension(image['ext'])}`;
+		const full_path = `${this.path}/${file_name}`;
+		try {
+		  await fsPromises.writeFile(full_path, image['file']);
+		  console.log('File saved successfully.');
+		  return full_path;
+		} catch (err) {
+		  console.error('Error saving file:', err);
+		  return undefined;
+		}
+	}
 
-		let success = false;
-		fsWriteFile(`${this.path}/${file_name}`, image['file'], (err) => {
+	async fetchImg(file_name: string) {
+		let img: any;
+		await fsReadFile(file_name, 'utf8', (err, data) => {
 			if (err) {
-				console.error('Error saving file: ', err);
+			  console.error('Error reading file:', err);
+			  return;
 			}
-			else {
-				console.log('File saved successfully.');
-				success = true;
-			}
+			// console.log("data:", data);
+			img = data;
 		});
-		return (success ? file_name : undefined);
+		console.log("img:", img);
+		return img;
 	}
 
 	async downloadPicture(intra: string, url: string) {
 		const image_data = await this.fetchPictureFromURL(url);
 		const file_name = this.uploadImg(intra, image_data);
 		console.log("File name:", file_name);
+		return (file_name);
 	}
 	
 	private async fetchPictureFromURL(url: string) {
