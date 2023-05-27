@@ -3,13 +3,15 @@ import { MessageTypeDTO, channelDTO, chatEmitDTO } from './dtos/MessageTypeDTO';
 // import { CommandDTO } from './dtos/CommandDTO';
 import { ChannelArrayProvider } from '../commonProvider/ChannelArrayProvider';
 import { ChatMode } from './enums/chatMode';
+import { Socket, Server } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { SocketGateway } from 'src/socket/socket.gateway';
 
 
 @Injectable()
 export class ChatService {
 	private channelDto: channelDTO[];
-	constructor(private channelArrayProvider: ChannelArrayProvider, private prismaService: PrismaService){
+	constructor(private channelArrayProvider: ChannelArrayProvider, private prismaService: PrismaService, private socketGateway: SocketGateway){
 		this.channelDto = [];
 	};
 
@@ -20,6 +22,8 @@ export class ChatService {
 	async reciveMsg(intra: string, client: any, MessageTo: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
 		this.printGroupChannelEntry();
+		let server: Server = this.socketGateway.server;
+		console.log(await server.fetchSockets());
 		if(MessageTo == "!cmd") {
 			console.log("fullComand: " + fullCommand);
 			if(fullCommand[0].includes("/new")) {

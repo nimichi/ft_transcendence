@@ -8,6 +8,7 @@ import { RedirectComponent } from './redirect/redirect.component';
 import { GameComponent } from './game/game.component';
 import { DisplayComponent } from './display/display.component';
 import { HistoryComponent } from './history/history.component';
+import { ListComponent } from './list/list.component';
 
 const routes: Routes = [{
 
@@ -45,6 +46,10 @@ const routes: Routes = [{
 {
   path: 'history',
   component: HistoryComponent
+},
+{
+  path: 'list',
+  component: ListComponent
 },
 
 ];

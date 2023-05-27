@@ -4,10 +4,11 @@ import { Injectable } from '@nestjs/common';
 import { ChannelArrayProvider } from './../commonProvider/ChannelArrayProvider';
 import { ChatGateway } from './chat.gateway';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { SocketModule } from 'src/socket/socket.module';
 
 @Module({
   providers: [ChatService, ChannelArrayProvider, ChatGateway],
-  imports: [PrismaModule],
+  imports: [PrismaModule, SocketModule],
   exports: [ChatService]
 })
 export class ChatModule {

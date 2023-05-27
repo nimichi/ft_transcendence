@@ -18,6 +18,7 @@ import { SharedModule } from './shared/shared.module';
 import { ChatModule } from './chat/chat.module';
 import { HistoryComponent } from './history/history.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ListComponent } from './list/list.component';
 
 
 
@@ -32,6 +33,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     GameComponent,
     DisplayComponent,
     HistoryComponent,
+    ListComponent,
   ],
   imports: [
     BrowserModule,

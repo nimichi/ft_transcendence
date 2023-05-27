@@ -30,7 +30,7 @@ export class SocketService {
 				user_tmp = {
 					intra_name: socket.handshake.auth.token,
 					full_name: socket.handshake.auth.token + " fullname",
-					picture: "https://cataas.com/cat",
+					picture: "https://picsum.photos/200",
 					tfa: false,
 					tfa_secret: null
 				}

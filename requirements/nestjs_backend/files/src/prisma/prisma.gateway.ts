@@ -21,6 +21,16 @@ export class PrismaGateway {
     return (user.picture);
   }
 
+  @SubscribeMessage('getuserlist')
+  async getUserList(client: any): Promise<{name: string, intra: string, pic: string}[]> {
+	const users = await this.prismaService.getAllUsers();
+	let userList: {name: string, intra: string, pic: string}[] = [];
+	for (let user of users){
+		userList.push({name: user.full_name, intra: user.intra_name, pic: user.picture})
+	}
+    return (userList);
+  }
+
   @SubscribeMessage('updatefullname')
   async updateFullName(client: any, newName: string): Promise<{name: string, success: boolean}>{
 	const re = /^[0-9A-Za-z\s\-]+$/;
