@@ -1,184 +1,167 @@
 import { Injectable } from '@nestjs/common';
 import { MessageTypeDTO, channelDTO, chatEmitDTO } from './dtos/MessageTypeDTO';
 // import { CommandDTO } from './dtos/CommandDTO';
-import { ChannelArrayProvider } from '../commonProvider/ChannelArrayProvider';
+// import { ChannelArrayProvider } from '../commonProvider/ChannelArrayProvider';
 import { ChatMode } from './enums/chatMode';
 import { Socket, Server } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { DirectFrindsDTO } from './dtos/DirectFriendsDTO';
 import { SocketGateway } from 'src/socket/socket.gateway';
 
 
 @Injectable()
 export class ChatService {
 	private channelDto: channelDTO[];
-	constructor(private channelArrayProvider: ChannelArrayProvider, private prismaService: PrismaService, private socketGateway: SocketGateway){
+	private queue: Set<string> = new Set<string>();
+
+	constructor(private prismaService: PrismaService, private socketGateway: SocketGateway){
 		this.channelDto = [];
 	};
 
 	private setChannelDTO(owner: string, admin: string, channelName: string): channelDTO {
-		return new channelDTO(owner, channelName, admin, false, "ssss");
+		return new channelDTO(owner, channelName, [admin], false,"ssss",[]);
 	}
 
 	async reciveMsg(intra: string, client: any, MessageTo: string, message: string) : Promise<chatEmitDTO>{
 		const fullCommand: string[] = message.split(" ")
-		this.printGroupChannelEntry();
-		let server: Server = this.socketGateway.server;
-		console.log(await server.fetchSockets());
 		if(MessageTo == "!cmd") {
 			console.log("fullComand: " + fullCommand);
 			if(fullCommand[0].includes("/new")) {
 				if (!fullCommand[1].includes("#")) {
-					console.log("message from:" + MessageTo);
-					// this.channelArrayProvider.addUserToList(fullCommand[1]);
-					console.log(this.channelArrayProvider.getUserList());
-					return new chatEmitDTO('newchat', fullCommand[1],['new channel',  'left'] );
+					const channelNameToUser: string = fullCommand[1];
+					return new chatEmitDTO('newchat', channelNameToUser,['new channel',  'left'] );
 				}
-				else if (fullCommand[1].includes("#") && !this.checkChannelInList(fullCommand[1])) { //newChannel
-
-					this.channelArrayProvider.addChannel(fullCommand[1]);
-					this.channelArrayProvider.addChannelEntry([intra], fullCommand[1]);
-
-					const tmpChannelEntrys = this.channelArrayProvider.getChannelEntrys();
-					console.log(tmpChannelEntrys)
-					//logic channel owner & channel admin
-					this.channelDto.push(this.setChannelDTO(intra, intra, fullCommand[1]));
-
-					//falls user joinenen tut wird er in eine map gespeichert
-					client.join(fullCommand[1]);
-					return new chatEmitDTO('newchat', fullCommand[1], ["new Conversation", 'left']);
-				}
-				else if(fullCommand[1].includes("#") && this.checkChannelInList(fullCommand[1])) {
-					client.join(fullCommand[1]);
-					this.channelArrayProvider.addUserToChannel(fullCommand[1], intra);
-					this.channelArrayProvider.addUserToList(intra);
-					return new chatEmitDTO('newchat', fullCommand[1], [this.channelArrayProvider.getUserList(), 'left']);
+				else if (fullCommand[1].includes("#")) { //newChannel
+					const roomChannel: string = fullCommand[1];
+					client.join(roomChannel);
+					if(this.channelDto.findIndex((channel) => (channel.channelName === roomChannel))) {
+						this.channelDto.push(this.setChannelDTO(intra, intra, roomChannel));
+					}
+					return new chatEmitDTO('newchat', roomChannel, ["new Conversation", 'left']);
 				}
 			}
-			else if(fullCommand[0].includes("/getchanellist")) {
-				return new chatEmitDTO('styledList', fullCommand[1], [this.channelArrayProvider.getChannels(), 'left']);
-			}
-			else if(fullCommand[0].includes("/friend")) {
-				const intra2: string = fullCommand[1];
-				//TODO: Type youre code here
-				this.prismaService.addFriend(client, intra2);
-				console.log("friends: " + intra + " " + intra2);
-			}
-			else if(fullCommand[0].includes("/game")) {
-				const intra2: string = fullCommand[1];
-				client.to(intra2).emit('navtoprivgame',{gameid: intra + intra2, powup: true})
-				client.emit('navtoprivgame',{gameid: intra + intra2, powup: true})
-				//TODO: Type youre code here
-				console.log("play game: " + intra + " vs " + intra2);
+			else if (fullCommand[0].includes("/delete")) { // /delete username | message comes from intra
+				//check die userlist ab
+				const userRoomNameToDelete = fullCommand[1];
+				console.log("Deleted user: " + userRoomNameToDelete);
+
+				if(!userRoomNameToDelete.includes("!cmd")){
+					new chatEmitDTO('deleteChatRoom', intra, userRoomNameToDelete);
+					// this.deleteUser(userRoomNameToDelete, intra);
+				}
 			}
 		}
-		else if(this.checkChannelInList(MessageTo)) {//TODO:
-			if(fullCommand[0] === "/getinfo") {
-				if(this.hasRights(intra, fullCommand[1])) {
+		else if(MessageTo.includes("#")) {
+			if(fullCommand[0].includes("/getinfo")) {
+				if(this.hasRights(intra, MessageTo)) {
 					const channelInfo : string = JSON.stringify (this.channelDto.find((dto) => dto.channelName === MessageTo));
 					console.log("channelInfo : " + channelInfo);
 					return new chatEmitDTO('styledList', fullCommand[1], [channelInfo, 'left']);
 				}
+				return new chatEmitDTO('chatrecv', MessageTo, "not enough rights");
 			}
 			else if (fullCommand[0].includes("/setadmin")) { // /setadmin mnies #ch1
 				if (fullCommand.length === 3) {
-					// console.log("fullcomand 0: "+ fullCommand[0]);
-					// console.log("fullcomand 1: "+ fullCommand[1]);
-					// console.log("fullcomand 2: "+ fullCommand[2]);
-					// console.log("message from sender: "+ intra);
-					//schau ob es erlaubt ist command sollte von admin oder
 					const checkIdx = this.channelDto.findIndex((dto) =>
-						((dto.owner === intra || dto.admin === intra) &&
+						((dto.owner === intra || dto.admin.findIndex((ad) => ad === intra) !== -1) &&
 							(dto.channelName === fullCommand[2])
 						));
-					const updatedChannelDto: channelDTO = this.setNewAdmin(intra, fullCommand[1], fullCommand[2], this.channelDto);
-					if (this.hasRights(intra, fullCommand[2]) === true) {
-						this.channelDto.splice(checkIdx, 1)[0];
-						this.channelDto.push(updatedChannelDto);
-						return new chatEmitDTO('chatrecv', fullCommand[1], ["New Admin" + fullCommand[1], "left"]);
+						if (this.hasRights(intra, MessageTo) === true) {
+							this.setNewAdmin(intra, fullCommand[1], fullCommand[2], this.channelDto);
+						return new chatEmitDTO('chatrecv', fullCommand[1], ["New Admin " + fullCommand[1]]);
 					}
 					else if (checkIdx === -1)
 						return new chatEmitDTO('chatrecv', MessageTo, ["Error: no Rights to set Admin", "left"]);
 				}
-				return new chatEmitDTO('chatrecv', MessageTo, ["Error: Wrong format", "left"]);
+				return new chatEmitDTO('chatrecv', MessageTo, ["Error: Wrong format\n</setadmin intraname channelName>", "left"]);
 			}
-			else if (fullCommand[0].includes("/getuserlist") && this.hasRights(intra, fullCommand[2])) {
-				console.log("get userList is accessed MessageTo: "+ MessageTo);
-				return new chatEmitDTO('chatrecv', MessageTo, [this.channelArrayProvider.getChannelEntrys().get(MessageTo), 'right']);
-			}else {
-				return new chatEmitDTO('chatrecv', MessageTo, ["Error: not Authorized", 'left']);
+			else if (fullCommand[0].includes("/getuserlist") && this.hasRights(intra, MessageTo)) {
+				const list: string[] = ['mnies', 'dmontema', 'mjeyavat'];
+				return new chatEmitDTO('chatrecv', MessageTo, list);
 			}
-		}
-		else if(fullCommand[0].includes("/msg")) {
-			if(fullCommand[1].includes("#")) {
-				//ist ein Channel
+			else if (fullCommand[0].includes("/ban") && this.hasRights(intra, MessageTo)) {
+
+				this.channelDto.find((c) => c.channelName === MessageTo).banned.push(fullCommand[1]);
+				return new chatEmitDTO('chatrecv',MessageTo, "user was banned");
 			}
 			else {
-				//ist ein UserName
-				const intraNameTo: string = fullCommand[1];
-				if(this.checkUserInList(intraNameTo)) {
-					const finalMessage: string = fullCommand[2].length !== 0 ? fullCommand[2] : "";
-					return new chatEmitDTO('chatrecv', MessageTo, finalMessage);
+				if(this.channelDto.find((c) => c.channelName === MessageTo).banned.findIndex((b) => b === intra) === -1) {
+					return new chatEmitDTO('chatrecv', MessageTo, "");
+				}
+				console.log("WE WANT WE WANT TO ...");
+				return new chatEmitDTO('chatrecv', MessageTo, "Not Authorized");
+			}
+		}
+		else{ // in private chat
+			if(fullCommand[0].includes("/game")) { // start game
+				if(intra === MessageTo){
+					return new chatEmitDTO('chatrecv', MessageTo, "only possible with other user");
+				}
+				const id = intra + '!g' +MessageTo;
+				if(this.queue.has(id)){
+					this.queue.delete(id);
+					client.to(MessageTo).emit('navtoprivgame',{gameid: intra + MessageTo, powup: true})
+					client.emit('navtoprivgame',{gameid: intra + MessageTo, powup: true})
+					return new chatEmitDTO('chatrecv', MessageTo, intra + " accepted yout invite");
+				}
+				else{
+					const rid = MessageTo + '!g' + intra;
+					this.queue.add(rid);
+					return new chatEmitDTO('chatrecv', MessageTo, intra + " wants to play against you. type '/game' to confirm");
 				}
 			}
-
-		}
-		// console.log("direct message to: "+ MessageTo);
-		const finalMessage = {
-			to: MessageTo,
-			msg: message
-		};
-
-		return new chatEmitDTO('chatrecv', MessageTo, message);
-	}
-
-	async disconnectUser(intra: string) {
-		if(this.channelArrayProvider.getUserList().length !== 0 && this.channelArrayProvider.userExists(intra)) {
-			const currentChannelList = this.channelArrayProvider.getChannels();
-			this.channelArrayProvider.deleteUserFromList(intra);
-			this.channelArrayProvider.deleteUserFromChannels(intra);
-		}
-	}
-
-	async connectUser(intra: string) {
-		//is user in channle
-		if(this.channelArrayProvider.getUserList.length !== 0 && !this.channelArrayProvider.userExists(intra)) {
-			this.channelArrayProvider.addUserToList(intra);
+			else if(fullCommand[0].includes("/friend")) { // start game
+				if(intra === MessageTo){
+					return new chatEmitDTO('chatrecv', MessageTo, "only possible with other user");
+				}
+				const id = intra + '!f' +MessageTo;
+				if(this.queue.has(id)){
+					this.queue.delete(id);
+					this.prismaService.addFriend(client, MessageTo);
+					return new chatEmitDTO('chatrecv', MessageTo, intra + " accepted yout invite");
+				}
+				else{
+					const rid = MessageTo + '!f' + intra;
+					this.queue.add(rid);
+					return new chatEmitDTO('chatrecv', MessageTo, intra + " wants to be your friend. type '/friend' to confirm");
+				}
+			}
+			else if(fullCommand[0].includes("/visit")) { // visit profile page
+				return new chatEmitDTO('navtoprofile', '', MessageTo);
+			}
+			else{
+				return this.sendPrivateMessage(intra, MessageTo, message);
+			}
 		}
 	}
 
 	private hasRights(askingClient: string, channelName:string) :boolean {
 		const idx = this.channelDto.findIndex((dto) => (
-			(dto.owner === askingClient || dto.admin === askingClient) && (dto.channelName === channelName)
+			(dto.owner === askingClient || dto.admin.findIndex((ad) => ad === askingClient) !== -1) && (dto.channelName === channelName)
 			));
 		return idx !== -1 ? true : false;
 	}
 
-	private setNewAdmin(commandFrom: string, intra: string, channelName: string, channels: channelDTO[]): channelDTO {
+	private setNewAdmin(commandFrom: string, intra: string, channelName: string, channels: channelDTO[]) {
 		//check if #ch1 is in channel
 		console.log("HERE in setNewAdmin\nchannelName: " + channelName + "\nintra: " + intra);
-		if (this.checkChannelInList(channelName) && this.checkUserInList(intra)) {
-			//const foundDto = dtoArray.find((dto) => dto.id === desiredId);
-			const channelInfo: channelDTO = channels.find((dto) => dto.channelName == channelName);
-			console.log("in Set new Admin: channelInfo: " + channelInfo);
-			if (channelInfo.owner === commandFrom || channelInfo.admin === commandFrom) {
-				return new channelDTO(commandFrom, channelName, intra, false, "ssss");
+		channels.find((dto) => dto.channelName == channelName).admin.push(intra);
+
+	}
+
+	private async sendPrivateMessage(intra: string, userName: string, message: string) : Promise<chatEmitDTO>{
+		//muss angepasst werden
+		const sockets = await this.socketGateway.server.fetchSockets();
+		//private schauen ob nutzer onine
+		for(let socket of sockets) {
+			if(socket.data.username === userName) {
+				return new chatEmitDTO('chatrecv', userName, message);
 			}
 		}
-		return new channelDTO(commandFrom, channelName, commandFrom, false, "ssss");
-	}
+		return new chatEmitDTO('chatrecv', intra, "user not available");
+		// if(!this.checkUserInList(intra, userName)) {
+		// 	this.channelArrayProvider.addUserToList(intra, userName);
+		// }
 
-	private checkUserInList(userName: string) : boolean {
-		return this.channelArrayProvider.getUserList().includes(userName)
 	}
-
-	private checkChannelInList(groupeChannelName: string) : boolean {
-		return this.channelArrayProvider.channelExists(groupeChannelName);
-	}
-
-	private printGroupChannelEntry() {
-		if (this.channelArrayProvider.getChannelEntrys()) {
-			console.log(this.channelArrayProvider.getChannelEntrys());
-		}
-	}
-
 }

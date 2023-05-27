@@ -31,7 +31,6 @@ export class ModalService {
 
   isModalVisible(id: string): boolean{
 	const bool = Boolean(this.modals.find(element => element.id === id)?.visible)
-	console.log('visibility ' + bool)
     return bool;
     // return !!this.modals.find(element => element.id === id)?.visible
     //? is called optional chaining to prevent segfault so to say

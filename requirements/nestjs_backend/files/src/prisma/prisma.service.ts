@@ -177,6 +177,9 @@ export class PrismaService extends PrismaClient {
   async getHistory(intra: string){
 	const user = await this.user.findUnique({ include: { matches_left: true, matches_right: true }, where: { intra_name: intra } });
 
+	if (!user)
+		return;
+
 	let matches: Match[] = [];
 
 	if (!user.matches_left.length)
@@ -202,6 +205,9 @@ export class PrismaService extends PrismaClient {
 
   async getUserdata(intra: string){
 	const user_data = await this.user.findUnique({ include: { matches_left: true, matches_right: true }, where: { intra_name: intra } });
+
+	if (!user_data)
+		return;
 
 	let win: number = 0;
 	let loss: number = 0;

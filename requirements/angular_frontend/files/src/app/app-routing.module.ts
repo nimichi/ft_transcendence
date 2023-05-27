@@ -44,6 +44,10 @@ const routes: Routes = [{
   component: DisplayComponent
 },
 {
+	path: 'display/:intra',
+	component: DisplayComponent
+},
+{
   path: 'history',
   component: HistoryComponent
 },

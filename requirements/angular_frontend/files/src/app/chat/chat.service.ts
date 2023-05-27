@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SocketService } from '../socket/socket.service';
 
 
@@ -17,11 +18,17 @@ export class ChatService {
 
   public selectedChat: string = this.chatList[0].name;
 
-  constructor(private socket: SocketService){
-	  this.socket.socketSubscribe('chatrecv', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
-	  this.socket.socketSubscribe('chatrecvR', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'right'));
-    this.socket.socketSubscribe('styledList', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
-	  socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
+  constructor(private socket: SocketService, private router: Router){
+	socket.socketSubscribe('chatrecv', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
+	socket.socketSubscribe('chatrecvR', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'right'));
+    socket.socketSubscribe('styledList', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
+    socket.socketSubscribe('deleteChatRoom', (chatRoomName: string) => this.deleteChatRoom(chatRoomName, 'right'));
+	socket.socketSubscribe('navtoprofile', (intra: string) => this.navToProfile(intra));
+	socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
+  }
+
+  navToProfile(intra: string){
+	this.router.navigate(['/display/' + intra]);
   }
 
   selectChat(chat: {name: string, msgs: {msg: string, align: string}[]}, event: Event){
@@ -53,6 +60,15 @@ export class ChatService {
     const chat = {name: msg.to, msgs: msgList};
     this.chatList.push(chat);
 	  console.log(this.msgList);
+  }
+
+  deleteChatRoom(chatRoomName: string, align: string) {
+    const index = this.chatList.findIndex((chat) => chat.name === chatRoomName);
+    if(index !== -1) {
+      this.selectedChat = this.chatList[0].name;
+      this.chatList.splice(index, 1);
+      return;
+    }
   }
 
   searchControl = new FormControl ('')
