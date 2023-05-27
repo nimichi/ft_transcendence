@@ -10,6 +10,6 @@ export class UploadImgGateway {
 		const [login] = client.rooms;
 
 		const ret = this.uploadImgService.uploadImg(login, payload);
-		console.log(ret);
+		console.log("File name:", ret);
 	}
 }

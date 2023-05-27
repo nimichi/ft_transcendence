@@ -137,7 +137,7 @@ export class UserComponent {
 				'file': file,
 				'ext': file.type,
 			};
-			this.socket.requestEvent('userpic', obj, () => {});
+			this.socket.emitEvent('userpic', obj);
 
 			// this.intraPic = URL.createObjectURL(file)
 			// console.log(this.intraPic)
