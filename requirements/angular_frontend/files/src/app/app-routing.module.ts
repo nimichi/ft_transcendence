@@ -35,6 +35,10 @@ const routes: Routes = [{
   component: GameComponent
 },
 {
+	path: 'game/:gameid/:powup',
+	component: GameComponent
+},
+{
   path: 'display',
   component: DisplayComponent
 },

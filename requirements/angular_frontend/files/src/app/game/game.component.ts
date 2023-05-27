@@ -3,6 +3,7 @@ import { SocketService } from '../socket/socket.service';
 import { ChatService } from '../chat/chat.service';
 import { ModalService } from '../services/modal.service';
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 interface IObject{
 	x: number,
@@ -49,12 +50,13 @@ export class GameComponent {
 
   private context!: CanvasRenderingContext2D;
 
-  constructor(private socketService: SocketService, private router: Router, public chat: ChatService, public gameEndModal: ModalService) {
+  constructor(private socketService: SocketService, private router: Router, public chat: ChatService, public gameEndModal: ModalService, private activatedRoute: ActivatedRoute) {
     socketService.socketSubscribe('newbarposition', (y: number) => this.newBarPosition(y))
 	socketService.socketSubscribe('newballposition', (pos: {x: number, y: number, xv: number, yv: number}) => this.newBallPosition(pos))
 	socketService.socketSubscribe('score', (score: {left: number, right: number}) => this.updateScore(score))
 	socketService.socketSubscribe('countdown', (data: {left: string, right: string, gameid: string}) => this.startCountdown(data))
 	socketService.socketSubscribe('gameresult', (name: string) => this.getResult(name))
+	console.log('game constructor called')
   }
 
   public ngOnInit () {
@@ -63,8 +65,15 @@ export class GameComponent {
 		this.router.navigate(['']);
 		return;
 	}
+
+	this.activatedRoute.params.subscribe((params: any) => {
+		if (params.gameid && params.powup){
+			this.waitForPrivateGame(params.gameid, params.powup);
+			console.log('privgame');
+		}
+	});
+
     this.gameEndModal.register('gameEnd')
-    // this.startCountdown()
   }
 
   initializeGameObjects() {
@@ -396,11 +405,15 @@ export class GameComponent {
   }
 
   waitForPowupGame(){
-	this.socketService.requestEvent("initgame", true, (isLeft: boolean) => this.setIsLeft(isLeft))
+	this.socketService.requestEvent("initprivgame", true, (isLeft: boolean) => this.setIsLeft(isLeft))
 	console.log('emit initgame w powup ' + Math.random() )
     this.showButton = false
 	this.showPowerUps = true
 	this.waiting = true
+  }
+
+  waitForPrivateGame(gameid: string, powup: boolean){
+	this.socketService.requestEvent("initgame", {gameid: gameid, powup: powup}, (isLeft: boolean) => this.setIsLeft(isLeft))
   }
 
   setIsLeft(isLeft: boolean){

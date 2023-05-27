@@ -19,6 +19,7 @@ export class GameGateway {
   private queue: Socket|null = null;
   private powupqueue: Socket|null = null;
   private games: Map<string, Game> = new Map<string, Game>()
+  private pirvqueue: Map<string, Socket> = new Map<string, Socket>()
   private gamecounter: number = 0;
   constructor(private GameService: GameService, private prismaService: PrismaService, private socketGateway: SocketGateway) {
   }
@@ -62,6 +63,18 @@ export class GameGateway {
 	this.socketGateway.setUserState(game.left, 1);
 	this.socketGateway.setUserState(game.right, 1);
 	this.games.delete(gameid)
+  }
+
+  @SubscribeMessage('initprivgame')
+  private async initPrivGame(client: any, payload: {gameid: string, powup: boolean}){
+	const queueItem = this.pirvqueue.get(payload.gameid)
+	if (!queueItem){
+		this.pirvqueue.set(payload.gameid, client);
+		return true;
+	}
+	this.startGame(queueItem[1].client, client, payload.powup);
+	this.pirvqueue.delete(payload.gameid)
+	return false;
   }
 
   @SubscribeMessage('barposition')

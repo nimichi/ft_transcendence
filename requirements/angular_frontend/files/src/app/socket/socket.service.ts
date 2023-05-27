@@ -51,11 +51,16 @@ export class SocketService {
 			auth: { token: code }
 		});
 		this.socket.on('disconnect', () => this.disconnectSocket());
+		this.socket.on('navtoprivgame', (gameid:  {gameid: string, powup: boolean}) => this.navToPrivGame(gameid));
 		this.socket.on('connect_error', (err: any) => failCallback(err));
 		this.callback.forEach((callback) => {
 			if (this.socket)
 				this.socket.on(callback.eventName, callback.function);
 		});
+	}
+
+	navToPrivGame(payload: {gameid: string, powup: boolean}){
+		this.router.navigate(['/game', payload.gameid, payload.powup ]);
 	}
 
 	disconnectSocket(){

@@ -16,4 +16,5 @@ import { ChatModule } from '../chat/chat.module';
 	SocketModule
   ]
 })
-export class GameModule { }
+export class GameModule {
+}

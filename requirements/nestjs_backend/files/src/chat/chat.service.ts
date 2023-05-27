@@ -61,6 +61,8 @@ export class ChatService {
 			}
 			else if(fullCommand[0].includes("/game")) {
 				const intra2: string = fullCommand[1];
+				client.to(intra2).emit('navtoprivgame',{gameid: intra + intra2, powup: true})
+				client.emit('navtoprivgame',{gameid: intra + intra2, powup: true})
 				//TODO: Type youre code here
 				console.log("play game: " + intra + " vs " + intra2);
 			}
