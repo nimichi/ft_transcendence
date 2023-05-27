@@ -50,8 +50,15 @@ export class channelDTO {
 	readonly owner: string;
 	readonly hidden: boolean;
 	channelName: string;
-	admin: string;
+	admin: string[];
+	banned: string[];
+	muted: Map<string, number>;
 	password: string | undefined;
 	
 
+}
+
+export class Block {
+	readonly fromUser: string;
+	readonly 
 }

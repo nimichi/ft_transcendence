@@ -1,47 +1,81 @@
 import { Injectable } from '@nestjs/common';
+import { DirectFrindsDTO } from 'src/chat/dtos/DirectFriendsDTO';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class ChannelArrayProvider {
 	private channels: string[] = [];
-	private channelEntrys: Map<string, string[]> = new Map<string, string[]>() ;
-	private userList: string[] = [];
+	private channelEntrys: Map<string, Socket[]> = new Map<string, Socket[]>();
+	private userList : Map<string, string[]> = new Map<string, string[]>();
 
+	deleteUserToDiconnect(intra: string) {
+		//einmal in userlist
+		const tmpMap = this.userList;
+		const tmpMap2 = this.channelEntrys;
+		
+		this.userList = this.eraseAllOcurenceInMap(intra, tmpMap);
+		//einmal in channelEntry
+		this.channelEntrys = this.eraseAllOcurenceInMap(intra, tmpMap2);
+	}
 
-	getUserList(): string[] {
+	private eraseAllOcurenceInMap(userToDelete: string, sourceMap: Map<string, string[]>) : Map<string, string[]> {
+		for(const [key, value] of this.userList) {
+			const updataValues = value.filter((val) => val !== userToDelete);
+			if(key === userToDelete || updataValues.length === 0) {
+				sourceMap.delete(userToDelete);
+			} else {
+				sourceMap.set(userToDelete, updataValues);
+			}
+		}
+		return sourceMap;
+	}
+
+	getUserListMap(): Map<string, string[]> {
 		return this.userList;
 	}
 
-	addUserToList(userName: string) :void {
-		this.userList.push(userName);
+	getUserListForThisUser(requestedUser: string): string[] {
+		return this.userList.get(requestedUser);
 	}
 
-	deleteUserFromList(userName: string): void {
-		if(this.userList.includes(userName)) {
-			const index = this.userList.indexOf(userName);
-			this.userList.splice(index, 1);
+	addUserToList(requestedUser: string, userName: string) :void {
+		if(this.userExists(requestedUser, userName) === -1 ) {
+			const existingUserList: string[] = this.userList.get(requestedUser);
+			existingUserList.push(userName);
+		}
+		if(this.userExists(userName, requestedUser) === -1) {
+			const existingUserList: string[] = this.userList.get(userName);
+			existingUserList.push(requestedUser);
 		}
 	}
 
-	userExists(userName: string) : boolean {
-		return this.userList.includes(userName);
+	createUserEntry(requestedUser: string) : boolean{
+		if(!this.userList.has(requestedUser)) {
+			this.userList.set(requestedUser, []);
+			return true;
+		}
+		return false;
 	}
 
-	getChannelEntrys(): Map<string , string[]> {
-		return this.channelEntrys;
+	deleteUserFromList(requestedUser: string, userName: string): void {
+		const existingUserListForKey = this.userList.get(requestedUser);
+		const updatedUserListForKey = existingUserListForKey.filter((user) => user !== userName);
+		this.userList.set(requestedUser, updatedUserListForKey);
 	}
 
-	addChannelEntry(userList: string[], channelName: string): void {
-		this.channelEntrys.set(channelName, userList);
+	userExists(requesteduser: string,userName: string) : number {
+		const existingUserList = this.userList.get(requesteduser);
+		return existingUserList.indexOf(userName);
 	}
 
-	deleteChannelEntry(channelName: string): void {
-		this.channelEntrys.delete(channelName);
-	}
+	getChannelEntrys(): Map<string , Socket[]> {return this.channelEntrys;}
+	addChannelEntry(userList: Socket[], channelName: string): void {this.channelEntrys.set(channelName, userList);}
+	deleteChannelEntry(channelName: string): void {this.channelEntrys.delete(channelName);}
 
-	addUserToChannel(channelName: string, userName: string): void{
+	addUserToChannel(channelName: string, userSocket: Socket): void{
 		const userListToUpadte = this.channelEntrys.get(channelName);
 		if(userListToUpadte !== undefined) {
-			userListToUpadte.push(userName);
+			userListToUpadte.push(userSocket);
 			this.deleteChannelEntry(channelName);
 			this.addChannelEntry(userListToUpadte, channelName);
 		}

@@ -21,6 +21,7 @@ export class ChatService {
 	  this.socket.socketSubscribe('chatrecv', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
 	  this.socket.socketSubscribe('chatrecvR', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'right'));
     this.socket.socketSubscribe('styledList', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
+    this.socket.socketSubscribe('deleteChatRoom', (chatRoomName: string) => this.deleteChatRoom(chatRoomName, 'right'));
 	  socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
   }
 
@@ -53,6 +54,15 @@ export class ChatService {
     const chat = {name: msg.to, msgs: msgList};
     this.chatList.push(chat);
 	  console.log(this.msgList);
+  }
+
+  deleteChatRoom(chatRoomName: string, align: string) {
+    const index = this.chatList.findIndex((chat) => chat.name === chatRoomName);
+    if(index !== -1) {
+      this.selectedChat = this.chatList[0].name;
+      this.chatList.splice(index, 1);
+      return;
+    }
   }
 
   searchControl = new FormControl ('')
