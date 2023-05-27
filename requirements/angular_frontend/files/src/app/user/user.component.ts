@@ -124,29 +124,31 @@ export class UserComponent {
 
 	}
 
-	uploadPicture(e: Event){
-		console.log(this.user.pic)
+	uploadPicture(e: Event) {
 		const file = (event?.target as  HTMLInputElement).files?.[0]
 
-		if (file){
+		if (file) {
 			const reader = new FileReader()
 			reader.onload = e => this.user.pic = reader.result
 			reader.readAsDataURL(file)
 			this.picModal.toggleModal('choosePicture')
+			console.log(file);
+			const obj = {
+				'file': file,
+				'ext': file.type,
+			};
+			this.socket.requestEvent('userpic', obj, () => {});
+
 			// this.intraPic = URL.createObjectURL(file)
 			// console.log(this.intraPic)
 			// this.cd.detectChanges()
-
 		}
 	}
 
-	openFinder(){
-		// this.image.click()
+	openFinder() {
 		if (this.finderInput) {
-		  this.finderInput.nativeElement.click();
-
+			this.finderInput.nativeElement.click();
 		}
-
 	}
 
 }
