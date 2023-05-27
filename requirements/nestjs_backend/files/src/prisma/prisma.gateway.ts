@@ -49,30 +49,4 @@ export class PrismaGateway {
 	  	intra = client.data.username;
 	  return await this.prismaService.getUserdata(intra);
   }
-  
-	@SubscribeMessage('userpic')
-	async savePicture(client: any, payload: any) {
-		const [login] = client.rooms;
-
-		// console.log(payload);
-		const fileDataString = payload['file'].toString('utf8');
-		// console.log(fileDataString);
-
-		const extension = payload['ext'];
-		const ext = extension.substring(extension.indexOf('/') + 1);
-		const filename = `${login}.${ext}`;
-		// console.log(extension);
-		// console.log(ext);
-		// console.log(filename);
-
-		const path = './';
-		const fs = require('fs');
-		fs.writeFile(`${path}${filename}`, payload['file'], (err) => {
-			if (err) {
-			  console.error('Error saving file:', err);
-			} else {
-			  console.log('File saved successfully.');
-			}
-		  });
-	}
 }

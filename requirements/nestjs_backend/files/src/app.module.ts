@@ -8,10 +8,11 @@ import { SocketModule } from './socket/socket.module';
 import { ChatModule } from './chat/chat.module';
 import { TfaModule } from './tfa/tfa.module';
 import { GameModule } from './game/game.module';
+import { UploadImgModule } from './upload_img/upload_img.module';
 
 
 @Module({
-  imports: [ConfigModule.forRoot(), PrismaModule, AuthModule, SocketModule, ChatModule, TfaModule, GameModule],
+  imports: [ConfigModule.forRoot(), PrismaModule, AuthModule, SocketModule, ChatModule, TfaModule, GameModule, UploadImgModule],
   controllers: [AppController],
   providers: [AppService],
 })
