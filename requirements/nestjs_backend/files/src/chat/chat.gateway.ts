@@ -55,6 +55,8 @@ export class ChatGateway {
 		}
 		else if( payload.chat !== "!cmd" && payload.chat.includes("#")) { //nachricheten in gruppe 
 			const constructedMessage = intra+": " + payload.msg;
+			if(responseDTO.msg === "Not Authorized")
+				return responseDTO.msg;
 			client.to(payload.chat).emit(responseDTO.modus, {to: payload.chat, msg: constructedMessage})
 		}
 		return payload.msg;

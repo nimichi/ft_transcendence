@@ -17,7 +17,7 @@ export class ChatService {
 	};
 
 	private setChannelDTO(owner: string, admin: string, channelName: string): channelDTO {
-		return new channelDTO(owner, channelName, [admin], false, "ssss");
+		return new channelDTO(owner, channelName, [admin], false,"ssss",[]);
 	}
 
 	async reciveMsg(intra: string, client: any, MessageTo: string, message: string) : Promise<chatEmitDTO>{
@@ -61,14 +61,13 @@ export class ChatService {
 			}
 		}
 		else if(MessageTo.includes("#")) {
-			console.log("here in info length: "+ fullCommand.length);
 			if(fullCommand[0].includes("/getinfo")) {
 				if(this.hasRights(intra, MessageTo)) {
 					const channelInfo : string = JSON.stringify (this.channelDto.find((dto) => dto.channelName === MessageTo));
 					console.log("channelInfo : " + channelInfo);
 					return new chatEmitDTO('styledList', fullCommand[1], [channelInfo, 'left']);
 				}
-				return new chatEmitDTO('chatrecv', MessageTo, ["Error: no Rights to set Admin", "left"]);
+				return new chatEmitDTO('chatrecv', MessageTo, "not enough rights");
 			}
 			else if (fullCommand[0].includes("/setadmin")) { // /setadmin mnies #ch1
 				if (fullCommand.length === 3) {
@@ -86,30 +85,26 @@ export class ChatService {
 				return new chatEmitDTO('chatrecv', MessageTo, ["Error: Wrong format\n</setadmin intraname channelName>", "left"]);
 			}
 			else if (fullCommand[0].includes("/getuserlist") && this.hasRights(intra, MessageTo)) {
-				console.log("get userList is accessed MessageTo: "+ MessageTo);
-				return new chatEmitDTO('chatrecv', MessageTo, "test"/*Here socketGatway.findUserList*/);
-			}else {
-				return new chatEmitDTO('chatrecv', MessageTo, ["Error: not Authorized", 'left']);
+				const list: string[] = ['mnies', 'dmontema', 'mjeyavat'];
+				return new chatEmitDTO('chatrecv', MessageTo, list);
+			}
+			else if (fullCommand[0].includes("/ban") && this.hasRights(intra, MessageTo)) {
+				
+				this.channelDto.find((c) => c.channelName === MessageTo).banned.push(fullCommand[1]);
+				return new chatEmitDTO('chatrecv',MessageTo, "user was banned");
+			} 
+			else {
+				if(this.channelDto.find((c) => c.channelName === MessageTo).banned.findIndex((b) => b === intra) === -1) {
+					return new chatEmitDTO('chatrecv', MessageTo, "");
+				}
+				console.log("WE WANT WE WANT TO ...");
+				return new chatEmitDTO('chatrecv', MessageTo, "Not Authorized");
 			}
 		}
-
+		
 		return this.sendPrivateMessage(intra, MessageTo, message);
 			
 	}
-
-	// private deleteUser(intra: string, userToDelete: string) {
-	// 	if(this.channelArrayProvider.getUserListForThisUser(intra).length !== 0) {
-	// 		this.channelArrayProvider.deleteUserFromList(intra,userToDelete);
-	// 	}
-	// }
-
-	// async disconnectUser(intra: string) {
-	// 	this.channelArrayProvider.deleteUserToDiconnect(intra);
-	// }
-
-	// async connectUser(intra: string) {
-	// 	this.channelArrayProvider.createUserEntry(intra);
-	// }
 
 	private hasRights(askingClient: string, channelName:string) :boolean {
 		const idx = this.channelDto.findIndex((dto) => (
