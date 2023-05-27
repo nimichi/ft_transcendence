@@ -22,11 +22,15 @@ export class PrismaGateway {
   }
 
   @SubscribeMessage('updatefullname')
-  async updateFullName(client: any, payload: string): Promise<string>{
-	const [login] = client.rooms;
-
-	this.prismaService.updateFullName(login, payload)
-	return payload
+  async updateFullName(client: any, newName: string): Promise<{name: string, success: boolean}>{
+	if (!await this.prismaService.findUserByIntra(client.data.username)) {
+		return {name: "Error! User not found.", success: false};
+	}
+	if (await this.prismaService.checkIfFullnameExists(newName)){
+		return {name: "Name already in use!", success: false}
+	}
+	await this.prismaService.updateFullName(client.data.username, newName)
+	return {name: newName, success: true}
   }
 
   @SubscribeMessage('gethistory')

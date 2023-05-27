@@ -24,6 +24,13 @@ export class PrismaService extends PrismaClient {
 		return ({ type: 'existing', value: existing_entry });
 	}
 
+	let i: number = 1;
+	const fullname = data.full_name
+	while(await this.checkIfFullnameExists(data.full_name)){
+		data.full_name = fullname + i.toString();
+		i++;
+	}
+
 	const new_entry = await this.user.create({ data });
 
 	console.log("User did not exist - creating and signing up User...");
@@ -37,6 +44,14 @@ export class PrismaService extends PrismaClient {
   async findUserByIntra(intra_name: string): Promise<User | null> {
 	const user = await this.user.findUnique({ where: { intra_name } });
 	return (user || null);
+  }
+
+  async checkIfFullnameExists(full_name: string): Promise<boolean> {
+	const user = await this.user.findUnique({ where: { full_name } });
+	if (user)
+		return true;
+	else
+		return false;
   }
 
   async addFriend(client: Socket, friend_intra: string) {
@@ -121,7 +136,7 @@ export class PrismaService extends PrismaClient {
   async updateFullName(intra_name: string, fullName: string) {
 	if (this.findUserByIntra(intra_name) === null) {
 		console.log("User not found.");
-		return ;
+		return false;
 	}
 	const updatedUser = await this.user.update({
 		where: { intra_name: intra_name},

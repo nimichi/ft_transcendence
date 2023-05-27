@@ -30,6 +30,8 @@ export class UserComponent {
 	public qrCode: string = ''
 	public verified: boolean = true
 
+	public showInUseMsg: boolean = false
+
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketService, private router: Router,
 		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService,
 		public chat: ChatService, private cd: ChangeDetectorRef) {
@@ -67,7 +69,7 @@ export class UserComponent {
 		this.picModal.unregister('choosePicture')
 		this.tfaModal.unregister('registerTFA')
 
-		
+
 	}
 
 	enableTFA(){
@@ -107,16 +109,23 @@ export class UserComponent {
 
 	initChangeName($event: Event){
 		this.newName = this.user.fullName;
+		this.showInUseMsg = false;
 		this.nameModal.toggleModal('chooseName')
 	}
 
 	submitName(){
-		this.user.fullName = this.newName;
-		this.socket.requestEvent('updatefullname', this.user.fullName, (name: string) => this.changeName(name));
+
+		this.socket.requestEvent('updatefullname', this.newName, (response: {name: string, success: boolean}) => this.changeName(response));
 	}
 
-	changeName(name: string){
-		this.nameModal.toggleModal('chooseName')
+	changeName(response: {name: string, success: boolean}){
+		if (response.success){
+			this.showInUseMsg = false;
+			this.nameModal.hideModal('chooseName')
+			this.user.fullName = response.name;
+		}
+		else
+			this.showInUseMsg = true;
 	}
 
 	changePic($event: Event){

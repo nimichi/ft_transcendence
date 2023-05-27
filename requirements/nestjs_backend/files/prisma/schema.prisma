@@ -14,7 +14,7 @@ datasource db {
 
 model User {
 	intra_name		String	@unique @id
-	full_name		String
+	full_name		String	@unique
 	picture			String?
 	tfa				Boolean
 	tfa_secret		String?
