@@ -9,7 +9,7 @@ interface IModal {
   providedIn: 'root'
 })
 export class ModalService {
-  private modals: IModal[] = []
+  public modals: IModal[] = []
 
   constructor() { }
 
@@ -18,19 +18,21 @@ export class ModalService {
       id,
       visible: false
     })
+	console.log('model length: ' + this.modals.length)
   }
-
-
 
   unregister(id: string){
     this.modals = this.modals.filter(
       element => element.id !== id
     )
+	console.log(this.modals)
   }
   //puts all but the id objct in a new array
 
   isModalVisible(id: string): boolean{
-    return Boolean(this.modals.find(element => element.id === id)?.visible)
+	const bool = Boolean(this.modals.find(element => element.id === id)?.visible)
+	console.log('visibility ' + bool)
+    return bool;
     // return !!this.modals.find(element => element.id === id)?.visible
     //? is called optional chaining to prevent segfault so to say
     //beide varianten sind dafur da um boolean zu forcen

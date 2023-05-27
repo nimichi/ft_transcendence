@@ -34,6 +34,6 @@ model Match {
 	left_score		Int
 	right_score		Int
 	powerup			Boolean
-	left_level		Int
-	right_level 	Int
+	left_level		Float
+	right_level 	Float
 }

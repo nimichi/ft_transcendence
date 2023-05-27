@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
-import { SocketModule } from '../socket/socket.module';
-import { TargetService } from '../services/target.service';
 import { SocketService } from '../socket/socket.service';
 
 @Component({
@@ -13,36 +11,17 @@ import { SocketService } from '../socket/socket.service';
   <button (click)="makeRequest()">Make Request</button>
 `
 })
-
-
-
 export class LoginComponent {
-  constructor(private http: HttpClient, private socket: SocketService, private target: TargetService) {
-	console.log("Socket state is: " + this.socket.socketState());
-	console.log(this.target.getTarget());
-	if (this.target.getTarget() != "")
-	{
-		console.log(this.target.getTarget());
-		if(!this.socket.socketState())
-			this.makeRequest();
-		else
-			window.location.href = this.target.getTarget();
-	}
+  constructor(private http: HttpClient, private socket: SocketService) {
   }
 
   ngOnInit(){
-
     if (this.socket.socketState())
 		  window.location.href = "/user";
     console.log(this.socket.socketState());
-
   }
 
-  jsongetvalue: any
-
-
-
-  makeRequest() {
+  makeRequest(){
 	const backendAdr: string = this.socket.getBackendAdr()
 
     const header = new HttpHeaders({
@@ -56,10 +35,5 @@ export class LoginComponent {
 	});
 
 
-    };
-    //query snippet abgreifen
-    //neue get request an die api mit dem query strimg schicken
-
-
-    //an jsongetvalue weiterleiten!:)
+  }
 }

@@ -6,7 +6,4 @@ import { SocketService } from './socket.service';
   providers: [SocketService]
 })
 export class SocketModule {
-	constructor(private socketService: SocketService){
-		console.log('SocketModule loaded.');
-	}
 }

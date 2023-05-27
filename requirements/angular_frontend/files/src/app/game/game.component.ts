@@ -4,6 +4,7 @@ import { ChatService } from '../chat/chat.service';
 import { ModalService } from '../services/modal.service';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
+import { SharedModule } from '../shared/shared.module';
 
 interface IObject{
 	x: number,
@@ -48,21 +49,21 @@ export class GameComponent {
   message: string = "Game ended unexpectedly"
   waiting: boolean = false
 
+  public showPrompt: boolean = false;
+
   private context!: CanvasRenderingContext2D;
 
-  constructor(private socketService: SocketService, private router: Router, public chat: ChatService, public gameEndModal: ModalService, private activatedRoute: ActivatedRoute) {
+  constructor(private socketService: SocketService, private router: Router, public chat: ChatService, private activatedRoute: ActivatedRoute) {
     socketService.socketSubscribe('newbarposition', (y: number) => this.newBarPosition(y))
 	socketService.socketSubscribe('newballposition', (pos: {x: number, y: number, xv: number, yv: number}) => this.newBallPosition(pos))
 	socketService.socketSubscribe('score', (score: {left: number, right: number}) => this.updateScore(score))
 	socketService.socketSubscribe('countdown', (data: {left: string, right: string, gameid: string}) => this.startCountdown(data))
 	socketService.socketSubscribe('gameresult', (name: string) => this.getResult(name))
-	console.log('game constructor called')
   }
 
   public ngOnInit () {
 	this.initializeGameObjects();
 	if (!this.socketService.socketState()){
-		this.router.navigate(['']);
 		return;
 	}
 
@@ -72,8 +73,6 @@ export class GameComponent {
 			console.log('privgame');
 		}
 	});
-
-    this.gameEndModal.register('gameEnd')
   }
 
   initializeGameObjects() {
@@ -423,7 +422,7 @@ export class GameComponent {
 
   gameInteruption(){
 	this.message = "connection lost";
-	this.gameEndModal.showModal("gameEnd")
+	this.showPrompt = true;
 	this.socketService.socketUnsubscribe('gameinteruption');
 	this.resetField();
 	console.log("gameInteruption called")
@@ -431,9 +430,8 @@ export class GameComponent {
 
   getResult(name: string){
 	this.socketService.socketUnsubscribe('gameinteruption');
-	console.log("gaame finished")
 	this.message = name + ' won!'
-	this.gameEndModal.showModal("gameEnd")
+	this.showPrompt = true;
   }
 
   resetField(){
@@ -457,14 +455,14 @@ export class GameComponent {
   }
 
   endGame(){
-    this.gameEndModal.hideModal("gameEnd")
+	this.showPrompt = false;
 	this.resetField();
+	this.router.navigate(['/game']);
   }
 
   ngOnDestroy(){
 	this.socketService.emitEvent('leftgamepage', this.gameid);
 	this.resetField()
-    this.gameEndModal.unregister('gameEnd');
 	this.socketService.socketUnsubscribe('gameinteruption');
 	this.socketService.socketUnsubscribe('newbarposition')
 	this.socketService.socketUnsubscribe('newballposition')

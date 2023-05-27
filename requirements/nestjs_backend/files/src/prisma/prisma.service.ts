@@ -152,8 +152,8 @@ export class PrismaService extends PrismaClient {
 	return (user.tfa_secret);
   }
 
-  async getUserLevel(inrta: string){
-	return 0;
+  async getUserLevel(intra: string){
+	return (await this.getUserdata(intra)).level;
   }
 
   async addMatchResult(data: any){

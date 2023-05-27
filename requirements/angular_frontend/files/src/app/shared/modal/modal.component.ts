@@ -5,14 +5,13 @@ import { ModalService } from 'src/app/services/modal.service';
   selector: 'app-modal',
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.css'],
-  // providers: [ModalService]
 })
 export class ModalComponent {
 
   @Input() modalID = ''
 
   constructor(
-    public modal: ModalService, 
+    public modal: ModalService,
     public el: ElementRef){
   }
 

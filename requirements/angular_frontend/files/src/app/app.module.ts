@@ -30,7 +30,6 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     FriendsComponent,
     RedirectComponent,
     GameComponent,
-    // SearchbarComponent,
     DisplayComponent,
     HistoryComponent,
   ],
@@ -42,9 +41,9 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     UserModule,
     HttpClientModule,
     BrowserAnimationsModule,
-	  ReactiveFormsModule,
+	ReactiveFormsModule,
     FormsModule
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

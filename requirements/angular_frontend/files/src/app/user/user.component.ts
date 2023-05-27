@@ -34,8 +34,7 @@ export class UserComponent {
 	public nameErrMsg: string = ""
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketService, private router: Router,
-		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService,
-		public chat: ChatService, private cd: ChangeDetectorRef) {
+		public modalService: ModalService, public chat: ChatService, private cd: ChangeDetectorRef) {
 		this.user = {
 			pic: null,
 			intra: "",
@@ -51,12 +50,9 @@ export class UserComponent {
 			this.router.navigate([''])
 		}
 
-		this.nameModal.register('chooseName')
-		this.picModal.register('choosePicture')
-		this.tfaModal.register('registerTFA')
-
-		//hier funcion die das modal aktiviert, wenn man auf den button klickt :)
-		//function muss dann im template eingebaut werden
+		this.modalService.register('chooseName')
+		this.modalService.register('choosePicture')
+		this.modalService.register('registerTFA')
 
 		this.socket.requestEvent("userdata", null, (data: User) => this.callbackUserData(data))
 	}
@@ -66,9 +62,9 @@ export class UserComponent {
 	}
 
 	ngOnDestroy(): void {
-		this.nameModal.unregister('chooseName')
-		this.picModal.unregister('choosePicture')
-		this.tfaModal.unregister('registerTFA')
+		this.modalService.unregister('chooseName')
+		this.modalService.unregister('choosePicture')
+		this.modalService.unregister('registerTFA')
 
 
 	}
@@ -80,7 +76,7 @@ export class UserComponent {
 		//backend call
 		//store qr code in varible
 
-		this.tfaModal.toggleModal('registerTFA')
+		this.modalService.showModal('registerTFA')
 	}
 
 	setQrCode(qrCode: string){
@@ -94,7 +90,7 @@ export class UserComponent {
 	closeTFA(verified: boolean){
 		if(verified){
 			this.verified = true
-			this.tfaModal.toggleModal('registerTFA')
+			this.modalService.hideModal('registerTFA')
 		}
 		else{
 			this.verified = false
@@ -111,7 +107,7 @@ export class UserComponent {
 	initChangeName($event: Event){
 		this.newName = this.user.fullName;
 		this.showNameErrMsg = false;
-		this.nameModal.toggleModal('chooseName')
+		this.modalService.showModal('chooseName')
 	}
 
 	submitName(){
@@ -122,7 +118,7 @@ export class UserComponent {
 	changeName(response: {name: string, success: boolean}){
 		if (response.success){
 			this.showNameErrMsg = false;
-			this.nameModal.hideModal('chooseName')
+			this.modalService.hideModal('chooseName')
 			this.user.fullName = response.name;
 		}
 		else
@@ -131,7 +127,7 @@ export class UserComponent {
 	}
 
 	changePic($event: Event){
-		this.picModal.toggleModal('choosePicture')
+		this.modalService.showModal('choosePicture')
 
 	}
 
@@ -143,7 +139,7 @@ export class UserComponent {
 			const reader = new FileReader()
 			reader.onload = e => this.user.pic = reader.result
 			reader.readAsDataURL(file)
-			this.picModal.toggleModal('choosePicture')
+			this.modalService.hideModal('choosePicture')
 			// this.intraPic = URL.createObjectURL(file)
 			// console.log(this.intraPic)
 			// this.cd.detectChanges()

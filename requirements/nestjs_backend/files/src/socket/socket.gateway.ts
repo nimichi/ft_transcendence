@@ -2,7 +2,6 @@ import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnectio
 import { Socket, Server } from 'socket.io';
 import { SocketService } from './socket.service';
 import { PrismaService } from '../prisma/prisma.service';
-// import { SocketService } from './socket.service';
 
 @WebSocketGateway()
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
