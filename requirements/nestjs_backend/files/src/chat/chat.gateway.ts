@@ -4,7 +4,7 @@ import { Socket } from 'socket.io';
 import { chatEmitDTO } from './dtos/MessageTypeDTO';
 
 @WebSocketGateway()
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway {
 
 	constructor(private chat: ChatService){}
 
@@ -60,17 +60,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		return payload.msg;
 	}
 
-	handleConnection(client: Socket) {
-		let intra;
-		[intra] = client.rooms;
-		this.chat.disconnectUser(intra);
-	}
+	// handleConnection(client: Socket) {
+	// 	let intra;
+	// 	[intra] = client.rooms;
+	// 	this.chat.disconnectUser(intra);
+	// }
 
-	handleDisconnect(client: Socket) {
-		let intra;
-		[intra] = client.rooms;
-		this.chat.connectUser(intra);
-	}
+	// handleDisconnect(client: Socket) {
+	// 	let intra;
+	// 	[intra] = client.rooms;
+	// 	this.chat.connectUser(intra);
+	// }
 
 	private responder(client: Socket, modus: string, MessageToRoom: string, intra: string): string {
 		console.log(MessageToRoom.includes("#"))

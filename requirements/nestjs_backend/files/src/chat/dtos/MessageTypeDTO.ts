@@ -38,13 +38,13 @@ export class channelDTO {
 	constructor(
 		owner: string,
 		channelName: string,
-		admin: string,
+		admin: string[],
 		hidden: boolean, //private heist kommt nicht in der offizielen list vor
 		password: string | undefined, //kann für public und private sein
 	){
 		this.owner = owner;
 		this.channelName = channelName;
-		this.admin = admin;
+		this.admin = [];
 		this.hidden = hidden;
 	}
 	readonly owner: string;
