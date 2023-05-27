@@ -30,7 +30,8 @@ export class UserComponent {
 	public qrCode: string = ''
 	public verified: boolean = true
 
-	public showInUseMsg: boolean = false
+	public showNameErrMsg: boolean = false
+	public nameErrMsg: string = ""
 
 	constructor(private activatedRoute: ActivatedRoute, private socket: SocketService, private router: Router,
 		public nameModal: ModalService, public picModal: ModalService, public tfaModal: ModalService,
@@ -109,7 +110,7 @@ export class UserComponent {
 
 	initChangeName($event: Event){
 		this.newName = this.user.fullName;
-		this.showInUseMsg = false;
+		this.showNameErrMsg = false;
 		this.nameModal.toggleModal('chooseName')
 	}
 
@@ -120,12 +121,13 @@ export class UserComponent {
 
 	changeName(response: {name: string, success: boolean}){
 		if (response.success){
-			this.showInUseMsg = false;
+			this.showNameErrMsg = false;
 			this.nameModal.hideModal('chooseName')
 			this.user.fullName = response.name;
 		}
 		else
-			this.showInUseMsg = true;
+			this.nameErrMsg = response.name;
+			this.showNameErrMsg = true;
 	}
 
 	changePic($event: Event){

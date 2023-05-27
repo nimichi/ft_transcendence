@@ -23,6 +23,10 @@ export class PrismaGateway {
 
   @SubscribeMessage('updatefullname')
   async updateFullName(client: any, newName: string): Promise<{name: string, success: boolean}>{
+	const re = /^[0-9A-Za-z\s\-]+$/;
+	if (!re.test(newName)) {
+		return {name: "Must contain only letters, numbers and dashes!", success: false};
+	}
 	if (!await this.prismaService.findUserByIntra(client.data.username)) {
 		return {name: "Error! User not found.", success: false};
 	}
