@@ -80,7 +80,7 @@
         </div>
       </div>
       <div class="flex justify-between items-center">
-        <h3 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ user.fullName }}</h3>
+        <h2 class="text-base font-semibold leading-7 tracking-tight text-indigo-400">{{ user.fullName }}</h2>
         <div class="h-5 w-5 text-indigo-200" (click)="initChangeName($event)">
           <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -93,52 +93,56 @@
     </button>
 
     <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-      <dt class="text-sm font-medium leading-6 text-indigo-400">Wins</dt>
+      <dt class="text-sm font-medium leading-6 text-indigo-400">Wins:</dt>
       <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0 ml-30">{{user.wins}}</dd>
-    </div>
-    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-      <dt class="text-sm font-medium leading-6 text-indigo-400">Losses</dt>
+      <dt class="text-sm font-medium leading-6 text-indigo-400">Losses:</dt>
       <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0 ml-30">{{user.losses}}</dd>
-
-    </div>
-    <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-      <dt class="text-sm font-medium leading-6 text-indigo-400">Level</dt>
+      <dt class="text-sm font-medium leading-6 text-indigo-400">Level:</dt>
       <dd class="mt-1 text-sm leading-6 text-indigo-400 sm:col-span-2 sm:mt-0 ml-30">{{user.level}}</dd>
     </div>
+
+	<!-- badges -->
+	<div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-8 sm:px-0">
+		<h2 class="text-sm font-large leading-8 text-indigo-400">Badges</h2>
+	</div>
+
+    <div class="flex py-0 px-10">
+	  <div *ngIf="3 > user.wins" >
+	    Win 3 games to earn your first badge.
+	  </div>
+      <div *ngIf="user.wins >= 3" style="margin-right:45px">
+      	<svg class="h-24 w-24 text-indigo-200" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      	  <path strokeLinecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+      	</svg>
+        3 games won!
+      </div>
+      <div *ngIf="user.wins >= 5" style="margin-right:45px">
+      	<svg class="h-24 w-24 text-indigo-200" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      	  <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+      	</svg>
+        5 games won!
+      </div>
+      <div *ngIf="user.wins >= 10">
+      	<svg class="h-24 w-24 text-indigo-200" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      	  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
+      	</svg>
+        10 games won!
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- stats -->
-<div class="flex py-8 px-4">
-  <div *ngIf="user.wins >= 3">
-    3 games won!
-    <svg class="h-24 w-24 text-indigo-200 " aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
-    </svg>
-  </div>
-  <div *ngIf="user.wins >= 5">
-    5 games won!
-    <svg class="h-24 w-24 text-indigo-200 " aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-    </svg>
-  </div>
-  <div *ngIf="user.wins >= 10">
-    10 games won!
-    <svg class="h-24 w-24 text-indigo-200 " aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
-    </svg>
-  </div>
-</div>
-</div>
+
+
 
 <!-- chat & icon  -->
 <div class="fixed bottom-0 right-0 p-4" style="z-index: 10;" (click)="openChat($event)">
     <svg class="h-12 w-12 text-indigo-200 " aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" stroke-linecap="round" stroke-linejoin="round"></path>
     </svg>
-  </div>
+</div>
 
-  <app-chat></app-chat>
+<app-chat></app-chat>
 
   <!-- <svg class="h-24 w-24 text-indigo-200 " aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
     <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
