@@ -45,9 +45,11 @@ export class channelDTO {
 	){
 		this.owner = owner;
 		this.channelName = channelName;
-		this.admin = [];
+		this.admin = admin;
+		this.muted = new Map<string, number>;
 		this.hidden = hidden;
 		this.banned = banned;
+		this.password = password;
 	}
 	readonly owner: string;
 	readonly hidden: boolean;
@@ -58,9 +60,4 @@ export class channelDTO {
 	password: string | undefined;
 	
 
-}
-
-export class Block {
-	readonly fromUser: string;
-	readonly 
 }

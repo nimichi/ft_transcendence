@@ -26,7 +26,7 @@ export class ChatGateway {
 			client.emit(responseDTO.modus, {to: payload.chat, msg: json});
 			return "";
 		}
-		else if(payload.chat.includes("#") && responseDTO.modus === 'chatrecv' && payload.msg[0] === "/") {
+		else if(payload.chat.includes("#")) {
 				const json = JSON.stringify(responseDTO.msg);
 				console.log("payload chat is: " + payload.chat);
 				console.log("ResponesDTO message json: "+ json);
@@ -44,12 +44,6 @@ export class ChatGateway {
 		else if(responseDTO.modus === 'navtoprofile') {
 			client.emit(responseDTO.modus, responseDTO.msg);
 		}
-		else if(responseDTO.modus === 'deleteChatRoom') {
-			const emitedFrom: string = payload.chat;
-			const userEmited: string = intra;
-			console.log("Chat gateway:\n\tResponse:\n\t\ToDeleteChannel: " + responseDTO.messageTo + "\nmessage: "+responseDTO.messageTo + "\nUser emited: " + userEmited +"\nEmmited from: " + emitedFrom);
-			client.emit(responseDTO.modus, responseDTO.msg);
-		}
 		else if  (payload.chat != "!cmd" && !payload.chat.includes("#")) { //direct message to user
 			console.log("modus: " + responseDTO.modus);
 			const constructedMessage = intra+ ": " + responseDTO.msg;
@@ -62,7 +56,7 @@ export class ChatGateway {
 				return responseDTO.msg;
 			client.to(payload.chat).emit(responseDTO.modus, {to: payload.chat, msg: constructedMessage})
 		}
-		return payload.msg;
+		return responseDTO.msg.toString();
 	}
 
 	// handleConnection(client: Socket) {
