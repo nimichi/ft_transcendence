@@ -60,6 +60,11 @@ export class UserComponent {
 
 	callbackUserData(userdata: User){
 		this.user = userdata
+		this.socket.requestEvent('fetchUserpic', null, (data: any) => this.callBackPictureData(data))
+	}
+
+	callBackPictureData(dataURL: string) {
+		this.user.pic = dataURL;
 	}
 
 	ngOnDestroy(): void {
@@ -139,9 +144,6 @@ export class UserComponent {
 			};
 			this.socket.emitEvent('uploadUserpic', obj);
 
-			// this.intraPic = URL.createObjectURL(file)
-			// console.log(this.intraPic)
-			// this.cd.detectChanges()
 		}
 	}
 

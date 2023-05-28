@@ -1,9 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import {	writeFile as fsWriteFile,
-			readFile as fsReadFile,
-			existsSync as fsExistsSync,
-			mkdirSync as fsMkdirSync,
-			promises as fsPromises } from 'fs';
+import { writeFile as fsWriteFile,
+		 readFile as fsReadFile,
+		 readFileSync as fsReadFileSync,
+		 existsSync as fsExistsSync,
+		 mkdirSync as fsMkdirSync,
+		 promises as fsPromises } from 'fs';
 import { HttpService } from '@nestjs/axios';
 import { Buffer } from 'buffer'
 import { throwError, map, catchError, lastValueFrom } from 'rxjs'
@@ -35,25 +36,20 @@ export class UploadImgService implements OnModuleInit {
 		try {
 		  await fsPromises.writeFile(full_path, image['file']);
 		  console.log('File saved successfully.');
-		  return full_path;
+		  return (full_path);
 		} catch (err) {
 		  console.error('Error saving file:', err);
-		  return undefined;
+		  return (undefined);
 		}
 	}
 
-	async fetchImg(file_name: string) {
-		let img: any;
-		await fsReadFile(file_name, 'utf8', (err, data) => {
-			if (err) {
-			  console.error('Error reading file:', err);
-			  return;
-			}
-			// console.log("data:", data);
-			img = data;
-		});
-		console.log("img:", img);
-		return img;
+	fetchImgAsDataURL(file_name: string) {
+		const img = fsReadFileSync(file_name);
+		const ext = file_name.substring(file_name.lastIndexOf('.') + 1);
+		const base64Data = img.toString('base64');
+		const dataURL = `data:${ext};base64,${base64Data}`;
+
+		return (dataURL);
 	}
 
 	async downloadPicture(intra: string, url: string) {
@@ -77,8 +73,8 @@ export class UploadImgService implements OnModuleInit {
 			};
 		} catch (error) {
 			console.error('Error:', error.message);
-			throw error;
+			throw (error);
 		}
-		return obj;
+		return (obj);
 	}
 }

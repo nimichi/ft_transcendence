@@ -32,22 +32,20 @@ export class HistoryComponent {
 			this.router.navigate(['']);
 			return;
 		}
-		this.socketService.requestEvent('gethistory', null, (data: Match[]) => this.recieveHistory(data))
-		this.socketService.requestEvent('fetchUserpic', null, (data: any) => this.recievePicture(data))
+		this.socketService.requestEvent('gethistory', null, (data: Match[]) => this.receiveHistory(data))
+		this.socketService.requestEvent('fetchUserpic', null, (data: any) => this.receivePicture(data))
 	}
 
-	recieveHistory(data: Match[]){
+	receiveHistory(data: Match[]){
 		if (data)
 			this.matches = data
 	}
 
-	recievePicture(picture: any){
-		console.log(picture);
+	receivePicture(picture: any) {
 		this.intraPic = picture;
 	}
-
+	
 	openChat($event: Event){
 		this.chat.toggleChat()
 	}
-
 }

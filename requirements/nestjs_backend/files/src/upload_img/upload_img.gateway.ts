@@ -22,7 +22,7 @@ export class UploadImgGateway {
 		const [login] = client.rooms;
 
 		const file_name = await this.prismaService.getPicture(login);
-		const img = await this.uploadImgService.fetchImg(file_name);
+		const img = this.uploadImgService.fetchImgAsDataURL(file_name);
 		
 		return (img);
 	}
