@@ -51,14 +51,16 @@
 
 <!-- change picture modal  -->
 <app-modal modalID="choosePicture">
-  <p class="text-2xl font-bold" heading>Wanna be whoever you want? (max size: 1 MB)</p>
+  <p class="text-2xl font-bold" heading>Wanna be whoever you want?</p>
   <div class="mb-3">
-	  <button type="submit"
-	  class="mt-6 block w-full bg-indigo-400 text-white py-1.5 px-3 rounded transition
+    <div *ngIf="tooBig" class="text-red-400">can you not read?!</div>
+    <button type="submit"
+	  class="mt-10 block w-full bg-indigo-400 text-white py-1.5 px-3 rounded transition
 	  hover:bg-indigo-500 disabled:opacity-50 disabled:bg-indigo-400" (click)="openFinder()">
 	  SELECT
 	  <input #finderInput type="file" style="display:none" accept="image/*" (change)="uploadPicture($event)">
   </button>
+  <p class="text-gray-400 text-xs mb-4">(max size: 1 MB)</p>
 </div>
 </app-modal>
 

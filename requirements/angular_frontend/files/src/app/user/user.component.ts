@@ -14,13 +14,15 @@ type User = {
 	level:		number;
 }
 
+
 @Component({
-  selector: 'app-user',
-  templateUrl: './user.component.html',
-  styleUrls: ['./user.component.css']
+	selector: 'app-user',
+	templateUrl: './user.component.html',
+	styleUrls: ['./user.component.css']
 })
 export class UserComponent {
-
+	
+	tooBig: boolean = false
 	public user: User
 
 	@ViewChild('finderInput') finderInput!: ElementRef
@@ -125,6 +127,7 @@ export class UserComponent {
 	}
 
 	changePic($event: Event){
+		this.tooBig = false
 		this.picModal.toggleModal('choosePicture')
 	}
 
@@ -132,8 +135,8 @@ export class UserComponent {
 		const file = (event?.target as  HTMLInputElement).files?.[0]
 		console.log("Size:", file?.size);
 		if (file != undefined && file?.size > 1e6) {
-			console.log("Too big. Try again.");
-			return false;
+			this.tooBig = true
+			return;
 		}
 		if (file) {
 			const reader = new FileReader()
@@ -147,7 +150,8 @@ export class UserComponent {
 			};
 			this.socket.emitEvent('uploadUserpic', obj);
 		}
-		return true;
+		this.tooBig = false
+		return;
 	}
 
 	openFinder() {
