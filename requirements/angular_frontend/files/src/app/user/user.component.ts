@@ -22,8 +22,9 @@ type User = {
 })
 export class UserComponent {
 
-	tooBig: boolean = false
-	public user: User
+	tooBig: boolean = false;
+	isTfaEnabled = false;
+	public user: User;
 
 	@ViewChild('finderInput') finderInput!: ElementRef
 	public newName: string = ""
@@ -52,11 +53,13 @@ export class UserComponent {
 			this.router.navigate([''])
 		}
 
-		this.modalService.register('chooseName')
-		this.modalService.register('choosePicture')
-		this.modalService.register('registerTFA')
+		this.modalService.register('chooseName');
+		this.modalService.register('choosePicture');
+		this.modalService.register('registerTFA');
+		this.modalService.register('disableTFA');
 
-		this.socket.requestEvent("userdata", null, (data: User) => this.callbackUserData(data))
+		this.socket.requestEvent("userdata", null, (data: User) => this.callbackUserData(data));
+		this.socket.requestEvent("getTfa", null, (res: boolean) => { this.isTfaEnabled = res; });
 	}
 
 	callbackUserData(userdata: User){
@@ -69,21 +72,20 @@ export class UserComponent {
 	}
 
 	ngOnDestroy(): void {
-		this.modalService.unregister('chooseName')
-		this.modalService.unregister('choosePicture')
-		this.modalService.unregister('registerTFA')
-
-
+		this.modalService.unregister('chooseName');
+		this.modalService.unregister('choosePicture');
+		this.modalService.unregister('registerTFA');
+		this.modalService.register('disableTFA');
 	}
 
 	enableTFA(){
 		let qrCode: string;
 		this.socket.requestEvent("initTFA", null, (res: string) => this.setQrCode(res))
+		this.modalService.showModal('registerTFA');
+	}
 
-		//backend call
-		//store qr code in varible
-
-		this.modalService.showModal('registerTFA')
+	disableTFA() {
+		this.modalService.showModal('disableTFA');
 	}
 
 	setQrCode(qrCode: string){
@@ -94,15 +96,28 @@ export class UserComponent {
 		this.socket.requestEvent("verifyTFA", this.tfaToken, (res: boolean) => this.closeTFA(res))
 	}
 
+	removeTFA() {
+		this.socket.requestEvent("removeTFA", null, (res: boolean) => {
+			if (res)
+				this.isTfaEnabled = false;
+			this.closeDisableTfaModal();
+		})
+	}
+
 	closeTFA(verified: boolean){
 		if(verified){
-			this.verified = true
-			this.modalService.hideModal('registerTFA')
+			this.verified = true;
+			this.modalService.hideModal('registerTFA');
+			this.isTfaEnabled = true;
 		}
 		else{
-			this.verified = false
-			this.tfaToken = ""
+			this.verified = false;
+			this.tfaToken = "";
 		}
+	}
+
+	closeDisableTfaModal() {
+		this.modalService.hideModal('disableTFA');
 	}
 
 	openChat($event: Event){

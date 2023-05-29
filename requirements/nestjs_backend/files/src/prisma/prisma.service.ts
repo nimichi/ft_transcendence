@@ -133,6 +133,21 @@ export class PrismaService extends PrismaClient {
 	console.log("added TFA verification.");
   }
 
+  async removeTFA(intra_name: string) {
+	if (this.findUserByIntra(intra_name) === null) {
+		console.log("User not found.");
+		return ;
+	}
+	const updatedUser = await this.user.update({
+		where: { intra_name: intra_name},
+		data: {
+			tfa: false,
+			tfa_secret: null
+		},
+	});
+	console.log("removed TFA verification.");
+  }
+
   async updateFullName(intra_name: string, fullName: string) {
 	if (this.findUserByIntra(intra_name) === null) {
 		console.log("User not found.");
