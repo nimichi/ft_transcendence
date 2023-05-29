@@ -47,4 +47,12 @@ export class TfaGateway {
 			return false;
 		}
 	}
+
+	@SubscribeMessage('removeTFA')
+	async removeTFA(client: any, payload: any): Promise<boolean> {
+		const [login] = client.rooms;
+
+		this.prismaService.removeTFA(login);
+		return (true);
+	}
 }

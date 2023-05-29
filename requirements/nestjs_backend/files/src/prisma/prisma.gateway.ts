@@ -21,6 +21,14 @@ export class PrismaGateway {
     return (user.picture);
   }
 
+  @SubscribeMessage('getTfa')
+  async getTfa(client: any, payload: any): Promise<boolean> {
+	const [login] = client.rooms;
+	const user = await this.prismaService.findUserByIntra(login);
+
+    return (user.tfa);
+  }
+
   @SubscribeMessage('getuserlist')
   async getUserList(client: any): Promise<{name: string, intra: string, pic: string}[]> {
 	const users = await this.prismaService.getAllUsers();
