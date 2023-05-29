@@ -126,12 +126,15 @@ export class UserComponent {
 
 	changePic($event: Event){
 		this.picModal.toggleModal('choosePicture')
-
 	}
 
 	uploadPicture(e: Event) {
 		const file = (event?.target as  HTMLInputElement).files?.[0]
-
+		console.log("Size:", file?.size);
+		if (file != undefined && file?.size > 1e6) {
+			console.log("Too big. Try again.");
+			return false;
+		}
 		if (file) {
 			const reader = new FileReader()
 			reader.onload = e => this.user.pic = reader.result
@@ -143,8 +146,8 @@ export class UserComponent {
 				'ext': file.type,
 			};
 			this.socket.emitEvent('uploadUserpic', obj);
-
 		}
+		return true;
 	}
 
 	openFinder() {
