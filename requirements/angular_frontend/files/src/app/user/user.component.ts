@@ -14,13 +14,15 @@ type User = {
 	level:		number;
 }
 
+
 @Component({
-  selector: 'app-user',
-  templateUrl: './user.component.html',
-  styleUrls: ['./user.component.css']
+	selector: 'app-user',
+	templateUrl: './user.component.html',
+	styleUrls: ['./user.component.css']
 })
 export class UserComponent {
 
+	tooBig: boolean = false
 	public user: User
 
 	@ViewChild('finderInput') finderInput!: ElementRef
@@ -59,6 +61,11 @@ export class UserComponent {
 
 	callbackUserData(userdata: User){
 		this.user = userdata
+		this.socket.requestEvent('fetchUserpic', null, (data: any) => this.callBackPictureData(data))
+	}
+
+	callBackPictureData(dataURL: string) {
+		this.user.pic = dataURL;
 	}
 
 	ngOnDestroy(): void {
@@ -127,33 +134,37 @@ export class UserComponent {
 	}
 
 	changePic($event: Event){
+		this.tooBig = false
 		this.modalService.showModal('choosePicture')
-
 	}
 
-	uploadPicture(e: Event){
-		console.log(this.user.pic)
+	uploadPicture(e: Event) {
 		const file = (event?.target as  HTMLInputElement).files?.[0]
-
-		if (file){
+		console.log("Size:", file?.size);
+		if (file != undefined && file?.size > 1e6) {
+			this.tooBig = true
+			return;
+		}
+		if (file) {
 			const reader = new FileReader()
 			reader.onload = e => this.user.pic = reader.result
 			reader.readAsDataURL(file)
 			this.modalService.hideModal('choosePicture')
-			// this.intraPic = URL.createObjectURL(file)
-			// console.log(this.intraPic)
-			// this.cd.detectChanges()
-
+			console.log(file);
+			const obj = {
+				'file': file,
+				'ext': file.type,
+			};
+			this.socket.emitEvent('uploadUserpic', obj);
 		}
+		this.tooBig = false
+		return;
 	}
 
-	openFinder(){
-		// this.image.click()
+	openFinder() {
 		if (this.finderInput) {
-		  this.finderInput.nativeElement.click();
-
+			this.finderInput.nativeElement.click();
 		}
-
 	}
 
 }

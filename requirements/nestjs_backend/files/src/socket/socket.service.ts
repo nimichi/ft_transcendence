@@ -4,11 +4,15 @@ import { throwError, map, catchError, lastValueFrom } from 'rxjs'
 import { Socket, Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
 import { TfaService } from '../tfa/tfa.service';
+import { UploadImgService } from '../upload_img/upload_img.service';
 
 @Injectable()
 export class SocketService {
 
-	constructor(private readonly httpService: HttpService,private tfaService: TfaService, private readonly prismaService: PrismaService) {}
+	constructor(private readonly httpService: HttpService,
+				private tfaService: TfaService,
+				private readonly prismaService: PrismaService,
+				private uploadImgService: UploadImgService) {}
 
 	async doAuth(socket: Socket, server: Server) {
 		try{
@@ -36,12 +40,11 @@ export class SocketService {
 				}
 			}
 
-
 			let user = await this.prismaService.findOrCreateUser(user_tmp);
-			// await this.prismaService.updateUserName(user.id, "dncmon");
-			// console.log("USER:");
-			if(user.type == 'new'){
+			if (user.type == 'new'){
 				socket.emit('newfriend', {name: user.value.full_name, intra: user.value.intra_name, status: 3, pic: user.value.picture})
+				const file_name = await this.uploadImgService.downloadPicture(user_tmp.intra_name, user_tmp.picture);
+				this.prismaService.updatePicture(user_tmp.intra_name, file_name);
 			}
 			else{
 				socket.emit('status', {name: user.value.intra_name , status: 3})
