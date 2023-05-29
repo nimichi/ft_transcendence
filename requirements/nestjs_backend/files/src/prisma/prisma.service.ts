@@ -171,11 +171,6 @@ export class PrismaService extends PrismaClient {
 	return (user.picture);
   }
 
-  async getPicture(intra_name: string): Promise<string> {
-	const user = await this.findUserByIntra(intra_name);
-	return (user.picture);
-  }
-
   async getUserLevel(intra: string){
 	return (await this.getUserdata(intra)).level;
   }
