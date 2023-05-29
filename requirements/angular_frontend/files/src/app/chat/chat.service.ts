@@ -13,15 +13,21 @@ export class ChatService {
   private visible = false
 
   public chatInput: string = "";
-  public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [ { name: '!cmd', msgs: []}]
+  public chatList: {name: string, msgs: {msg: string, align: string}[]}[] = [{ name: '!cmd', msgs: [
+	  {msg: "/new '#channel' -pwd 'password': create or join a protected server", align: "left"},
+	  {msg: "/new '#channel' -pvt': create a private server", align: "left"},
+	  {msg: "/new '#channel': create or join a public server", align: "left"},
+	  {msg: "/new 'intra': start a private conversastion", align: "left"},
+	  {msg: "commands:", align: "left"}
+	 ]}]
   public msgList: {msg: string, align: string}[] = this.chatList[0].msgs;
 
   public selectedChat: string = this.chatList[0].name;
 
   constructor(private socket: SocketService, private router: Router){
-	socket.socketSubscribe('chatrecv', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
-	socket.socketSubscribe('chatrecvR', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'right'));
-    socket.socketSubscribe('styledList', (msg:  {to: string, msg: string}) => this.recvMessage(msg, 'left'));
+	socket.socketSubscribe('chatrecv', (msg:  {window: string, msg: string}) => this.recvMessage(msg, 'left'));
+	socket.socketSubscribe('chatrecvR', (msg:  {window: string, msg: string}) => this.recvMessage(msg, 'right'));
+    socket.socketSubscribe('styledlist', (msg:  {window: string, msg: string}) => this.recvMessage(msg, 'left'));
     socket.socketSubscribe('deleteChatRoom', (chatRoomName: string) => this.deleteChatRoom(chatRoomName, 'right'));
 	socket.socketSubscribe('navtoprofile', (intra: string) => this.navToProfile(intra));
 	socket.socketSubscribe('newchat', (chat: {name: string, msgs: {msg: string, align: string}[]}) => this.newChat(chat))
@@ -42,22 +48,31 @@ export class ChatService {
   }
 
   newChat(chat: {name: string, msgs: {msg: string, align: string}[]}){
+	  if (chat.name.startsWith("#")){
+
+	  }
+	  else{
+		chat.msgs.push({msg: "/friend: add a friend", align: "left"});
+		chat.msgs.push({msg: "/game: start a game", align: "left"});
+		chat.msgs.push({msg: "/game -p: start a game with powerups", align: "left"});
+		chat.msgs.push({msg: "/visit: show user profile", align: "left"});
+		chat.msgs.push({msg: "commands:", align: "left"});
+	  }
 	  this.chatList.push(chat);
   }
 
 
-  recvMessage(msg: {to: string, msg: string}, align: string){
-	  console.log("++++++++++++++RECVMESSAGE+++++++++++++++++++++++++++");
+  recvMessage(msg: {window: string, msg: string}, align: string){
 	  console.log("msg: " + msg);
     for(let chat of this.chatList){
-      if(chat.name == msg.to){
+      if(chat.name == msg.window){
         chat.msgs.unshift( { msg: msg.msg, align: align } );
         return;
       }
     }
     let msgList: {msg: string, align: string}[] = [];
     msgList.push({msg: msg.msg, align: align});
-    const chat = {name: msg.to, msgs: msgList};
+    const chat = {name: msg.window, msgs: msgList};
     this.chatList.push(chat);
 	  console.log(this.msgList);
   }
@@ -74,13 +89,11 @@ export class ChatService {
   searchControl = new FormControl ('')
 
   sendMessage(){
-	  this.socket.requestEvent('chatsend', { chat: this.selectedChat, msg: this.chatInput}, (value: any) => this.sendMessageCallback(value));
+	  this.socket.requestEvent('chatsend', { chat: this.selectedChat, msg: this.chatInput}, () => this.serverAnswer());
   }
 
-  sendMessageCallback(msg: any){
-	  this.chatInput = '';
-	  this.msgList.unshift( { msg: msg, align: 'right' } );
-	  console.log(msg);
+  serverAnswer(){
+	this.chatInput = "";
   }
 
   isChatVisible(){

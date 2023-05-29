@@ -67,6 +67,7 @@ export class GameComponent {
 		return;
 	}
 
+
 	this.activatedRoute.params.subscribe((params: any) => {
 		if (params.gameid && params.powup){
 			this.waitForPrivateGame(params.gameid, params.powup);

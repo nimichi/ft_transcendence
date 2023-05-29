@@ -9,7 +9,8 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect, 
 	public server: Server;
 	private userStates: Map<string, 0 | 1 | 2 > = new Map<string, 0 | 1 | 2>()
 
-	constructor(private socketService: SocketService, private prismaService: PrismaService){}
+	constructor(private socketService: SocketService, private prismaService: PrismaService){
+	}
 
 	afterInit(server: Server) {
 
