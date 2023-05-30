@@ -163,7 +163,7 @@ export class ChatService {
 					}
 					if (this.hasAdminRights(processDto.from, channel) === true) {
 						this.setNewAdmin(processDto.msgParts[1], channel);
-						responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.window, msg: `user ${processDto.msgParts[1]} recieved admin rights`}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.window, msg: `user ${processDto.msgParts[1]} received admin rights`}));
 						break;
 					}
 					else{
