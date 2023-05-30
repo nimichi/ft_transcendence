@@ -89,7 +89,7 @@ export class GameComponent {
     this.RightBar.y = this.canvasHeight / 2 - this.LeftBar.height / 2;
     this.PowerUp.height = 30;
     this.PowerUp.width = 30;
-	this.PowerUp.x = -100;
+	  this.PowerUp.x = -100;
     // this.LeftBar.speed =
   }
 
@@ -180,7 +180,7 @@ export class GameComponent {
 
   spawnPowerUp(pos: {x: number, y: number})
   {
-	this.context.clearRect(this.PowerUp.x, this.PowerUp.y, this.PowerUp.width, this.PowerUp.height);
+	  this.context.clearRect(this.PowerUp.x, this.PowerUp.y, this.PowerUp.width, this.PowerUp.height);
     this.PowerUp.x = pos.x;
     this.PowerUp.y = pos.y;
     this.cooldown = true;
@@ -252,15 +252,17 @@ export class GameComponent {
   {
 	  if (this.gameid == "")
 		  return;
-    if (this.isLeftPlayer && this.hitboxCollider(this.Ball, this.LeftBar) == true)
+    if (this.hitboxCollider(this.Ball, this.LeftBar) == true)
     {
       this.collisionDetection(this.LeftBar);
-		  this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
+      if (this.isLeftPlayer)
+		    this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
 	  }
-    if (!this.isLeftPlayer && this.hitboxCollider(this.Ball, this.RightBar) == true)
+    if (this.hitboxCollider(this.Ball, this.RightBar) == true)
     {
 		  this.collisionDetection(this.RightBar);
-		  this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
+      if (!this.isLeftPlayer)
+		    this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
     }
   }
 
@@ -294,12 +296,34 @@ export class GameComponent {
     if (type == 'L')
     {
       this.context.clearRect(this.LeftBar.x, this.LeftBar.y, this.LeftBar.width, this.LeftBar.height);
+      if (this.LeftBar.y == 0)
       this.LeftBar.height = 80;
+    else if (this.LeftBar.y == this.canvasHeight - 160)
+    {
+      this.LeftBar.height = 80;
+      this.LeftBar.y += 80
+    }
+    else
+    {
+      this.LeftBar.height = 80;
+      this.LeftBar.y += 40;
+    }
     }
     if (type == 'R')
     {
       this.context.clearRect(this.RightBar.x, this.RightBar.y, this.RightBar.width, this.RightBar.height);
-      this.RightBar.height = 80;
+      if (this.RightBar.y == 0)
+        this.RightBar.height = 80;
+      else if (this.RightBar.y == this.canvasHeight - 160)
+      {
+        this.RightBar.height = 80;
+        this.RightBar.y += 80
+      }
+      else
+      {
+        this.RightBar.height = 80;
+        this.RightBar.y += 40;
+      }
     }
     this.cooldown = false;
   }
@@ -310,9 +334,21 @@ export class GameComponent {
     {
       if (this.Ball.xv > 0)
       {
-        if (this.LeftBar.y - 80 > 0)
-          this.LeftBar.y -= 80;
-        this.LeftBar.height = 160;
+        if (this.LeftBar.y >= 40 && this.LeftBar.y <= this.canvasWidth - 40)
+        {
+          this.LeftBar.y -= 40;
+          this.LeftBar.height = 160;
+        }
+        else if (this.LeftBar.y < 40)
+        {
+          this.LeftBar.y = 0;
+          this.LeftBar.height = 160;
+        }
+        else if (this.LeftBar.y > this.canvasWidth - 40)
+        {
+          this.LeftBar.y = this.canvasWidth - 160;
+          this.LeftBar.height = 160;
+        }
         setTimeout(() => this.changeHeight('L'), 15000);
       }
       else
