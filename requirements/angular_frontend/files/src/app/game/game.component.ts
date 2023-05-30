@@ -70,7 +70,10 @@ export class GameComponent {
 
 	this.activatedRoute.params.subscribe((params: any) => {
 		if (params.gameid && params.powup){
-			this.waitForPrivateGame(params.gameid, params.powup);
+			if (params.powup === 'true')
+				this.waitForPrivateGame(params.gameid, true);
+			else
+				this.waitForPrivateGame(params.gameid, false);
 			console.log('privgame');
 		}
 	});
@@ -100,12 +103,12 @@ export class GameComponent {
   }
 
   startCountdown(data: {left: string, right: string, gameid: string}) {
-	console.log("start coundown " + Math.random())
+	this.resetField()
 	this.waiting = false;
 	this.gameid = data.gameid
 	this.socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
-	this.socketService.requestEvent('getpic', data.left, (pic: string) => this.setLeftPic(pic));
-	this.socketService.requestEvent('getpic', data.right, (pic: string) => this.setRightPic(pic));
+	this.socketService.requestEvent('fetchUserpic', data.left, (pic: string) => this.setLeftPic(pic));
+	this.socketService.requestEvent('fetchUserpic', data.right, (pic: string) => this.setRightPic(pic));
 	this.countdown();
   }
 
@@ -115,7 +118,6 @@ export class GameComponent {
     this.countdownValue--
     if (this.countdownValue > 0){
       setTimeout(this.countdown.bind(this), 1000)
-      console.log(this.countdownValue)
     }
     else{
       this.showCountdown = false
@@ -215,6 +217,8 @@ export class GameComponent {
     let bounceAngle = normalizedIntersectY * this.radian(60);
     this.Ball.xv = Math.cos(bounceAngle);
     this.Ball.yv = Math.sin(bounceAngle) * -1;
+	if(!this.isLeftPlayer)
+		this.Ball.xv = this.Ball.xv * -1;
   }
 
   collisionDetection(Bar:IObject)
@@ -405,7 +409,7 @@ export class GameComponent {
   }
 
   waitForPowupGame(){
-	this.socketService.requestEvent("initprivgame", true, (isLeft: boolean) => this.setIsLeft(isLeft))
+	this.socketService.requestEvent("initgame", true, (isLeft: boolean) => this.setIsLeft(isLeft))
 	console.log('emit initgame w powup ' + Math.random() )
     this.showButton = false
 	this.showPowerUps = true
@@ -413,7 +417,7 @@ export class GameComponent {
   }
 
   waitForPrivateGame(gameid: string, powup: boolean){
-	this.socketService.requestEvent("initgame", {gameid: gameid, powup: powup}, (isLeft: boolean) => this.setIsLeft(isLeft))
+	this.socketService.requestEvent("initprivgame", {gameid: gameid, powup: powup}, (isLeft: boolean) => this.setIsLeft(isLeft))
   }
 
   setIsLeft(isLeft: boolean){

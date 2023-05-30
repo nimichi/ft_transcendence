@@ -13,7 +13,7 @@ export class ChatGateway {
 	async handleRecieveMsg (client: Socket, payload: {chat: string, msg: string}) : Promise<string> {
 		let processDto: processDTO = new processDTO(payload.chat, client.data.username, client, payload.msg, payload.msg.split(" "))
 		const responses: emitDTO[] = await this.chat.processInput(processDto);
-		client.emit(Event.CHATRECVR, {window: payload.chat, msg: payload.msg});
+		client.emit(Event.SENDRIGHTALIGNEDMSG, {window: payload.chat, msg: payload.msg});
 		for(let response of responses){
 			switch (response.to){
 				case client.data.username:

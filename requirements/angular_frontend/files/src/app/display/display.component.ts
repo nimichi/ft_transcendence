@@ -31,15 +31,6 @@ type Match = {
 })
 export class DisplayComponent {
 
-//   	intraPic: string  = "https://cdn.intra.42.fr/users/439ae812911986ad4e2b01a32ef73ea4/rschleic.jpg"
-// 	intraName: string  = ""
-//   fullName: string = "Romy Schleicher"
-//   intraBadgeLevel: number = 5
-//   wins: number = 0
-// 	losses: number = 0
-// 	level: number = 0
-//   listData: any [ ] = []
-
 	public user: User;
 
 	matches: Match[] = [];

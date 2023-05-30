@@ -1,12 +1,12 @@
-// src/prisma/prisma.module.ts
-
 import { Module } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 import { PrismaGateway } from './prisma.gateway';
 import { PrismaService } from './prisma.service';
+import { UploadImgService } from './services/upload_img.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  providers: [PrismaService, PrismaGateway],
-  exports: [PrismaService],
+  providers: [PrismaService, PrismaGateway, UploadImgService],
+  imports: [HttpModule],
+  exports: [PrismaService, UploadImgService],
 })
 export class PrismaModule {}

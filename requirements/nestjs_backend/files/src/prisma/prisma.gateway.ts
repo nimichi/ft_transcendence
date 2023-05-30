@@ -1,5 +1,6 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { PrismaService } from './prisma.service';
+import { UploadImgService } from 'src/prisma/services/upload_img.service';
 
 type User = {
 	pic:		String | ArrayBuffer | null;
@@ -12,13 +13,26 @@ type User = {
 
 @WebSocketGateway()
 export class PrismaGateway {
-	constructor(private prismaService: PrismaService) {}
+	constructor(private prismaService: PrismaService, private uploadImgService: UploadImgService) {}
 
-  @SubscribeMessage('getpic')
-  async getUserName(client: any, intra: string): Promise<string> {
-	const user = await this.prismaService.findUserByIntra(intra);
+  @SubscribeMessage('uploadUserpic')
+  async savePicture(client: any, payload: any) {
+	  const [login] = client.rooms;
 
-    return (user.picture);
+	  const file_name = await this.uploadImgService.uploadImg(login, payload);
+	  console.log("File name:", file_name);
+	  this.prismaService.updatePicture(login, file_name);
+	  console.log("PIC:", await this.prismaService.getPicture(login));
+  }
+
+  @SubscribeMessage('fetchUserpic')
+  async fetchPicture(client: any, intra: string | null) {
+	  if (!intra)
+	  	intra = client.data.username
+	  const file_name = await this.prismaService.getPicture(intra);
+	  const img = this.uploadImgService.fetchImgAsDataURL(file_name);
+
+	  return (img);
   }
 
   @SubscribeMessage('getTfa')
@@ -34,7 +48,7 @@ export class PrismaGateway {
 	const users = await this.prismaService.getAllUsers();
 	let userList: {name: string, intra: string, pic: string}[] = [];
 	for (let user of users){
-		userList.push({name: user.full_name, intra: user.intra_name, pic: user.picture})
+		userList.push({name: user.full_name, intra: user.intra_name, pic: this.uploadImgService.fetchImgAsDataURL(user.picture)})
 	}
     return (userList);
   }
@@ -55,6 +69,11 @@ export class PrismaGateway {
 	return {name: newName, success: true}
   }
 
+  @SubscribeMessage('blockedusers')
+  async getBlockedUsers(client: any): Promise<string[]>{
+	return await this.prismaService.getBlockedUsers(client.data.username);
+  }
+
   @SubscribeMessage('gethistory')
   async getHistory(client: any, intra: string|null){
 	if (intra == null)
@@ -71,8 +90,10 @@ export class PrismaGateway {
 
   @SubscribeMessage('userdata')
   async handleUserDataMessage(client: any, intra: string|null): Promise<User> {
-	  if (!intra)
-	  	intra = client.data.username;
-	  return await this.prismaService.getUserdata(intra);
+    if (!intra)
+    	intra = client.data.username;
+    let user = await this.prismaService.getUserdata(intra);
+	user.pic = this.uploadImgService.fetchImgAsDataURL(user.pic);
+    return user;
   }
 }

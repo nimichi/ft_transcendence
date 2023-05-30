@@ -1,8 +1,16 @@
 import { INestApplication, Injectable } from '@nestjs/common';
 import { PrismaClient, User, Match } from '@prisma/client';
 import { Socket } from 'socket.io';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+
+type MatchInput = {
+    left_intra: string,
+    right_intra: string,
+    left_score: number,
+    right_score: number,
+    powerup: boolean,
+    left_level: number,
+    right_level: number,
+}
 
 @Injectable()
 export class PrismaService extends PrismaClient {
@@ -12,6 +20,57 @@ export class PrismaService extends PrismaClient {
 
   async enableShutdownHooks(app: INestApplication) {
       await app.close();
+  }
+
+  async blockUser(blockedIntra: string, blokingIntra: string){
+	if (this.findUserByIntra(blokingIntra) === null) {
+		console.log("User not found.");
+		return ;
+	}
+	const blocked = await this.getBlockedUsers(blokingIntra);
+	for (let user of blocked){
+		if (user === blockedIntra)
+			return;
+	}
+	await this.user.update({
+		data: {
+			blocked: {
+				push: blockedIntra
+			},
+		},
+		where: { intra_name: blokingIntra },
+	})
+  }
+
+  async getBlockedUsers(intra: string): Promise<string[]>{
+	const user = await this.user.findUnique({
+		where: {
+		  intra_name: intra,
+		},
+	  })
+	return user.blocked;
+  }
+
+  async unblockUser(unblockIntra: string, unblockingIntra: string){
+	const user = await this.user.findUnique({
+		where: {
+		  intra_name: unblockingIntra,
+		},
+	  })
+	if (!user)
+	  return;
+	let newBlockedList: string[] = []
+	for (const blocked in user.blocked){
+		if (blocked !== unblockIntra)
+			newBlockedList.push(blocked)
+	}
+	await this.user.update({
+		where: { intra_name: unblockingIntra},
+		data: {
+			blocked: newBlockedList
+		},
+	});
+
   }
 
   async findOrCreateUser(data: User) {
@@ -190,7 +249,7 @@ export class PrismaService extends PrismaClient {
 	return (await this.getUserdata(intra)).level;
   }
 
-  async addMatchResult(data: any){
+  async addMatchResult(data: MatchInput){
 	await this.match.create({ data });
 	this.findMatchesByIntra("mnies");
   }

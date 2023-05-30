@@ -4,7 +4,7 @@ import { throwError, map, catchError, lastValueFrom } from 'rxjs'
 import { Socket, Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
 import { TfaService } from '../tfa/tfa.service';
-import { UploadImgService } from '../upload_img/upload_img.service';
+import { UploadImgService } from '../prisma/services/upload_img.service';
 
 @Injectable()
 export class SocketService {

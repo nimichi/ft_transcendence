@@ -6,8 +6,7 @@ import { writeFile as fsWriteFile,
 		 mkdirSync as fsMkdirSync,
 		 promises as fsPromises } from 'fs';
 import { HttpService } from '@nestjs/axios';
-import { Buffer } from 'buffer'
-import { throwError, map, catchError, lastValueFrom } from 'rxjs'
+import { throwError, catchError, lastValueFrom } from 'rxjs'
 
 @Injectable()
 export class UploadImgService implements OnModuleInit {
@@ -18,7 +17,7 @@ export class UploadImgService implements OnModuleInit {
 	onModuleInit() {
 		this.mkdirPath();
 	}
-	
+
 	private mkdirPath() {
 		if (!fsExistsSync(this.path)) {
 			fsMkdirSync(this.path, { recursive: true });
@@ -58,7 +57,7 @@ export class UploadImgService implements OnModuleInit {
 		console.log("File name:", file_name);
 		return (file_name);
 	}
-	
+
 	private async fetchPictureFromURL(url: string) {
 		try {
 			const response = await lastValueFrom(

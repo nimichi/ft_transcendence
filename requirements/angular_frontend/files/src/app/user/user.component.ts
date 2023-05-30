@@ -64,11 +64,6 @@ export class UserComponent {
 
 	callbackUserData(userdata: User){
 		this.user = userdata
-		this.socket.requestEvent('fetchUserpic', null, (data: any) => this.callBackPictureData(data))
-	}
-
-	callBackPictureData(dataURL: string) {
-		this.user.pic = dataURL;
 	}
 
 	ngOnDestroy(): void {

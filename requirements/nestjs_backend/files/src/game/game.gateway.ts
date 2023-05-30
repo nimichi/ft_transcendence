@@ -1,6 +1,5 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { GameService } from './game.service';
-import { Match } from '@prisma/client';
 import { Socket, Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
 import { SocketGateway } from '../socket/socket.gateway';
@@ -13,6 +12,15 @@ type Game = {
 	powup:			boolean
 };
 
+type MatchInput = {
+    left_intra: string,
+    right_intra: string,
+    left_score: number,
+    right_score: number,
+    powerup: boolean,
+    left_level: number,
+    right_level: number,
+}
 
 @WebSocketGateway()
 export class GameGateway {
@@ -66,13 +74,13 @@ export class GameGateway {
   }
 
   @SubscribeMessage('initprivgame')
-  private async initPrivGame(client: any, payload: {gameid: string, powup: boolean}){
+  private async initPrivGame(client: Socket, payload: {gameid: string, powup: boolean}){
 	const queueItem = this.pirvqueue.get(payload.gameid)
 	if (!queueItem){
 		this.pirvqueue.set(payload.gameid, client);
 		return true;
 	}
-	this.startGame(queueItem[1].client, client, payload.powup);
+	this.startGame(queueItem, client, payload.powup);
 	this.pirvqueue.delete(payload.gameid)
 	return false;
   }
@@ -154,7 +162,7 @@ export class GameGateway {
   private async finishGame(gameid: string, intra: string, game: Game){
 	  const leftuser = (await this.prismaService.findUserByIntra(game.left))
 	  const rightuser = (await this.prismaService.findUserByIntra(game.right))
-	  const result = {
+	  const result: MatchInput = {
 		left_intra:		game.left,
 		right_intra:	game.right,
 		left_score:		game.scoreleft,

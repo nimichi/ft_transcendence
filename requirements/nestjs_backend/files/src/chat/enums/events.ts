@@ -1,8 +1,10 @@
 export enum Event {
 	NEWCHAT = "newchat",
-	CHATRECV = "chatrecv",
-	CHATRECVR = "chatrecvR",
-	STYLEDLIST = "styledlist",
+	SENDMSG = "chatrecv",
+	SENDRIGHTALIGNEDMSG = "chatrecvR",
+	SENDBLOCKABLEMSG = "chatrecvblockable",
 	NAVTOPRIVGAME = "navtoprivgame",
-	NAVTOPROFILE = "navtoprofile"
+	NAVTOPROFILE = "navtoprofile",
+	BLOCKUSER = "blockuser",
+	UNBLOCKUSER = "unblockuser"
 }

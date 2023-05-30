@@ -18,6 +18,7 @@ model User {
 	picture			String?
 	tfa				Boolean
 	tfa_secret		String?
+	blocked			String[]
 	matches_left	Match[]	@relation("left")
 	matches_right	Match[]	@relation("right")
 	friends			User[]	@relation("UserFriends")

@@ -57,25 +57,53 @@ export class ChatService {
 					// case create channel
 					this.channelDtos.push(this.setChannelDTOs(processDto.from, channelName, password, hide));
 					processDto.client.join(channelName);
-					responses.push(new emitDTO(Event.NEWCHAT, processDto.from, {name: channelName, msgs: [{msg: "new channel created, you are channel owner", align: 'left'}]}));
+					responses.push(new emitDTO(Event.NEWCHAT, processDto.from, {name: channelName, msgs: [
+						{msg: "see commands with '/cmnds'", align: 'left'},
+						{msg: "you have admin rights.", align: 'left'},
+						{msg: "you are channel owner.", align: 'left'},
+						{msg: "new channel created.", align: 'left'},
+					]}));
 				}else if(dto.hidden) {
 					// case deny join private channel
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: "!cmd", msg: "this channel is private"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: "!cmd", msg: "this channel is private"}));
 				}else if (dto.password !== password) {
 					// case deny join wrong pwd
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: "!cmd", msg: "Wrong Password"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: "!cmd", msg: "Wrong Password"}));
 				}
 				else{
 					// case join existing channel
 					processDto.client.join(channelName);
-					responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: channelName, msg: `user ${processDto.from} joined the channel`}));
-					responses.push(new emitDTO(Event.NEWCHAT, processDto.from, {name: channelName, msgs: [{msg: "channel joined", align: 'left'}]}));
+					responses.push(new emitDTO(Event.SENDMSG, channelName, {window: channelName, msg: `user ${processDto.from} joined the channel`}));
+					let msgs: {msg: string, align: string}[] = [];
+					if (dto.admin.has(processDto.from)){
+						msgs.push({msg: "see commands with '/cmnds'", align: 'left'});
+						msgs.push({msg: "you have admin rights.", align: 'left'});
+					}
+					if (dto.owner === processDto.from)
+						msgs.push({msg: "you are channel owner", align: 'left'});
+					msgs.push({msg: "channel joined", align: 'left'});
+					responses.push(new emitDTO(Event.NEWCHAT, processDto.from, {name: channelName, msgs: msgs}));
 				}
 			}
 			else {
 				// case new user
 				responses.push(new emitDTO(Event.NEWCHAT, processDto.from , {name: processDto.msgParts[1], msgs: [{msg: "new connversation", align: 'left'}]}));
 			}
+		}
+		else if(processDto.msgParts.length >= 2 && processDto.msgParts[0] === "/block"){
+			this.queue.delete(processDto.window + '!f' + processDto.from);
+			this.queue.delete(processDto.window + '!g' + processDto.from)
+			this.prismaService.blockUser(processDto.msgParts[1], processDto.from);
+			responses.push(new emitDTO(Event.BLOCKUSER, processDto.from, processDto.msgParts[1]));
+			responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: "!cmd", msg: `${processDto.msgParts[1]} has been blocked`}));
+		}
+		else if(processDto.msgParts.length >= 2 && processDto.msgParts[0] === "/unblock"){
+			this.prismaService.unblockUser(processDto.msgParts[1], processDto.from);
+			responses.push(new emitDTO(Event.UNBLOCKUSER, processDto.from, processDto.msgParts[1]));
+			responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: "!cmd", msg: `${processDto.msgParts[1]} has been unblocked`}));
+		}
+		else if(processDto.msgParts.length >= 1 && processDto.msgParts[0] === "/blocked"){
+			responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: "!cmd", msg: (await this.prismaService.getBlockedUsers(processDto.from)).toString()}));
 		}
 		return responses;
 	}
@@ -89,93 +117,110 @@ export class ChatService {
 			switch (processDto.msgParts[0]){
 				case "/info": {
 					if(this.hasAdminRights(processDto.from, channel)) {
-						const channelInfo : string = JSON.stringify (channel);
+						const channelInfo : string = JSON.stringify (channel, null, " ");
 						console.log("channelInfo : " + channelInfo);
-						responses.push(new emitDTO(Event.STYLEDLIST, processDto.from, [channelInfo, 'left']));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: channelInfo}));
 						break;
 					}
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "not enough rights"} ));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
+					break;
+				}
+				case "/cmnds": {
+					if(!this.hasAdminRights(processDto.from, channel)) {
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
+						break;
+					}
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/info: see channel info"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/invite 'intra': invite user to channel"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/setadmin 'intra': give admin rights"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/ban 'intra': ban user"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/kick 'intra': kick user"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/mute 'intra': mute user for 2 minutes"}));
+					if(channel.owner == processDto.from){
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/pwd 'password': set or update password"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "/pwd: remove password"}));
+					}
 					break;
 				}
 				case "/invite": {
 					if (this.hasAdminRights(processDto.from, channel) === false) {
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "error: no rights to invite users"} ));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
 						break;
 					}
 					if (processDto.msgParts.length < 2){
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "incorrect format: expected '/invite intra'"} ));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "incorrect format: expected '/invite intra'"} ));
 						break;
 					}
-					responses.push(new emitDTO(Event.CHATRECV, processDto.msgParts[1], {window: processDto.from, msg: `${processDto.from} invited you to join the channel ${processDto.window}. Type '/enter ${processDto.window}' to join`}));
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: `user ${processDto.msgParts[1]} has been invited to join the channel`}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.msgParts[1], {window: processDto.from, msg: `${processDto.from} invited you to join the channel ${processDto.window}. Type '/enter ${processDto.window}' to join`}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: `user ${processDto.msgParts[1]} has been invited to join the channel`}));
 					this.queue.add(processDto.msgParts[1] + processDto.window);
 					break;
 				}
 				case "/setadmin": {
 					if (processDto.msgParts.length < 2) {
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "error: wrong format\n</setadmin intraname>"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "error: wrong format\n</setadmin intraname>"}));
 						break;
 					}
 					if (this.hasAdminRights(processDto.from, channel) === true) {
 						this.setNewAdmin(processDto.msgParts[1], channel);
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: `user ${processDto.msgParts[1]} recieved admin rights`}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.window, msg: `user ${processDto.msgParts[1]} recieved admin rights`}));
 						break;
 					}
 					else{
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "error: no rights to set admin"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"}));
 						break;
 					}
 				}
 				case "/ban": {
 					if (!this.hasAdminRights(processDto.from, channel)){
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "not authorized"} ));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
 						break;
 					}
 					const userToBan = processDto.msgParts[1];
 					if(channel.owner === userToBan) {
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "error:" + userToBan + " is owner!"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "error:" + userToBan + " is owner!"}));
 						break;
 					}
 					channel.banned.add(userToBan);
 					const clientToBan = (await this.socketGateway.server.fetchSockets()).find((s) => s.data.username === userToBan);
 					clientToBan.leave(processDto.window);
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: `user ${userToBan} is banned`}));
-					responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.window, msg: `user ${userToBan} was banned`}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: `user ${userToBan} is banned`}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.window, msg: `user ${userToBan} was banned`}));
 					break;
 				}
 				case "/kick": {
 					if (!this.hasAdminRights(processDto.from, channel)){
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "not authorized"} ));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
 						break;
 					}
 					const userToKick = processDto.msgParts[1];
 					if(channel.owner === userToKick) {
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "error: " + userToKick + " is owner!"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "error: " + userToKick + " is owner!"}));
 						break;
 					}
 					const clientToKick = (await this.socketGateway.server.fetchSockets()).find((s) => s.data.username === userToKick);
 					if (clientToKick){
-						responses.push(new emitDTO(Event.CHATRECV, userToKick, {window: processDto.window, msg: "you have been kicked!"}));
+						responses.push(new emitDTO(Event.SENDMSG, userToKick, {window: processDto.window, msg: "you have been kicked!"}));
 						clientToKick.leave(processDto.window);
 					}
-					responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.window, msg: "user " + userToKick + " has been kicked"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.window, msg: "user " + userToKick + " has been kicked"}));
 					break;
 				}
 				case "/mute": {
 					if (!this.hasAdminRights(processDto.from, channel)){
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "not authorized"} ));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
 						break;
 					}
 					if (processDto.msgParts.length >= 2){
 						const userToMute = processDto.msgParts[1];
 						if(channel.owner === userToMute) {
-							responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "error: wrong format\n</mute intra>"} ));
+							responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "error: wrong format\n</mute intra>"} ));
 							break;
 						}
 						else{
 							channel.muted.set(userToMute, Date.now() + 2 * 60 * 1000 );
-							responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.window, msg: "user "+ userToMute + " has been muted for 2 minutes"} ));
-							responses.push(new emitDTO(Event.CHATRECV,  processDto.from, {window: processDto.window, msg: "user " + userToMute + " is muted for 2 minutes"}));
+							responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.window, msg: "user "+ userToMute + " has been muted for 2 minutes"} ));
+							responses.push(new emitDTO(Event.SENDMSG,  processDto.from, {window: processDto.window, msg: "user " + userToMute + " is muted for 2 minutes"}));
 							break;
 						}
 					}
@@ -183,33 +228,33 @@ export class ChatService {
 				case "/pwd": {
 					const channelDto = this.channelDtos.find((c) => c.channelName ===  processDto.window);
 					if (                        channelDto.owner !== processDto.from){
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "not authorized"} ));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
 						break;
 					}
 					let newpwd: string;
 					if(processDto.msgParts.length === 2) {
 						newpwd = processDto.msgParts[1];
 					}
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "password has been updated"} ));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "password has been updated"} ));
 					break;
 				}
 				default: {
 					const channelDto = this.channelDtos.find((c) => c.channelName === processDto.window);
 					if(channel.banned.has(processDto.from)) {//bann
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "not authorized"} ));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "not authorized"} ));
 						break;
 					}
 					if(!processDto.client.rooms.has(processDto.window)) { //kick rejoin
 						processDto.client.join(processDto.window);
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "you joined the channel"}));
-						responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.window, msg: "user " + processDto.from + " joined back in"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "you joined the channel"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.window, msg: "user " + processDto.from + " joined back in"}));
 					}
 					if(channelDto.muted.has(processDto.from) && channelDto.muted.get(processDto.from) >= Date.now()) //mute
 					{
-						responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "you are muted, try again later"}));
+						responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "you are muted, try again later"}));
 						break;
 					}
-					responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.window, msg: processDto.from + ': ' + processDto.msg}));
+					responses.push(new emitDTO(Event.SENDBLOCKABLEMSG, processDto.window, {window: processDto.window, msg: processDto.from + ': ' + processDto.msg, sender: processDto.from}));
 					break
 				}
 			}
@@ -223,44 +268,58 @@ export class ChatService {
 		switch (processDto.msgParts[0]){
 			case "/game": { // start game
 				if(processDto.from === processDto.window){
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "only possible with other user"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "only possible with other user"}));
 					break;
 				}
 				const id = processDto.from + '!g' +processDto.window;
+				console.log(this.queue)
 				if(this.queue.has(id)){
 					this.queue.delete(id);
-					responses.push(new emitDTO(Event.NAVTOPRIVGAME, processDto.window, {window: processDto.from, msg: processDto.from + " accepted yout invite"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.from, msg: processDto.from + " accepted yout invite"}));
+					responses.push(new emitDTO(Event.NAVTOPRIVGAME, processDto.from ,{gameid: processDto.from + processDto.window, powup: false}));
+					responses.push(new emitDTO(Event.NAVTOPRIVGAME, processDto.window ,{gameid: processDto.from + processDto.window, powup: false}));
+				}
+				else if(this.queue.has(id + "!p")){
+					this.queue.delete(id + "!p");
+					responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.from, msg: processDto.from + " accepted yout invite"}));
 					responses.push(new emitDTO(Event.NAVTOPRIVGAME, processDto.from ,{gameid: processDto.from + processDto.window, powup: true}));
 					responses.push(new emitDTO(Event.NAVTOPRIVGAME, processDto.window ,{gameid: processDto.from + processDto.window, powup: true}));
 				}
 				else{
 					const rid = processDto.window + '!g' + processDto.from;
-					this.queue.add(rid);
-					responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.from, msg: processDto.from + " wants to play against you. type '/game' to confirm"}));
+					if (processDto.msgParts.length >= 2 && processDto.msgParts[1] === "-p"){
+						this.queue.delete(rid);
+						this.queue.add(rid + "!p");
+					}
+					else{
+						this.queue.delete(rid + "!p");
+						this.queue.add(rid);
+					}
+					responses.push(new emitDTO(Event.SENDBLOCKABLEMSG, processDto.window, {window: processDto.from, msg: processDto.from + " wants to play against you. type '/game' to confirm", sender: processDto.from}));
 				}
 				break;
 			}
 			case "/friend": { // start game
 				if(processDto.from === processDto.window){
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "only possible with other user"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "only possible with other user"}));
 					break;
 				}
 				const id = processDto.from + '!f' +processDto.window;
 				if(this.queue.has(id)){
 					this.queue.delete(id);
 					this.prismaService.addFriend(processDto.client, processDto.window);
-					responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.from, msg: processDto.from + " accepted your invite"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.from, msg: processDto.from + " accepted your invite"}));
 				}
 				else{
 					const rid = processDto.window + '!f' + processDto.from;
 					this.queue.add(rid);
-					responses.push(new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.from, msg: processDto.from + " wants to be your friend. type '/friend' to confirm"}));
+					responses.push(new emitDTO(Event.SENDBLOCKABLEMSG, processDto.window, {window: processDto.from, msg: processDto.from + " wants to be your friend. type '/friend' to confirm", sender: processDto.from}));
 				}
 				break;
 			}
 			case "/enter": { // enter ptivate channel
 				if(processDto.msgParts.length < 2){
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "incorrect format: expected '/enter #channel'"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "incorrect format: expected '/enter #channel'"}));
 					break;
 				}
 				if(this.queue.has(processDto.from + processDto.msgParts[1])){
@@ -269,7 +328,7 @@ export class ChatService {
 					responses.push(new emitDTO(Event.NEWCHAT, processDto.from, {name: processDto.msgParts[1], msgs: [{msg: "channel joined", align: 'left'}]}));
 				}
 				else{
-					responses.push(new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "no invitation pending for '" + processDto.msgParts[2] + "'"}));
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "no invitation pending for '" + processDto.msgParts[2] + "'"}));
 				}
 				break;
 			}
@@ -298,9 +357,10 @@ export class ChatService {
 		const sockets = await this.socketGateway.server.fetchSockets();
 		for(let socket of sockets) {
 			if(socket.data.username === processDto.window) {
-				return new emitDTO(Event.CHATRECV, processDto.window, {window: processDto.from, msg: processDto.msg});
+				console.log(processDto.msg)
+				return new emitDTO(Event.SENDBLOCKABLEMSG, processDto.window, {window: processDto.from, msg: processDto.msg, sender: processDto.from});
 			}
 		}
-		return new emitDTO(Event.CHATRECV, processDto.from, {window: processDto.window, msg: "could not deliver message. user not available"});
+		return new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "could not deliver message. user not available"});
 	}
 }

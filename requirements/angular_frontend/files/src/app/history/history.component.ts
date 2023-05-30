@@ -44,7 +44,7 @@ export class HistoryComponent {
 	receivePicture(picture: any) {
 		this.intraPic = picture;
 	}
-	
+
 	openChat($event: Event){
 		this.chat.toggleChat()
 	}
