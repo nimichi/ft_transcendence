@@ -15,7 +15,7 @@
           <div class="table-cell text-indigo-400">Result</div>
 		  <div class="table-cell text-indigo-400">Powerups</div>
         </div>
-        <div class="table-row" *ngFor="let item of matches">
+        <div class="table-row" *ngFor="let item of matches.reverse()">
           <div class="table-cell">{{ item.left_intra }}</div>
           <div class="table-cell">{{ item.left_level }}</div>
 		  <div class="table-cell">{{ item.right_intra }}</div>

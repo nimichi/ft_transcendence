@@ -1,6 +1,7 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { PrismaService } from './prisma.service';
 import { UploadImgService } from 'src/prisma/services/upload_img.service';
+import { Socket } from 'socket.io';
 
 type User = {
 	pic:		String | ArrayBuffer | null;
@@ -85,7 +86,12 @@ export class PrismaGateway {
   async getFriends(client: any, payload: null){
 
 	const intra = client.data.username;
-	return await this.prismaService.getFriends(intra);
+	let friends = await this.prismaService.getFriends(intra);
+	for (let friend of friends){
+		console.log(friend.pic)
+		friend.pic = this.uploadImgService.fetchImgAsDataURL(friend.pic);
+	}
+	return friends
   }
 
   @SubscribeMessage('userdata')
@@ -96,4 +102,22 @@ export class PrismaGateway {
 	user.pic = this.uploadImgService.fetchImgAsDataURL(user.pic);
     return user;
   }
+
+  async addFriend(client: Socket, friend_intra: string) {
+	if (client.data.username == friend_intra) {
+		console.log("Can not be friends with themselves.");
+		return (false);
+	}
+	if (await this.prismaService.addFriendToDb(client.data.username, friend_intra) == false)
+		return false;
+	const friend = await this.prismaService.findUserByIntra(friend_intra)
+	client.emit('newfriend', {name: friend.full_name, intra: friend_intra, status: 0, pic: this.uploadImgService.fetchImgAsDataURL(friend.picture)})
+	if (await this.prismaService.addFriendToDb(friend_intra, client.data.username) == false)
+		return false;
+	const friend2 = await this.prismaService.findUserByIntra(client.data.username)
+	client.to(friend_intra).emit('newfriend', {name: friend2.full_name, intra: client.data.username, status: 0, pic: this.uploadImgService.fetchImgAsDataURL(friend2.picture)})
+	return true;
+  }
 }
+
+

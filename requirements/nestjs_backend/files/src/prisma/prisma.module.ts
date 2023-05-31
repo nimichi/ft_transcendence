@@ -7,6 +7,6 @@ import { HttpModule } from '@nestjs/axios';
 @Module({
   providers: [PrismaService, PrismaGateway, UploadImgService],
   imports: [HttpModule],
-  exports: [PrismaService, UploadImgService],
+  exports: [PrismaService, UploadImgService, PrismaGateway],
 })
 export class PrismaModule {}

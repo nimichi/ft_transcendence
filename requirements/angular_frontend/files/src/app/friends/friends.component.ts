@@ -10,7 +10,7 @@ import { SocketService } from '../socket/socket.service';
 export class FriendsComponent {
 
   // playing 1, offline 2, online 3
-  listValues: {name: string, intra: string, status: number, pic: string}[] = [];
+  listValues: {name: string, intra: string, status: number, pic: String | ArrayBuffer | null}[] = [];
 
 
 
@@ -21,16 +21,16 @@ export class FriendsComponent {
 			this.router.navigate(['']);
 			return;
 		}
-		this.socket.requestEvent('getfriends', null, (data: {name: string, intra: string, status: number, pic: string}[]) => this.getListCallback(data))
-		this.socket.socketSubscribe('newfriend', (friend: {name: string, intra: string, status: number, pic: string}) => this.newFriend(friend));
+		this.socket.requestEvent('getfriends', null, (data: {name: string, intra: string, status: number, pic: String | ArrayBuffer | null}[]) => this.getListCallback(data))
+		this.socket.socketSubscribe('newfriend', (friend: {name: string, intra: string, status: number, pic: String | ArrayBuffer | null}) => this.newFriend(friend));
 	}
 
-	newFriend(friend: {name: string, intra: string, status: number, pic: string}){
+	newFriend(friend: {name: string, intra: string, status: number, pic: String | ArrayBuffer | null}){
 		this.socket.requestEvent('state', friend.intra, (data: {intra: string, state: 0 | 1 | 2 }) => this.setState(data));
 		this.listValues.push(friend)
 	}
 
-	getListCallback(data: {name: string, intra: string, status: number, pic: string}[]){
+	getListCallback(data: {name: string, intra: string, status: number, pic: String | ArrayBuffer | null}[]){
 		data.forEach(friend => {
 			this.socket.requestEvent('state', friend.intra, (data: {intra: string, state: 0 | 1 | 2 }) => this.setState(data));
 			this.socket.socketSubscribe(friend.intra + 'state', (data: {intra: string, state: 0 | 1 | 2 }) => this.setState(data));

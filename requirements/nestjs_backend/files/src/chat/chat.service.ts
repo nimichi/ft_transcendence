@@ -3,8 +3,9 @@ import { channelDTO, emitDTO, processDTO } from './dtos/chatDTO';
 // import { CommandDTO } from './dtos/CommandDTO';
 // import { ChannelArrayProvider } from '../commonProvider/ChannelArrayProvider';
 import { Event } from './enums/events';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { SocketGateway } from 'src/socket/socket.gateway';
+import { PrismaService } from '../prisma/prisma.service';
+import { SocketGateway } from '../socket/socket.gateway';
+import { PrismaGateway } from '../prisma/prisma.gateway';
 
 
 @Injectable()
@@ -12,7 +13,7 @@ export class ChatService {
 	private channelDtos: channelDTO[];
 	private queue: Set<string> = new Set<string>();
 
-	constructor(private prismaService: PrismaService, private socketGateway: SocketGateway){
+	constructor(private prismaService: PrismaService, private prismaGateway: PrismaGateway, private socketGateway: SocketGateway){
 		this.channelDtos = [];
 	};
 
@@ -214,7 +215,7 @@ export class ChatService {
 					if (processDto.msgParts.length >= 2){
 						const userToMute = processDto.msgParts[1];
 						if(channel.owner === userToMute) {
-							responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "error: wrong format\n</mute intra>"} ));
+							responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: `not authorized. ${userToMute} is channel owner`} ));
 							break;
 						}
 						else{
@@ -224,6 +225,8 @@ export class ChatService {
 							break;
 						}
 					}
+					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "error: wrong format\n</mute intra>"} ));
+					break;
 				}
 				case "/pwd": {
 					const channelDto = this.channelDtos.find((c) => c.channelName ===  processDto.window);
@@ -235,6 +238,7 @@ export class ChatService {
 					if(processDto.msgParts.length === 2) {
 						newpwd = processDto.msgParts[1];
 					}
+					channelDto.password = newpwd;
 					responses.push(new emitDTO(Event.SENDMSG, processDto.from, {window: processDto.window, msg: "password has been updated"} ));
 					break;
 				}
@@ -307,7 +311,7 @@ export class ChatService {
 				const id = processDto.from + '!f' +processDto.window;
 				if(this.queue.has(id)){
 					this.queue.delete(id);
-					this.prismaService.addFriend(processDto.client, processDto.window);
+					this.prismaGateway.addFriend(processDto.client, processDto.window);
 					responses.push(new emitDTO(Event.SENDMSG, processDto.window, {window: processDto.from, msg: processDto.from + " accepted your invite"}));
 				}
 				else{

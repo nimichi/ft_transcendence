@@ -1,6 +1,5 @@
 import { INestApplication, Injectable } from '@nestjs/common';
 import { PrismaClient, User, Match } from '@prisma/client';
-import { Socket } from 'socket.io';
 
 type MatchInput = {
     left_intra: string,
@@ -113,22 +112,6 @@ export class PrismaService extends PrismaClient {
 		return false;
   }
 
-  async addFriend(client: Socket, friend_intra: string) {
-	if (client.data.username == friend_intra) {
-		console.log("Can not be friends with themselves.");
-		return (false);
-	}
-	if (await this.addFriendToDb(client.data.username, friend_intra) == false)
-		return false;
-	const friend = await this.findUserByIntra(friend_intra)
-	client.emit('newfriend', {name: friend.full_name, intra: friend_intra, status: 0, pic: friend.picture})
-	if (await this.addFriendToDb(friend_intra, client.data.username) == false)
-		return false;
-	const friend2 = await this.findUserByIntra(client.data.username)
-	client.to(friend_intra).emit('newfriend', {name: friend2.full_name, intra: client.data.username, status: 0, pic: friend2.picture})
-	return true;
-  }
-
   async addFriendToDb(user_intra: string, friend_intra: string) {
 	const user = await this.findUserByIntraWithFriends(user_intra);
 	const friend = await this.findUserByIntra(friend_intra);
@@ -169,7 +152,7 @@ export class PrismaService extends PrismaClient {
 	if (user)
 	{
 		for(let friend of user.friends){
-			friends.push({name: friend.full_name, intra: friend.intra_name, status: 0, pic: friend.pic})
+			friends.push({name: friend.full_name, intra: friend.intra_name, status: 0, pic: friend.picture})
 		}
 		return friends;
 	}
