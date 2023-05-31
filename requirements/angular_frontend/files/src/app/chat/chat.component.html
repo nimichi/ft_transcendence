@@ -68,9 +68,9 @@
                 </div>
         </nav>
 
-        <div class="overflow-auto px-1 py-1" style="height: 298px" id="journal-scroll">
+        <div class="overflow-auto px-1 py-1" style="height: 298px" id="journal-scroll" #scrollMe [scrollTop]="scrollMe.scrollHeight">
 			<ul>
-				<li *ngFor="let item of chatService.msgList.slice().reverse()"  [ngStyle]="{'text-align': item.align}"  class="text-indigo-500">{{ item.msg }}</li>
+				<li *ngFor="let item of chatService.msgList.slice().reverse()" [ngStyle]="{'text-align': item.align}"  class="text-indigo-500">{{ item.msg }}</li>
 			</ul>
         </div>
 
