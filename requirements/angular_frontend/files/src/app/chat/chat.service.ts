@@ -14,7 +14,7 @@ export class ChatService {
 		{msg: "/new '#channel' -pwd 'password': create or join a protected server", align: "left"},
 		{msg: "/new '#channel' -pvt': create a private server", align: "left"},
 		{msg: "/new '#channel': create or join a public server", align: "left"},
-		{msg: "/blocked 'intra': see blocked users", align: "left"},
+		{msg: "/blocked: see blocked users", align: "left"},
 		{msg: "/unblock 'intra': unblock user", align: "left"},
 		{msg: "/block 'intra': block user", align: "left"},
 		{msg: "/new 'intra': start a private conversastion", align: "left"},
@@ -54,7 +54,7 @@ export class ChatService {
 
 		}
 		else{
-			chat.msgs.push({msg: "/friend: add a friend", align: "left"});
+			chat.msgs.push({msg: "/friend: add as friend", align: "left"});
 			chat.msgs.push({msg: "/game: start a game", align: "left"});
 			chat.msgs.push({msg: "/game -p: start a game with powerups", align: "left"});
 			chat.msgs.push({msg: "/visit: show user profile", align: "left"});
