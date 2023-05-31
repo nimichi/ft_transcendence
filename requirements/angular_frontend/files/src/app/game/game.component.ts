@@ -23,6 +23,7 @@ interface IObject{
 })
 
 export class GameComponent {
+
   private gameid: string = "";
   canvasWidth = 800;
   canvasHeight = 400;
@@ -64,6 +65,7 @@ export class GameComponent {
   public ngOnInit () {
 	this.initializeGameObjects();
 	if (!this.socketService.socketState()){
+		this.router.navigate(['']);
 		return;
 	}
 
@@ -103,7 +105,17 @@ export class GameComponent {
   }
 
   startCountdown(data: {left: string, right: string, gameid: string}) {
-	this.resetField()
+	this.context.clearRect(this.PowerUp.x, this.PowerUp.y, this.PowerUp.width, this.PowerUp.height);
+	this.context.clearRect(this.Ball.x - 1 , this.Ball.y - 1, 3 + this.Ball.width, 3 + this.Ball.width);
+	this.Ball.xv = 0;
+	this.Ball.yv = 0;
+	this.Ball.x = -8;
+	this.leftScore = 0
+	this.rightScore = 0
+	this.context.clearRect(this.LeftBar.x, this.LeftBar.y, this.LeftBar.width, this.LeftBar.height);
+	this.context.clearRect(this.RightBar.x, this.RightBar.y, this.RightBar.width, this.RightBar.height);
+	this.LeftBar.y = this.canvasHeight / 2 - this.LeftBar.height / 2;
+	this.RightBar.y = this.canvasHeight / 2 - this.RightBar.height / 2;
 	this.waiting = false;
 	this.gameid = data.gameid
 	this.socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
@@ -257,17 +269,15 @@ export class GameComponent {
   {
 	  if (this.gameid == "")
 		  return;
-    if (this.hitboxCollider(this.Ball, this.LeftBar) == true)
+    if (this.isLeftPlayer && this.hitboxCollider(this.Ball, this.LeftBar) == true)
     {
       this.collisionDetection(this.LeftBar);
-      if (this.isLeftPlayer)
-		    this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
+		  this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
 	  }
-    if (this.hitboxCollider(this.Ball, this.RightBar) == true)
+    if (!this.isLeftPlayer && this.hitboxCollider(this.Ball, this.RightBar) == true)
     {
 		  this.collisionDetection(this.RightBar);
-      if (!this.isLeftPlayer)
-		    this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
+		  this.socketService.emitEvent('ballposition', {pos: {x: this.Ball.x, y: this.Ball.y, xv: this.Ball.xv, yv: this.Ball.yv}, gameid: this.gameid});
     }
   }
 
