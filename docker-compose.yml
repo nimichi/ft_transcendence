@@ -28,12 +28,10 @@ services:
     volumes:
       - ./requirements/angular_frontend/files:/ft_transcendence
       - /ft_transcendence/node_modules
-    env_file:
-      - .env
     networks:
       - network
   postgres:
-    image: postgres
+    image: postgres:15
     container_name: postgres
     restart: always
     ports:

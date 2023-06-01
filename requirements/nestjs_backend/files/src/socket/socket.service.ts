@@ -17,27 +17,17 @@ export class SocketService {
 	async doAuth(socket: Socket, server: Server) {
 		try{
 			let user_tmp: any
-			if (socket.handshake.auth.token.length != 8 ){
-				const access = await this.getAccessToken(socket.handshake.auth.token);
 
-				const user_data = await this.requestUserData(access.access_token);
+			const access = await this.getAccessToken(socket.handshake.auth.token);
 
-				user_tmp = {
-					intra_name: user_data.login,
-					full_name: user_data.displayname,
-					picture: user_data.image.versions.medium,
-					tfa: false,
-					tfa_secret: null
-				}
-			}
-			else{
-				user_tmp = {
-					intra_name: socket.handshake.auth.token,
-					full_name: socket.handshake.auth.token + " fullname",
-					picture: "https://picsum.photos/200",
-					tfa: false,
-					tfa_secret: null
-				}
+			const user_data = await this.requestUserData(access.access_token);
+
+			user_tmp = {
+				intra_name: user_data.login,
+				full_name: user_data.displayname,
+				picture: user_data.image.versions.medium,
+				tfa: false,
+				tfa_secret: null
 			}
 
 			let user = await this.prismaService.findOrCreateUser(user_tmp);

@@ -118,10 +118,23 @@ export class GameComponent {
 	this.RightBar.y = this.canvasHeight / 2 - this.RightBar.height / 2;
 	this.waiting = false;
 	this.gameid = data.gameid
+	document.addEventListener("visibilitychange", () => this.leftTab());
+
 	this.socketService.socketSubscribe('gameinteruption', () => this.gameInteruption())
 	this.socketService.requestEvent('fetchUserpic', data.left, (pic: string) => this.setLeftPic(pic));
 	this.socketService.requestEvent('fetchUserpic', data.right, (pic: string) => this.setRightPic(pic));
 	this.countdown();
+  }
+
+  leftTab(){
+	if (document.hidden){
+		this.socketService.socketUnsubscribe('gameinteruption')
+		this.socketService.emitEvent('leftgamepage', this.gameid);
+		this.resetField();
+		this.message = "Tab lost focus"
+		this.showPrompt = true;
+		document.removeEventListener("visibilitychange",  () => this.gameInteruption())
+	}
   }
 
   countdown(){
