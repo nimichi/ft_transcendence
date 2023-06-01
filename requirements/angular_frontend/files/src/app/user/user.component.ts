@@ -128,8 +128,15 @@ export class UserComponent {
 	}
 
 	submitName(){
-
-		this.socket.requestEvent('updatefullname', this.newName, (response: {name: string, success: boolean}) => this.changeName(response));
+		if (this.newName.length < 16){
+			this.socket.requestEvent('updatefullname', this.newName, (response: {name: string, success: boolean}) => this.changeName(response));
+			return;
+		}
+		else{
+			console.log(this.newName.length)
+			this.showNameErrMsg = true;
+			this.nameErrMsg = 'name too long'
+		}
 	}
 
 	changeName(response: {name: string, success: boolean}){
