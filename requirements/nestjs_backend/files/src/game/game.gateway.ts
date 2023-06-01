@@ -80,6 +80,7 @@ export class GameGateway {
 		this.pirvqueue.set(payload.gameid, client);
 		return true;
 	}
+	console.log("powup: " + payload.powup);
 	this.startGame(queueItem, client, payload.powup);
 	this.pirvqueue.delete(payload.gameid)
 	return false;

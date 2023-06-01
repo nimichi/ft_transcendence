@@ -72,10 +72,11 @@ export class GameComponent {
 
 	this.activatedRoute.params.subscribe((params: any) => {
 		if (params.gameid && params.powup){
-			if (params.powup === 'true')
+			console.log("param" + params.powup)
+			// if (params.powup == true)
 				this.waitForPrivateGame(params.gameid, true);
-			else
-				this.waitForPrivateGame(params.gameid, false);
+			// else
+			// 	this.waitForPrivateGame(params.gameid, false);
 			console.log('privgame');
 		}
 	});
@@ -476,6 +477,7 @@ export class GameComponent {
   }
 
   waitForPrivateGame(gameid: string, powup: boolean){
+	this.showPowerUps = powup;
 	this.socketService.requestEvent("initprivgame", {gameid: gameid, powup: powup}, (isLeft: boolean) => this.setIsLeft(isLeft))
   }
 
